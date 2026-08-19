@@ -195,7 +195,8 @@ img { max-width: 100%; height: auto; border-radius: var(--radius); }
 .wordmark { font-size: 1rem; font-weight: 600; color: var(--fg); text-decoration: none; }
 .wordmark:hover { text-decoration: underline; text-decoration-thickness: 1px; }
 .site-links { display: flex; align-items: baseline; gap: var(--s4); font-size: var(--fs-meta); }
-.site-links a[aria-current="page"] { color: var(--fg-muted); text-decoration: none; }
+/* the page you're on is a location, not a link: label weight, full ink */
+.site-links a[aria-current="page"] { color: var(--fg); font-weight: 600; text-decoration: none; }
 
 .theme-toggle {
   font: inherit; font-size: var(--fs-meta); color: var(--fg-muted);
