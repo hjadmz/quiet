@@ -407,9 +407,14 @@ div.highlighter-rouge.has-copy pre.highlight { padding-top: calc(var(--s2) + 36p
   /* A reader who forced dark mode must not print dark ink tokens onto white
      paper. Match the (0,2,0) specificity of the dark blocks so this wins. */
   :root, :root:not([data-theme="light"]), :root[data-theme="dark"] {
+    /* color-scheme must go back to light too: a dark scheme paints the root
+       canvas, which then blocks the body background from propagating and
+       frames the page in black. */
+    color-scheme: light;
     --bg: #fff; --fg: #000; --fg-muted: #333;
     --surface: #fff; --border: #999; --accent: #000;
   }
+  html { background: #fff; }
 
   .site-header, .site-footer, .skip-link, .theme-toggle,
   .copy-btn, .post-nav, .toc, .anchor { display: none; }
