@@ -130,6 +130,33 @@ more usable, which is precisely why restraint has to be earned by
 function first. The design is intended to be *unnoticed*; if the reader
 notices it, it has failed.
 
+## the footer, and pages too short to scroll
+
+A page shorter than the window creates a problem most sites answer by
+accident: the leftover space has to go somewhere, and if it lands between
+the last line and the footer, that gap changes with every window height —
+measured at 256px in one window and 1,056px in another. Nothing about
+that is a decision.
+
+So the footer has exactly two states, both deliberate. When the page
+scrolls, content ends a fixed distance above the footer's rule. When it
+does not, the footer sits flush to the bottom edge and the slack sits
+*above* that 1px rule, where it reads as the page's bottom band rather
+than as spacing gone wrong. The footer's own internals never move: the
+rule sits the same distance from the first footer line on every page at
+every height. One spacing token owns the content-to-footer distance, so
+two paddings can never compound into an arbitrary total.
+
+## why there is no pagination
+
+Measured on a 53-post build: the home page lists the newest five and
+links to the archive; the archive comes to 3,284px — about three and a
+half screens — and 11KB of HTML. Paging that would add URLs, "page 2 of
+6" chrome, and a second mental model, and it would break the thing that
+actually finds a post: the browser's find-in-page, which only searches
+the page it is on. A flat chronological list stays faster to scan than
+any pager until a blog is far larger than a personal one gets.
+
 ## motion
 
 One gesture exists: a 150ms cross-fade between pages, with the header
