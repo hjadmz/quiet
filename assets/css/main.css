@@ -404,6 +404,13 @@ div.highlighter-rouge.has-copy pre.highlight { padding-top: calc(var(--s2) + 36p
 
 /* ---------- print ---------- */
 @media print {
+  /* A reader who forced dark mode must not print dark ink tokens onto white
+     paper. Match the (0,2,0) specificity of the dark blocks so this wins. */
+  :root, :root:not([data-theme="light"]), :root[data-theme="dark"] {
+    --bg: #fff; --fg: #000; --fg-muted: #333;
+    --surface: #fff; --border: #999; --accent: #000;
+  }
+
   .site-header, .site-footer, .skip-link, .theme-toggle,
   .copy-btn, .post-nav, .toc, .anchor { display: none; }
   body { background: #fff; color: #000; display: block; }
