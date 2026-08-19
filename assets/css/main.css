@@ -1,8 +1,10 @@
 /* quiet — one stylesheet.
-   Every design token lives in the :root block below. If you know CSS,
-   this is the only place you need to look to retheme the whole site.
-   Colors are authored in OKLCH with hex fallbacks (same values,
-   measured for contrast: body ≥ 7:1, everything else ≥ 4.5:1). */
+   Type, space, fonts, and radius live in the first :root block.
+   Colors are authored in OKLCH inside the @supports blocks (edit
+   those); the adjacent hex values are fallbacks for pre-2023 browsers
+   — keep them in sync. Dark values appear twice on purpose: once for
+   the system preference, once for the forced data-theme toggle.
+   All pairs measured for contrast: body ≥ 7:1, everything else ≥ 4.5:1. */
 
 /* ---------- tokens ---------- */
 :root {
@@ -201,9 +203,14 @@ img { max-width: 100%; height: auto; border-radius: var(--radius); }
   position: relative;
 }
 .theme-toggle:hover { color: var(--fg); }
-/* invisible hit-area extension: quiet visually, ≥44px for touch */
+/* invisible hit-area extensions: quiet visually, ~44px tall for touch.
+   Chrome links get ±8px horizontally so neighbors never overlap. */
 .theme-toggle::after, .copy-btn::after {
   content: ""; position: absolute; inset: -12px;
+}
+.wordmark, .site-links a, .footer-links a { position: relative; }
+.wordmark::after, .site-links a::after, .footer-links a::after {
+  content: ""; position: absolute; inset: -10px -8px;
 }
 html:not(.js) .theme-toggle { display: none; }
 
@@ -216,8 +223,7 @@ html:not(.js) .theme-toggle { display: none; }
 .footer-meta { margin: var(--s2) 0 0; }
 
 /* ---------- home & archive ---------- */
-.home-title { font-size: var(--fs-h3); }
-.tagline { color: var(--fg-muted); margin: var(--s2) 0 0; }
+.tagline { color: var(--fg-muted); margin: 0; }
 .empty { color: var(--fg-muted); }
 
 .post-list { list-style: none; margin: var(--s7) 0 0; padding: 0; }
@@ -256,7 +262,7 @@ h2[id], h3[id], h4[id], sup[id], .footnotes li[id] { scroll-margin-top: var(--s6
 
 .anchor { margin-left: var(--s2); font-weight: 400; text-decoration: none; opacity: 0; }
 h2:hover .anchor, h3:hover .anchor, h4:hover .anchor,
-.anchor:hover, .anchor:focus-visible { opacity: 1; }
+.anchor:hover, .anchor:focus { opacity: 1; }
 @media (hover: none) { .anchor { opacity: 1; } }
 
 blockquote {
@@ -320,6 +326,8 @@ pre.highlight code { font-size: 1em; }
   padding: var(--s1) var(--s3); cursor: pointer;
 }
 .copy-btn:hover { color: var(--fg); border-color: var(--fg-muted); }
+/* when JS adds the button, clear the first code line out from under it */
+div.highlighter-rouge.has-copy pre.highlight { padding-top: calc(var(--s2) + 36px); }
 
 /* rouge tokens — one restrained palette per theme, all ≥ 4.5:1 */
 .highlight .c, .highlight .c1, .highlight .cm, .highlight .cs, .highlight .cp
@@ -342,12 +350,14 @@ pre.highlight code { font-size: 1em; }
 }
 
 @media (prefers-contrast: more) {
-  :root, :root[data-theme="dark"] { --fg-muted: var(--fg); --border: var(--fg); }
+  /* :not() keeps specificity (0,2,0) so this wins in every theme state */
+  :root, :root:not([data-theme="light"]) { --fg-muted: var(--fg); --border: var(--fg); }
 }
 
 @media (forced-colors: active) {
   .copy-btn, .theme-toggle { border: 1px solid ButtonText; }
   .anchor { opacity: 1; }
+  li:target, sup:target { outline: 2px solid Highlight; outline-offset: 2px; }
 }
 
 /* ---------- print ---------- */

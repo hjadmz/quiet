@@ -2,7 +2,7 @@
 title: everything a post can do
 description: every element this template styles, on one page — a reference for writers and a regression test for tinkerers.
 toc: true
-updated: 2026-08-18
+last_modified_at: 2026-08-18
 ---
 
 This post exercises every element the template knows how to render.
@@ -70,7 +70,7 @@ is off, in which case the button simply doesn't exist.
 // counts words the way the reading-time meta line does
 function readingTime(text, wpm = 220) {
   const words = text.trim().split(/\s+/).length;
-  return Math.max(1, Math.round(words / wpm));
+  return Math.max(1, Math.ceil(words / wpm));
 }
 ```
 

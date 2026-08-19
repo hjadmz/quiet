@@ -3,9 +3,11 @@ layout: default
 ---
 {%- assign _n = site.posts_on_home | default: 5 %}
 <div class="home">
-  <h1 class="home-title">{{ site.title }}</h1>
+  {%- comment %} The header wordmark is the visible site title; repeating
+  it here would stutter. The h1 stays for structure and screen readers. {% endcomment %}
+  <h1 class="visually-hidden">{{ site.title | escape }}</h1>
   {%- if site.tagline and site.tagline != "" %}
-  <p class="tagline">{{ site.tagline }}</p>
+  <p class="tagline">{{ site.tagline | escape }}</p>
   {%- endif %}
   {%- if site.posts.size == 0 %}
   <p class="empty">nothing here yet.</p>
@@ -13,10 +15,10 @@ layout: default
   <ul class="post-list">
     {%- for post in site.posts limit: _n %}
     <li>
-      <a class="post-list-title" href="{{ post.url | relative_url }}">{{ post.title }}</a>
+      <a class="post-list-title" href="{{ post.url | relative_url }}">{{ post.title | escape }}</a>
       <p class="post-list-meta">
         <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: site.date_format }}</time>
-        {%- if post.description %} — {{ post.description }}{% endif %}
+        {%- if post.description %} — {{ post.description | escape }}{% endif %}
       </p>
     </li>
     {%- endfor %}

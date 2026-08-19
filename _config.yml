@@ -53,9 +53,14 @@ theme_default: system
 # How many posts the home page lists before "all posts →".
 posts_on_home: 5
 
-# Date format used everywhere. "%b %-d, %Y" renders "Aug 18, 2026".
-# See https://shopify.github.io/liquid/filters/date/ for options.
+# Date format for posts and the home list. "%b %-d, %Y" renders
+# "Aug 18, 2026". (The archive shows month + day under its year
+# headings.) See https://shopify.github.io/liquid/filters/date/.
 date_format: "%b %-d, %Y"
+
+# IANA timezone for post dates and feed timestamps.
+# e.g. America/New_York, Europe/Berlin, Asia/Tokyo.
+timezone: America/Chicago
 
 # "· 6 min read" on posts. Set false to hide.
 show_reading_time: true
@@ -70,23 +75,25 @@ footer:
   email: ""             # e.g. you@example.com
 
 # Icons. Replace these files (or point these paths at your own).
+# /assets/img/favicon.ico is the legacy fallback — replace it in place.
 favicon: /assets/img/favicon.svg
 apple_touch_icon: /assets/img/apple-touch-icon.png
 
-# Default social-preview image for pages that don't set their own.
-# Posts can override it with `image: /path.png` in their front matter.
-og_image: /assets/img/og-default.png
+# Default social-preview image: replace the file at
+# assets/img/og-default.png, or change the path in the `defaults:`
+# block at the bottom of this file. Posts can override it with
+# `image: /path.png` in their front matter.
 
 # Analytics are off by default and nothing is loaded from third
-# parties. If you must, paste a privacy-respecting snippet here
-# (e.g. GoatCounter or Plausible) — see README recipes.
+# parties. If you must, paste a privacy-respecting snippet as a
+# single-quoted one-liner (real snippets contain double quotes), e.g.
+# analytics_html: '<script data-goatcounter="https://CODE.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>'
 analytics_html: ""
 
 # ---------------------------------------------------------------
-# Engine settings. You shouldn't need to touch anything below.
+# Engine settings. You shouldn't need to touch anything below,
+# except the social-image path in `defaults:` if you moved yours.
 # ---------------------------------------------------------------
-
-timezone: America/Chicago
 
 markdown: kramdown
 kramdown:

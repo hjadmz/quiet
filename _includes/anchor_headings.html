@@ -17,10 +17,13 @@
       {%- for _p in _parts offset: 1 -%}
         {%- assign _id = _p | split: '"' | first -%}
         {%- assign _segs = _p | split: _close -%}
+        {%- comment %} Text is already kramdown-escaped; only neutralize
+        quotes so the attribute can never break. {% endcomment %}
+        {%- assign _txt = _segs | first | remove_first: _id | remove_first: '">' | strip_html | strip | replace: '"', '&quot;' -%}
         {{- _open -}}
         {%- for _s in _segs -%}
           {%- if forloop.first -%}
-            {{- _s -}}<a class="anchor" href="#{{ _id }}" aria-label="permalink to this heading">#</a>{{- _close -}}
+            {{- _s -}}<a class="anchor" href="#{{ _id }}" aria-label="permalink to {{ _txt }}">#</a>{{- _close -}}
           {%- else -%}
             {{- _s -}}{%- unless forloop.last -%}{{- _close -}}{%- endunless -%}
           {%- endif -%}

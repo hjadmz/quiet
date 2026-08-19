@@ -21,7 +21,8 @@ succeeded.
    default for `username.github.io` repos).
 3. Edit `_config.yml` — every key is commented. Set at least `title`,
    `author.name`, and `url`.
-4. Delete the three demo posts in `_posts/`.
+4. Delete the three demo posts in `_posts/`, and rewrite `about.md`
+   in your own words.
 5. Write Markdown files in `_posts/` named `YYYY-MM-DD-your-title.md`.
 
 Your site is live at `https://username.github.io` about a minute after
@@ -47,11 +48,11 @@ Front matter reference:
 | `title`       | yes      | the post's title |
 | `description` | by convention | one line under the title on the home page, and the post's search/social description |
 | `toc`         | no       | `toc: true` renders a table of contents from the post's h2/h3 headings |
-| `updated`     | no       | `updated: 2026-09-01` shows an "updated" date next to the original |
+| `last_modified_at` | no  | `last_modified_at: 2026-09-01` shows an "updated" date and updates the feed, sitemap, and page metadata |
 | `image`       | no       | path to a social-preview image for this post, overriding the site default |
 
 Drafts live in `_drafts/` (no date in the filename) and never publish.
-Preview them locally with `jekyll serve --drafts`.
+Preview them locally with `bundle exec jekyll serve --drafts`.
 
 ## customization
 
@@ -68,12 +69,17 @@ commented in place. The short version:
 | `body_font` | `sans` or `serif` — both system stacks |
 | `theme_default` | `system`, `light`, or `dark` |
 | `posts_on_home` | how many posts the home page lists |
-| `date_format` | strftime format for all dates |
+| `date_format` | strftime format for dates on posts and the home list |
+| `timezone` | IANA timezone for post dates and feed timestamps |
 | `show_reading_time` | the "· 6 min read" meta |
 | `show_credit` | the "built with quiet" footer line |
 | `footer.github`, `footer.email` | footer links; hidden when empty |
-| `favicon`, `apple_touch_icon`, `og_image` | icon and social-image paths |
+| `favicon`, `apple_touch_icon` | icon paths |
 | `analytics_html` | empty by default; see recipes |
+
+The default social-preview image is the file at
+`assets/img/og-default.png` — replace it with your own (1200×630), or
+point the `image:` path in the config's `defaults:` block somewhere else.
 
 ### changing the accent
 
@@ -85,8 +91,11 @@ lighter and slightly desaturated usually works.
 ### changing the type
 
 `body_font: serif` switches the body to a system serif stack (Charter /
-Iowan Old Style / Georgia). Deeper changes — sizes, spacing, colors —
-live in one `:root` token block at the top of `assets/css/main.css`.
+Iowan Old Style / Georgia). Deeper changes live at the top of
+`assets/css/main.css`: sizes, spacing, fonts, and radius in the first
+`:root` block; colors in the OKLCH `@supports` blocks just below it
+(the adjacent hex values are fallbacks for old browsers — keep them
+in sync, once per theme).
 
 ## custom domain
 

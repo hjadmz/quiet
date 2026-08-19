@@ -15,7 +15,7 @@ permalink: /archive/
     <ul class="archive-list">
       {%- for post in _year.items %}
       <li>
-        <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
+        <a href="{{ post.url | relative_url }}">{{ post.title | escape }}</a>
         <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%b %-d" }}</time>
       </li>
       {%- endfor %}

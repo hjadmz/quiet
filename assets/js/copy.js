@@ -1,4 +1,4 @@
-/* quiet — copy button for code blocks. JS off = no button, no loss. */
+/* code copy button. JS off = no button */
 (function () {
   if (!navigator.clipboard) return;
   var live = document.createElement("div");
@@ -14,14 +14,16 @@
     btn.textContent = "copy";
     btn.addEventListener("click", function () {
       navigator.clipboard.writeText(code.innerText).then(function () {
-        btn.textContent = "copied";
-        live.textContent = "copied to clipboard";
+        live.textContent = btn.textContent = "copied";
         setTimeout(function () {
           btn.textContent = "copy";
           live.textContent = "";
         }, 2000);
+      }).catch(function () {
+        live.textContent = btn.textContent = "copy failed";
       });
     });
+    block.classList.add("has-copy");
     block.appendChild(btn);
   });
 })();

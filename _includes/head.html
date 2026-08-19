@@ -1,17 +1,17 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
+<script>{% include theme.js %}</script>
 {% seo %}
 {% feed_meta %}
-<link rel="icon" href="{{ site.favicon | default: '/assets/img/favicon.svg' | relative_url }}" type="image/svg+xml">
+{%- assign _fav = site.favicon | default: '/assets/img/favicon.svg' %}
+<link rel="icon" href="{{ _fav | relative_url }}"{% if _fav contains '.svg' %} type="image/svg+xml"{% endif %}>
 <link rel="alternate icon" href="{{ '/assets/img/favicon.ico' | relative_url }}" sizes="32x32">
 <link rel="apple-touch-icon" href="{{ site.apple_touch_icon | default: '/assets/img/apple-touch-icon.png' | relative_url }}">
 <link rel="stylesheet" href="{{ '/assets/css/main.css' | relative_url }}">
+{%- assign _accent_dark = site.accent_dark | default: site.accent -%}
+{%- if _accent_dark == "" %}{% assign _accent_dark = site.accent %}{% endif -%}
 {%- if site.accent and site.accent != "" %}
-<style>:root{--accent:{{ site.accent }}}</style>
+<style>:root{--accent:{{ site.accent }}}@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--accent:{{ _accent_dark }}}}:root[data-theme=dark]{--accent:{{ _accent_dark }}}</style>
 {%- endif %}
-{%- if site.accent_dark and site.accent_dark != "" %}
-<style>@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--accent:{{ site.accent_dark }}}}:root[data-theme=dark]{--accent:{{ site.accent_dark }}}</style>
-{%- endif %}
-<script>{% include theme.js %}</script>
 {%- include analytics.html %}

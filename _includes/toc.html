@@ -10,7 +10,11 @@
   {%- if _lead == '2 id="' or _lead == '3 id="' -%}
     {%- assign _lvl = _c | slice: 0, 1 -%}
     {%- assign _q = _c | split: '"' -%}
-    {%- assign _t = _q[2] | split: '</h' | first | remove_first: '>' | strip_html | strip -%}
+    {%- comment %} Heading inner HTML may itself contain quoted attributes
+    (inline code, links), so peel off the known prefix instead of
+    splitting on quotes: `2 id="`, then the id, then `">`. {% endcomment %}
+    {%- assign _head = _c | split: '</h' | first -%}
+    {%- assign _t = _head | remove_first: _lead | remove_first: _q[1] | remove_first: '">' | strip_html | strip -%}
     {%- capture _crumbs -%}{{ _crumbs }}{{ _lvl }}|||{{ _q[1] }}|||{{ _t }}@@@{%- endcapture -%}
   {%- endif -%}
 {%- endfor -%}

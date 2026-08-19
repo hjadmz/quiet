@@ -1,16 +1,24 @@
 ---
 layout: default
 ---
-{%- assign _content = content | replace: '<table>', '<div class="table-wrap"><table>' | replace: '</table>', '</table></div>' -%}
+{%- comment %} Build-time transforms: wrap tables for horizontal scroll and
+make scrollable regions keyboard-focusable (tabindex) — no JS. {% endcomment %}
+{%- assign _content = content
+  | replace: '<table>', '<div class="table-wrap" tabindex="0"><table>'
+  | replace: '</table>', '</table></div>'
+  | replace: '<pre class="highlight"><code', '<pre class="highlight" tabindex="0"><code' -%}
 <article class="post">
   <header class="post-header">
-    <h1>{{ page.title }}</h1>
+    <h1>{{ page.title | escape }}</h1>
     <p class="meta">
       <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: site.date_format }}</time>
       {%- if site.show_reading_time -%}
         {%- assign _words = content | strip_html | number_of_words %} · {{ _words | plus: 219 | divided_by: 220 }} min read
       {%- endif -%}
-      {%- if page.updated %} · updated <time datetime="{{ page.updated | date_to_xmlschema }}">{{ page.updated | date: site.date_format }}</time>
+      {%- comment %} last_modified_at also updates the feed, sitemap, and
+      JSON-LD via the whitelisted plugins; `updated` still displays. {% endcomment %}
+      {%- assign _upd = page.last_modified_at | default: page.updated -%}
+      {%- if _upd %} · updated <time datetime="{{ _upd | date_to_xmlschema }}">{{ _upd | date: site.date_format }}</time>
       {%- endif %}
     </p>
   </header>
@@ -24,10 +32,10 @@ layout: default
 {%- if page.previous or page.next %}
 <nav class="post-nav" aria-label="more posts">
   {%- if page.next %}
-  <a class="post-nav-newer" href="{{ page.next.url | relative_url }}"><span class="post-nav-label">← newer</span>{{ page.next.title }}</a>
+  <a class="post-nav-newer" href="{{ page.next.url | relative_url }}"><span class="post-nav-label">← newer</span>{{ page.next.title | escape }}</a>
   {%- endif %}
   {%- if page.previous %}
-  <a class="post-nav-older" href="{{ page.previous.url | relative_url }}"><span class="post-nav-label">older →</span>{{ page.previous.title }}</a>
+  <a class="post-nav-older" href="{{ page.previous.url | relative_url }}"><span class="post-nav-label">older →</span>{{ page.previous.title | escape }}</a>
   {%- endif %}
 </nav>
 {%- endif %}
