@@ -255,7 +255,12 @@ html:not(.js) .theme-toggle { display: none; }
   display: flex; justify-content: space-between; flex-wrap: wrap; gap: var(--s4);
   margin-top: var(--s8); padding-top: var(--s5); border-top: 1px solid var(--border);
 }
-.post-nav-label { display: block; font-size: var(--fs-meta); color: var(--fg-muted); margin-bottom: var(--s1); }
+/* inline-block stops the link's underline from painting through the
+   label — only the title reads as the link */
+.post-nav-label {
+  display: inline-block; width: 100%;
+  font-size: var(--fs-meta); color: var(--fg-muted); margin-bottom: var(--s1);
+}
 .post-nav-older { margin-left: auto; text-align: right; }
 
 /* ---------- prose ---------- */
