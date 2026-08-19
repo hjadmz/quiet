@@ -344,6 +344,20 @@ div.highlighter-rouge.has-copy pre.highlight { padding-top: calc(var(--s2) + 36p
   { color: var(--code-num); }
 .highlight .err { color: inherit; background: transparent; }
 
+/* ---------- motion ---------- */
+/* Page-to-page navigation cross-fades (View Transitions, CSS-only).
+   The header holds still while content transitions — motion as
+   continuity, never decoration. Browsers without support, and anyone
+   preferring reduced motion, get instant navigation as before. */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition { navigation: auto; }
+  ::view-transition-old(root), ::view-transition-new(root) {
+    animation-duration: 150ms;
+    animation-timing-function: ease-out;
+  }
+  .site-header { view-transition-name: site-header; }
+}
+
 /* ---------- preference modes ---------- */
 @media (prefers-reduced-motion: reduce) {
   *, ::before, ::after { transition: none !important; animation: none !important; }
