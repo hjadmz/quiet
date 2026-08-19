@@ -5,11 +5,8 @@ permalink: /about/
 description: who writes this, and why.
 ---
 
-i'm henry — a design engineer in training. i care about software that
-works quietly: fewer features, better ones, nothing performing for
-attention.
+this is the about page. replace it with who you are — a few honest
+sentences beat a résumé.
 
-this blog is where i think out loud about design, systems, and
-building things carefully.
-
-elsewhere: [github](https://github.com/hjadmz).
+this blog is built with [quiet](https://github.com/hjadmz/quiet),
+a template with everything it needs and nothing it doesn't.

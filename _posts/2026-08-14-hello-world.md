@@ -3,7 +3,7 @@ title: hello, world
 description: a first post, and a small promise about what this place is for.
 ---
 
-This is a blog built with [quiet](https://github.com/hjadmz/hjadmz.github.io) —
+This is a blog built with [quiet](https://github.com/hjadmz/quiet) —
 a template with everything it needs and nothing it doesn't.
 
 There are no trackers here, no cookie banner, no comment counters asking

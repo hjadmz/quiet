@@ -6,24 +6,24 @@
 
 # Site name. Appears in the header, the browser tab, and your feed.
 # Example: title: jane doe
-title: hjadmz
+title: quiet
 
 # One-line bio shown on the home page under your site name.
 # Set to "" to hide it.
-tagline: notes on design, systems, and building quietly.
+tagline: everything it needs, nothing it doesn't.
 
 # Search/social description for the site itself (posts use their own
 # `description` front matter). Often the same as the tagline.
-description: notes on design, systems, and building quietly.
+description: a quiet blog template for GitHub Pages.
 
 # Used in the RSS feed and page metadata.
 author:
-  name: Henry Adams
+  name: Your Name
 
 # Your site's address.
 # User site  (username.github.io repo): https://username.github.io
 # Project site (any other repo name):   https://username.github.io
-url: https://hjadmz.github.io
+url: https://username.github.io
 
 # "" for a user site (username.github.io).
 # "/repo-name" for a project site (a repo not named username.github.io).
@@ -34,13 +34,13 @@ lang: en
 
 # Your one accent color. Used only for links, the focus ring, and
 # text selection — nothing else gets color. Any CSS color works.
-# This is oklch(45% 0.07 265) as hex, for the widest browser support.
-accent: "#42547c"
+# Leave "" for the built-in restrained blue, oklch(52% 0.1 250).
+accent: ""
 
 # Optional: a separate accent for dark mode (usually lighter and
 # slightly desaturated). Leave "" to reuse `accent` in dark mode too.
-# This is oklch(73% 0.07 265) as hex.
-accent_dark: "#92a8d5"
+#
+accent_dark: ""
 
 # Body typeface: "sans" or "serif". Both are system font stacks —
 # instant, private, and native-feeling on every OS.
@@ -60,7 +60,7 @@ date_format: "%b %-d, %Y"
 
 # IANA timezone for post dates and feed timestamps.
 # e.g. America/New_York, Europe/Berlin, Asia/Tokyo.
-timezone: America/Chicago
+timezone: Etc/UTC
 
 # "· 6 min read" on posts. Set false to hide.
 show_reading_time: true
@@ -71,7 +71,7 @@ show_credit: true
 
 # Footer links. Each renders only if set.
 footer:
-  github: hjadmz        # your GitHub username
+  github: ""        # your GitHub username
   email: ""             # e.g. you@example.com
 
 # Icons. Replace these files (or point these paths at your own).
