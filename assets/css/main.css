@@ -145,7 +145,9 @@ main, .site-header nav, .site-footer {
     padding-right: var(--s4);
   }
 }
-main { flex: 1 0 auto; padding-top: var(--s6); padding-bottom: var(--s8); }
+/* One spacing owns the content-to-footer distance — main padding. The footer
+   adds no top margin, so the two never compound into an arbitrary total. */
+main { flex: 1 0 auto; padding-top: var(--s6); padding-bottom: var(--s7); }
 
 ::selection { background: rgba(56, 108, 160, 0.25); }
 @supports (background: color-mix(in srgb, red 50%, blue)) {
@@ -230,9 +232,13 @@ img { max-width: 100%; height: auto; border-radius: var(--radius); }
 }
 html:not(.js) .theme-toggle { display: none; }
 
+/* The rule matters: on a page too short to scroll, the leftover window space
+   sits ABOVE this line, so it reads as the page bottom band rather than as a
+   random gap that changes with the window height. */
 .site-footer {
   flex-shrink: 0;
-  padding-top: var(--s6); padding-bottom: var(--s6); margin-top: var(--s6);
+  border-top: 1px solid var(--border);
+  padding-top: var(--s5); padding-bottom: var(--s6);
   font-size: var(--fs-meta); color: var(--fg-muted);
 }
 .footer-links { display: flex; gap: var(--s4); margin: 0; }
