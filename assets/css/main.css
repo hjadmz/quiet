@@ -134,15 +134,15 @@ main, .site-header nav, .site-footer {
   width: 100%;
   max-width: var(--measure);
   margin-inline: auto;
-  padding-left: max(var(--s5), env(safe-area-inset-left));
-  padding-right: max(var(--s5), env(safe-area-inset-right));
+  padding-left: var(--s5);
+  padding-right: var(--s5);
 }
 /* On the narrowest phones (folded foldables, older small screens) reading
    width is the scarce resource — give the text back 16px. */
 @media (max-width: 22.5rem) {
   main, .site-header nav, .site-footer {
-    padding-left: max(var(--s4), env(safe-area-inset-left));
-    padding-right: max(var(--s4), env(safe-area-inset-right));
+    padding-left: var(--s4);
+    padding-right: var(--s4);
   }
 }
 main { flex: 1 0 auto; padding-top: var(--s6); padding-bottom: var(--s8); }
@@ -392,6 +392,8 @@ div.highlighter-rouge.has-copy pre.highlight { padding-top: calc(var(--s2) + 36p
 @media (prefers-contrast: more) {
   /* :not() keeps specificity (0,2,0) so this wins in every theme state */
   :root, :root:not([data-theme="light"]) { --fg-muted: var(--fg); --border: var(--fg); }
+  /* the softened underline is a low-contrast affordance; restore it fully */
+  a { text-decoration-color: var(--accent); }
 }
 
 @media (forced-colors: active) {

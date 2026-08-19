@@ -150,6 +150,9 @@ laws, Gestalt grouping, contrast arithmetic, reading-measure research —
 and a few popular blog features are deliberately refused.
 [docs/DESIGN-PRINCIPLES.md](docs/DESIGN-PRINCIPLES.md) records the
 reasoning, the measured numbers, and the refusals.
+[docs/ACCEPTANCE.md](docs/ACCEPTANCE.md) is the measured test report:
+Lighthouse, axe, contrast ratios, byte budgets, and the device widths
+this was verified against.
 
 ## license
 

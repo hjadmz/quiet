@@ -20,9 +20,9 @@ description: a quiet blog template for GitHub Pages.
 author:
   name: Your Name
 
-# Your site's address.
-# User site  (username.github.io repo): https://username.github.io
-# Project site (any other repo name):   https://username.github.io
+# Your site's address — always https://username.github.io.
+# For a project site (a repo not named username.github.io), keep this the
+# same and set baseurl below.
 url: https://username.github.io
 
 # "" for a user site (username.github.io).
