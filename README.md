@@ -104,6 +104,20 @@ point your DNS at GitHub Pages per
 [GitHub's guide](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site),
 and update `url` in `_config.yml`.
 
+## hosting somewhere else
+
+Nothing here depends on GitHub. The build is plain Jekyll producing plain
+static files, so any host works:
+
+- **Cloudflare Pages / Netlify** — connect the repo, set the build command
+  to `jekyll build` and the output directory to `_site`, then set `url` in
+  `_config.yml` to your final address. Nothing else changes.
+- **Any static host, or your own server** — run `bundle exec jekyll build`
+  and upload the `_site` folder.
+- **Served from a subfolder** (e.g. `example.com/blog`) — set
+  `baseurl: "/blog"`. Every internal link and asset already goes through
+  `relative_url`, so no code changes are needed.
+
 ## local preview
 
 You usually don't need one — push and look. When you want one:
@@ -128,6 +142,14 @@ more, add it deliberately:
 - **A custom font** — put the `.woff2` in `assets/`, add an
   `@font-face` rule at the top of `assets/css/main.css`, and change
   `--font-sans`. Self-host; never a font CDN.
+
+## why it's built this way
+
+Every decision here traces to something measurable — Hick's and Fitts's
+laws, Gestalt grouping, contrast arithmetic, reading-measure research —
+and a few popular blog features are deliberately refused.
+[docs/DESIGN-PRINCIPLES.md](docs/DESIGN-PRINCIPLES.md) records the
+reasoning, the measured numbers, and the refusals.
 
 ## license
 
