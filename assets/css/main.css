@@ -290,6 +290,14 @@ html:not(.js) .theme-toggle { display: none; }
 .post-content > h2 + *, .post-content > h3 + *, .post-content > h4 + * { margin-block-start: 0.6em; }
 .post-content > hr, .post-content > hr + * { margin-block-start: var(--s7); }
 
+/* Writers paste long URLs and identifiers. Without this, one unbreakable
+   string sets the width of the whole page: measured 882px of content inside a
+   323px column, which scrolls the entire document sideways on a phone.
+   Code blocks are excluded on purpose — they scroll in their own box. */
+.post-content, .post-list-title, .post-list-meta, .archive-list a,
+.post-nav a, .toc a { overflow-wrap: anywhere; }
+.post-content pre { overflow-wrap: normal; }
+
 h2[id], h3[id], h4[id], sup[id], .footnotes li[id] { scroll-margin-top: var(--s6); }
 
 .anchor { margin-left: var(--s2); font-weight: 400; text-decoration: none; opacity: 0; }
