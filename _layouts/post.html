@@ -1,12 +1,15 @@
 ---
 layout: default
 ---
-{%- comment %} Build-time transforms: wrap tables for horizontal scroll and
-make scrollable regions keyboard-focusable (tabindex) — no JS. {% endcomment %}
+{%- comment %} Build-time transforms: wrap tables for horizontal scroll, make
+scrollable regions keyboard-focusable (tabindex), and drop the deprecated
+doc-endnote role that GitHub Pages' pinned kramdown still emits on footnote
+items (axe flags it; newer kramdown already removed it). No JS. {% endcomment %}
 {%- assign _content = content
   | replace: '<table>', '<div class="table-wrap" tabindex="0"><table>'
   | replace: '</table>', '</table></div>'
-  | replace: '<pre class="highlight"><code', '<pre class="highlight" tabindex="0"><code' -%}
+  | replace: '<pre class="highlight"><code', '<pre class="highlight" tabindex="0"><code'
+  | replace: ' role="doc-endnote"', '' -%}
 <article class="post">
   <header class="post-header">
     <h1>{{ page.title | escape }}</h1>

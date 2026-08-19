@@ -4,7 +4,8 @@ layout: default
 {%- assign _content = content
   | replace: '<table>', '<div class="table-wrap" tabindex="0"><table>'
   | replace: '</table>', '</table></div>'
-  | replace: '<pre class="highlight"><code', '<pre class="highlight" tabindex="0"><code' -%}
+  | replace: '<pre class="highlight"><code', '<pre class="highlight" tabindex="0"><code'
+  | replace: ' role="doc-endnote"', '' -%}
 <article class="page">
   <h1>{{ page.title | escape }}</h1>
   <div class="post-content">
