@@ -1,0 +1,28 @@
+---
+layout: default
+---
+{%- assign _n = site.posts_on_home | default: 5 %}
+<div class="home">
+  <h1 class="home-title">{{ site.title }}</h1>
+  {%- if site.tagline and site.tagline != "" %}
+  <p class="tagline">{{ site.tagline }}</p>
+  {%- endif %}
+  {%- if site.posts.size == 0 %}
+  <p class="empty">nothing here yet.</p>
+  {%- else %}
+  <ul class="post-list">
+    {%- for post in site.posts limit: _n %}
+    <li>
+      <a class="post-list-title" href="{{ post.url | relative_url }}">{{ post.title }}</a>
+      <p class="post-list-meta">
+        <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: site.date_format }}</time>
+        {%- if post.description %} — {{ post.description }}{% endif %}
+      </p>
+    </li>
+    {%- endfor %}
+  </ul>
+  {%- if site.posts.size > _n %}
+  <p class="all-posts"><a href="{{ '/archive/' | relative_url }}">all posts →</a></p>
+  {%- endif %}
+  {%- endif %}
+</div>

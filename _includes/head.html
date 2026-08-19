@@ -1,0 +1,17 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+{% seo %}
+{% feed_meta %}
+<link rel="icon" href="{{ site.favicon | default: '/assets/img/favicon.svg' | relative_url }}" type="image/svg+xml">
+<link rel="alternate icon" href="{{ '/assets/img/favicon.ico' | relative_url }}" sizes="32x32">
+<link rel="apple-touch-icon" href="{{ site.apple_touch_icon | default: '/assets/img/apple-touch-icon.png' | relative_url }}">
+<link rel="stylesheet" href="{{ '/assets/css/main.css' | relative_url }}">
+{%- if site.accent and site.accent != "" %}
+<style>:root{--accent:{{ site.accent }}}</style>
+{%- endif %}
+{%- if site.accent_dark and site.accent_dark != "" %}
+<style>@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--accent:{{ site.accent_dark }}}}:root[data-theme=dark]{--accent:{{ site.accent_dark }}}</style>
+{%- endif %}
+<script>{% include theme.js %}</script>
+{%- include analytics.html %}

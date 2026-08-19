@@ -1,0 +1,123 @@
+# ---------------------------------------------------------------
+# quiet — everything you personalize lives in this one file.
+# Edit a value, commit, and GitHub Pages rebuilds your site.
+# Any key you leave empty ("") simply renders nothing.
+# ---------------------------------------------------------------
+
+# Site name. Appears in the header, the browser tab, and your feed.
+# Example: title: jane doe
+title: hjadmz
+
+# One-line bio shown on the home page under your site name.
+# Set to "" to hide it.
+tagline: notes on design, systems, and building quietly.
+
+# Search/social description for the site itself (posts use their own
+# `description` front matter). Often the same as the tagline.
+description: notes on design, systems, and building quietly.
+
+# Used in the RSS feed and page metadata.
+author:
+  name: Henry Adams
+
+# Your site's address.
+# User site  (username.github.io repo): https://username.github.io
+# Project site (any other repo name):   https://username.github.io
+url: https://hjadmz.github.io
+
+# "" for a user site (username.github.io).
+# "/repo-name" for a project site (a repo not named username.github.io).
+baseurl: ""
+
+# Language code for the whole site (html lang attribute).
+lang: en
+
+# Your one accent color. Used only for links, the focus ring, and
+# text selection — nothing else gets color. Any CSS color works.
+# This is oklch(45% 0.07 265) as hex, for the widest browser support.
+accent: "#42547c"
+
+# Optional: a separate accent for dark mode (usually lighter and
+# slightly desaturated). Leave "" to reuse `accent` in dark mode too.
+# This is oklch(73% 0.07 265) as hex.
+accent_dark: "#92a8d5"
+
+# Body typeface: "sans" or "serif". Both are system font stacks —
+# instant, private, and native-feeling on every OS.
+body_font: sans
+
+# Theme when a visitor first arrives: "system", "light", or "dark".
+# Visitors can change it with the toggle; their choice is remembered.
+theme_default: system
+
+# How many posts the home page lists before "all posts →".
+posts_on_home: 5
+
+# Date format used everywhere. "%b %-d, %Y" renders "Aug 18, 2026".
+# See https://shopify.github.io/liquid/filters/date/ for options.
+date_format: "%b %-d, %Y"
+
+# "· 6 min read" on posts. Set false to hide.
+show_reading_time: true
+
+# "built with quiet" line in the footer. Set false to remove it —
+# guilt-free, it's MIT.
+show_credit: true
+
+# Footer links. Each renders only if set.
+footer:
+  github: hjadmz        # your GitHub username
+  email: ""             # e.g. you@example.com
+
+# Icons. Replace these files (or point these paths at your own).
+favicon: /assets/img/favicon.svg
+apple_touch_icon: /assets/img/apple-touch-icon.png
+
+# Default social-preview image for pages that don't set their own.
+# Posts can override it with `image: /path.png` in their front matter.
+og_image: /assets/img/og-default.png
+
+# Analytics are off by default and nothing is loaded from third
+# parties. If you must, paste a privacy-respecting snippet here
+# (e.g. GoatCounter or Plausible) — see README recipes.
+analytics_html: ""
+
+# ---------------------------------------------------------------
+# Engine settings. You shouldn't need to touch anything below.
+# ---------------------------------------------------------------
+
+timezone: America/Chicago
+
+markdown: kramdown
+kramdown:
+  input: GFM            # fenced code, tables, autolinks
+highlighter: rouge
+
+permalink: /:year/:title/
+
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+  - jekyll-sitemap
+
+# Give every page the default social image unless it sets its own,
+# and give posts the post layout so front matter stays minimal.
+defaults:
+  - scope:
+      path: ""
+    values:
+      image: /assets/img/og-default.png
+  - scope:
+      path: ""
+      type: posts
+    values:
+      layout: post
+
+exclude:
+  - README.md
+  - LICENSE
+  - Gemfile
+  - Gemfile.lock
+  - docs
+  - .devcontainer
+  - .editorconfig

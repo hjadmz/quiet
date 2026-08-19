@@ -1,0 +1,14 @@
+---
+title: hello, world
+description: a first post, and a small promise about what this place is for.
+---
+
+This is a blog built with [quiet](https://github.com/hjadmz/hjadmz.github.io) —
+a template with everything it needs and nothing it doesn't.
+
+There are no trackers here, no cookie banner, no comment counters asking
+to be looked at. Just text, set carefully, that loads fast and reads well
+on anything with a screen.
+
+If you're reading this on your own fork: welcome. Delete the demo posts
+in `_posts/`, edit `_config.yml`, and write. That's the whole workflow.

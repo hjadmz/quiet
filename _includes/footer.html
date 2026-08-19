@@ -1,0 +1,12 @@
+<footer class="site-footer">
+  <p class="footer-links">
+    {%- if site.footer.github and site.footer.github != "" %}
+    <a href="https://github.com/{{ site.footer.github }}">github</a>
+    {%- endif %}
+    {%- if site.footer.email and site.footer.email != "" %}
+    <a href="mailto:{{ site.footer.email }}">email</a>
+    {%- endif %}
+    <a href="{{ '/feed.xml' | relative_url }}">rss</a>
+  </p>
+  <p class="footer-meta">© {{ 'now' | date: '%Y' }} {{ site.author.name }}{% if site.show_credit %} · built with <a href="https://github.com/hjadmz/hjadmz.github.io">quiet</a>{% endif %}</p>
+</footer>

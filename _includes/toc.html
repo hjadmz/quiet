@@ -1,0 +1,42 @@
+{% comment %}
+  Build-time table of contents from h2–h3 headings. Pure Liquid, no JS.
+  Rendered only when a post sets `toc: true` in its front matter.
+  Usage: {% include toc.html html=content %}
+{% endcomment %}
+{%- assign _chunks = include.html | split: '<h' -%}
+{%- assign _crumbs = "" -%}
+{%- for _c in _chunks offset: 1 -%}
+  {%- assign _lead = _c | slice: 0, 6 -%}
+  {%- if _lead == '2 id="' or _lead == '3 id="' -%}
+    {%- assign _lvl = _c | slice: 0, 1 -%}
+    {%- assign _q = _c | split: '"' -%}
+    {%- assign _t = _q[2] | split: '</h' | first | remove_first: '>' | strip_html | strip -%}
+    {%- capture _crumbs -%}{{ _crumbs }}{{ _lvl }}|||{{ _q[1] }}|||{{ _t }}@@@{%- endcapture -%}
+  {%- endif -%}
+{%- endfor -%}
+{%- if _crumbs != "" -%}
+{%- assign _items = _crumbs | split: '@@@' -%}
+<nav class="toc" aria-label="contents">
+  <p class="toc-title">contents</p>
+  <ul>
+    {%- assign _open3 = false -%}
+    {%- assign _openli = false -%}
+    {%- for _it in _items -%}
+      {%- assign _f = _it | split: '|||' -%}
+      {%- if _f[0] == '2' -%}
+        {%- if _open3 %}</ul>{% assign _open3 = false %}{% endif -%}
+        {%- if _openli %}</li>{% endif -%}
+        <li><a href="#{{ _f[1] }}">{{ _f[2] }}</a>
+        {%- assign _openli = true -%}
+      {%- else -%}
+        {%- unless _open3 -%}
+          {%- if _openli %}<ul>{% assign _open3 = true %}{% else %}<li>{% assign _openli = true %}{% endif -%}
+        {%- endunless -%}
+        {%- if _open3 %}<li><a href="#{{ _f[1] }}">{{ _f[2] }}</a></li>{% else %}<a href="#{{ _f[1] }}">{{ _f[2] }}</a>{% endif -%}
+      {%- endif -%}
+    {%- endfor -%}
+    {%- if _open3 %}</ul>{% endif -%}
+    {%- if _openli %}</li>{% endif -%}
+  </ul>
+</nav>
+{%- endif -%}

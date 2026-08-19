@@ -1,0 +1,33 @@
+{% comment %}
+  Injects a quiet "#" permalink into every h2–h4 that kramdown gave an id.
+  Pure Liquid, runs at build time, no JavaScript.
+  Usage: {% include anchor_headings.html html=content %}
+  Safe around code blocks: Rouge HTML-escapes code, so literal "</h2>"
+  text inside a snippet can never match here.
+{% endcomment %}
+{%- assign _out = include.html -%}
+{%- assign _levels = "2|3|4" | split: "|" -%}
+{%- for _lv in _levels -%}
+  {%- capture _open %}<h{{ _lv }} id="{% endcapture -%}
+  {%- capture _close %}</h{{ _lv }}>{% endcapture -%}
+  {%- assign _parts = _out | split: _open -%}
+  {%- if _parts.size > 1 -%}
+    {%- capture _rebuilt -%}
+      {{- _parts[0] -}}
+      {%- for _p in _parts offset: 1 -%}
+        {%- assign _id = _p | split: '"' | first -%}
+        {%- assign _segs = _p | split: _close -%}
+        {{- _open -}}
+        {%- for _s in _segs -%}
+          {%- if forloop.first -%}
+            {{- _s -}}<a class="anchor" href="#{{ _id }}" aria-label="permalink to this heading">#</a>{{- _close -}}
+          {%- else -%}
+            {{- _s -}}{%- unless forloop.last -%}{{- _close -}}{%- endunless -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endfor -%}
+    {%- endcapture -%}
+    {%- assign _out = _rebuilt -%}
+  {%- endif -%}
+{%- endfor -%}
+{{ _out }}
