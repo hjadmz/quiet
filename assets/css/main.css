@@ -137,6 +137,14 @@ main, .site-header nav, .site-footer {
   padding-left: max(var(--s5), env(safe-area-inset-left));
   padding-right: max(var(--s5), env(safe-area-inset-right));
 }
+/* On the narrowest phones (folded foldables, older small screens) reading
+   width is the scarce resource — give the text back 16px. */
+@media (max-width: 22.5rem) {
+  main, .site-header nav, .site-footer {
+    padding-left: max(var(--s4), env(safe-area-inset-left));
+    padding-right: max(var(--s4), env(safe-area-inset-right));
+  }
+}
 main { flex: 1 0 auto; padding-top: var(--s6); padding-bottom: var(--s8); }
 
 ::selection { background: rgba(56, 108, 160, 0.25); }
@@ -208,6 +216,7 @@ img { max-width: 100%; height: auto; border-radius: var(--radius); }
   font: inherit; font-size: var(--fs-meta); color: var(--fg-muted);
   background: none; border: 0; padding: 0; cursor: pointer;
   position: relative;
+  white-space: nowrap; /* never break "theme: system" mid-label */
 }
 .theme-toggle:hover { color: var(--fg); }
 /* invisible hit-area extensions: quiet visually, ~44px tall for touch.
