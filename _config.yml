@@ -98,6 +98,8 @@ analytics_html: ""
 markdown: kramdown
 kramdown:
   input: GFM            # fenced code, tables, autolinks
+  # text-presentation arrow: without &#xfe0e; iOS renders ↩ as a blue emoji
+  footnote_backlink: "&#8617;&#xfe0e;"
 highlighter: rouge
 
 permalink: /:year/:title/

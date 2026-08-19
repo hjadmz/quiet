@@ -262,6 +262,11 @@ html:not(.js) .theme-toggle { display: none; }
   font-size: var(--fs-meta); color: var(--fg-muted); margin-bottom: var(--s1);
 }
 .post-nav-older { margin-left: auto; text-align: right; }
+/* narrow screens: a quiet left-aligned stack instead of a scattered wrap */
+@media (max-width: 36rem) {
+  .post-nav { flex-direction: column; gap: var(--s5); }
+  .post-nav-older { margin-left: 0; text-align: left; }
+}
 
 /* ---------- prose ---------- */
 .post-content > * { margin-block: 0; }
