@@ -289,8 +289,12 @@ html:not(.js) .theme-toggle { display: none; }
 }
 
 /* ---------- prose ---------- */
-.post-content > * { margin-block: 0; }
-.post-content > * + * { margin-block-start: 1.35em; }
+/* One prose rhythm, wherever prose lives — .post-content on posts and
+   Markdown pages, .page on hand-written pages like 404. Without the second
+   selector those paragraphs fall back to the browser default (1em) and sit
+   measurably tighter than every other paragraph on the site. */
+.post-content > *, .page > * { margin-block: 0; }
+.post-content > * + *, .page > * + * { margin-block-start: 1.35em; }
 .post-content > h2, .post-content > h3, .post-content > h4 { margin-block-start: 2.2em; }
 .post-content > h2 + *, .post-content > h3 + *, .post-content > h4 + * { margin-block-start: 0.6em; }
 .post-content > hr, .post-content > hr + * { margin-block-start: var(--s7); }
