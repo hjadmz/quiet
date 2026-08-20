@@ -262,6 +262,11 @@ html:not(.js) .theme-toggle { display: none; }
 }
 .archive-list time { color: var(--fg-muted); font-size: var(--fs-meta); white-space: nowrap; }
 
+/* Markdown pages (about, 404) get the same title-to-content rhythm as posts,
+   where .post-header supplies it. Without this the first line sits flush
+   against the heading — measured 0px on /about/ against 34px on a post. */
+.page h1 { margin-bottom: var(--s6); }
+
 /* ---------- post ---------- */
 .post-header { margin-bottom: var(--s6); }
 .meta { margin: var(--s2) 0 0; font-size: var(--fs-meta); color: var(--fg-muted); }
