@@ -295,6 +295,12 @@ html:not(.js) .theme-toggle { display: none; }
    measurably tighter than every other paragraph on the site. */
 .post-content > *, .page > * { margin-block: 0; }
 .post-content > * + *, .page > * + * { margin-block-start: 1.35em; }
+/* Nested prose containers too. Without this a paragraph inside a blockquote,
+   a list item or a footnote keeps the browser default 1em margin, which
+   collapses outward and silently overrides the spacing set around it —
+   measured as a 1.0rem gap under one heading where every other was 0.6rem. */
+.post-content blockquote > *, .post-content li > * { margin-block: 0; }
+.post-content blockquote > * + *, .post-content li > * + * { margin-block-start: 1.35em; }
 .post-content > h2, .post-content > h3, .post-content > h4 { margin-block-start: 2.2em; }
 .post-content > h2 + *, .post-content > h3 + *, .post-content > h4 + * { margin-block-start: 0.6em; }
 .post-content > hr, .post-content > hr + * { margin-block-start: var(--s7); }
