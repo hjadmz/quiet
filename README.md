@@ -52,6 +52,17 @@ Front matter reference:
 | `last_modified_at` | no  | `last_modified_at: 2026-09-01` shows an "updated" date and updates the feed, sitemap, and page metadata |
 | `image`       | no       | path to a social-preview image for this post, overriding the site default |
 
+### heading anchors and TOC behavior
+
+`quiet` generates both TOC and heading anchors at build time from real rendered headings:
+
+- `toc: true` builds a TOC from **h2 and h3 headings only**.
+- h2–h4 headings receive a small `#` permalink link (the blue hash in your browser); it lets readers jump to direct URLs for that heading.
+- No JavaScript is used for these links; they are part of the generated HTML.
+- If you want a cleaner look, remove heading hashes by changing `.anchor` in `assets/css/main.css` (for example, `display: none;` or a neutral color).
+
+This is intentional: subtitles in `##`/`###` form are included for article navigation, while deep h4 headings stay out of the TOC to avoid an overly busy map.
+
 Files in `_drafts/` (no date in the filename) are not rendered by a normal
 build. They are still visible if committed to a public repository, so never
 put secrets or genuinely private writing there. Preview them with
