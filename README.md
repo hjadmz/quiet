@@ -121,7 +121,8 @@ and update `url` in `_config.yml`.
 
 For Cloudflare Pages, connect the custom domain in the Pages dashboard;
 do not add a GitHub Pages `CNAME` file. In either case, choose one canonical
-hostname and set `url` to it.
+hostname and set `url` to it. If you want this running at `blog.hjadmz.com`,
+set both `url` values to that host and map that subdomain in Pages/DNS.
 
 ## hosting somewhere else
 
