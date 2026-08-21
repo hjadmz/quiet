@@ -2,6 +2,7 @@
   "name": "quiet-jekyll-template",
   "private": true,
   "scripts": {
+    "blog:new": "node scripts/new-post.mjs",
     "build": "bundle exec jekyll build --strict_front_matter",
     "build:cloudflare": "bundle exec jekyll build --strict_front_matter --config _config.yml,_config.cloudflare.yml",
     "build:test": "node tests/build-test-site.cjs",

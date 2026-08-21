@@ -25,13 +25,21 @@ failed; if its details make reading feel effortless, it has succeeded.
    in your own words.
 5. Write Markdown files in `_posts/` named `YYYY-MM-DD-your-title.md`.
 
+You can skip manual file naming with:
+
+```bash
+npm run blog:new -- "My post title"
+```
+
+This writes `YYYY-MM-DD-my-post-title.md` with `published: false`. After you finish writing, open your preferred editor and switch it to `published: true`.
+
 GitHub Pages rebuilds after each push to `main`; the exact wait varies.
 The hosted path requires no local build tools. Local preview and the
 maintainer checks use the pinned Ruby and Node dependencies in this repo.
 
 ## writing posts
 
-Create `_posts/2026-08-18-my-first-post.md`:
+Create a new post file with `npm run blog:new -- "My first post"` and then edit it:
 
 ```markdown
 ---
