@@ -439,6 +439,9 @@ div.highlighter-rouge.has-copy pre.highlight { padding-top: calc(var(--s2) + 36p
   :root, :root:not([data-theme="light"]) { --fg-muted: var(--fg); --border: var(--fg); }
   /* the softened underline is a low-contrast affordance; restore it fully */
   a { text-decoration-color: var(--accent); }
+  /* the 25% tint selection is invisible at this contrast; swap the pair
+     so the selection is unambiguous */
+  ::selection { background: var(--accent); color: var(--bg); }
 }
 
 @media (forced-colors: active) {
