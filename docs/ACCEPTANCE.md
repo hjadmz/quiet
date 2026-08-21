@@ -1,58 +1,64 @@
-# acceptance report — quiet v1.0
+# acceptance report — quiet 1.1 candidate
 
-Every item from the build spec's checklist, marked with measured results.
-Measured 2026-08-19 on the production build (Jekyll 3.10.0 — the same
-version GitHub Pages runs — with the three whitelisted plugins), after a
-30-finding multi-agent review (6 dimensions, each finding adversarially
-verified) and the fixes that followed.
+Updated 2026-08-20. This report separates retained checks from historical
+point-in-time audits. A dated pass is evidence for that build, not a permanent
+property of every fork or host.
 
-| # | check | result | measured |
-|---|-------|--------|----------|
-| 1 | Fresh fork personalizes with only `_config.yml` edits | **pass** | simulated fork: 8 config edits (title, tagline, author, url, accent, accent_dark, body_font, footer) → clean build, all values applied, zero edits outside the config |
-| 2 | Fully functional with JavaScript disabled | **pass** | sandboxed no-scripts load: toggle hidden, no copy buttons, TOC + anchors + footnotes + full content all present (they're build-time HTML) |
-| 3 | Lighthouse mobile 100/100/100/100 on Home and kitchen-sink post | **pass** | home: 100/100/100/100 · post: 100/100/100/100 (perf/a11y/best-practices/SEO), headless Chrome, final build |
-| 4 | Zero third-party requests | **pass** | every href/src is same-origin; no fonts, no CDNs, no analytics; Lighthouse network shows only same-origin requests |
-| 5 | axe: 0 violations on every page; validator passes | **pass** | axe-core 4.x on all 7 pages: 0 violations. html-validate structural rules: 0 problems on all 7 pages. (W3C's vnu not run locally — no Java runtime; kramdown's self-closing voids and colon footnote ids are valid HTML5.) Titles/descriptions are HTML-escaped, so hostile strings (`& < > "`) can't produce invalid markup — regression-tested with a torture post |
-| 6 | Keyboard-only walkthrough | **pass** | tab order measured: skip link → wordmark → archive → about → toggle → TOC → content; scrollable code/table regions focusable (`tabindex="0"`); heading anchors have unique labels ("permalink to Text", …); copy verified with a real click (clipboard write confirmed, "copied" announced via live region); footnote round-trip is plain anchors with `:target` highlight |
-| 7 | Body ≥ 7:1, all text ≥ 4.5:1, both themes | **pass** | computed from OKLCH→sRGB: body 16.4:1 light / 13.7:1 dark; muted 6.7 / 6.9; default accent 5.2 / 7.5; code tokens 6.2–8.7 on their surface |
-| 8 | No theme flash on dark reload | **pass** (structural) | the 600 B theme script is inline in `<head>` *before* the stylesheet link and sets `data-theme` pre-paint; `<meta name="color-scheme">` covers pre-CSS canvas paint |
-| 9 | 320 px: no horizontal scroll | **pass** | document scrollWidth 305 at a 320 px viewport on the kitchen-sink page; wide tables/code scroll inside their own focusable containers |
-| 10 | Feed validates, full content; sitemap present | **pass** | feed.xml well-formed (xmllint), full `<content type="html">`; `last_modified_at` propagates to feed `<updated>`, sitemap `<lastmod>`, and JSON-LD `dateModified` (verified equal); sitemap lists all 6 pages, excludes 404 |
-| 11 | Zero CLS; all images have dimensions | **pass** | Lighthouse CLS = 0 on both audited pages; the demo figure carries explicit `width`/`height` + `loading="lazy"` |
-| 12 | Print preview clean, chrome-free | **pass** | print-to-PDF inspected: no header/nav/footer/toggle/TOC/copy buttons; black-on-white; URLs printed after external links |
-| 13 | Page weight within budget | **pass** | kitchen-sink post: HTML ~13 KB + CSS 15.8 KB + copy.js 1.0 KB ≈ 30 KB excluding content images (budget ≤ 60 KB). CSS 16,206 B unminified against a 16,384 B ceiling — only 178 B of headroom left, so the next feature should replace CSS rather than add it. Theme script 600 B (≤ 600 B); copy.js 1,019 B (≤ 1 KB); total JS 1,619 B (≤ 2 KB). Re-measure this row whenever the CSS changes. |
-| 14 | Project-site `baseurl` mode untouched | **pass** | built with `--baseurl /quiet`: 0 unprefixed internal refs across all pages |
-| 15 | `prefers-reduced-motion` and `prefers-contrast: more` | **pass** | reduced motion kills all transitions/animations with `!important`; contrast-more raises muted/border to full ink via a `(0,2,0)`-specificity selector verified to win in all five theme states (a specificity bug here was caught by review and fixed) |
+The current toolchain is Ruby 3.3.12, Bundler 2.6.9, Jekyll 3.10.0, Node 22,
+Playwright 1.62.1, and axe-core 4.13.0. Ruby, gems, and npm packages are pinned
+in the repository; CI runs with Bundler frozen.
 
-## deviations from the build spec
+## retained release checks
 
-Each deliberate, each documented:
+| # | check | current evidence |
+|---|---|---|
+| 1 | Generic template and production demo build from clean source | `npm run verify` validates the host-neutral build, `npm run verify:cloudflare` adds Cloudflare's output headers, and `npm run test:portable` simulates a customized fork with the demo posts and hjadmz overlay removed. `npm run verify:demo` additionally checks the exact demo routes, canonical origin, placeholder removal, and visible demo/AI disclosure. The build checks cover strict front matter, generated routes, local links/fragments, metadata, output exclusions, deployment headers, and budgets. |
+| 2 | Generic and project-subpath builds remain portable | The default GitHub Pages config and a `/quiet` baseurl overlay both build and pass the same generated-site checks. |
+| 3 | JavaScript is optional | A controlled post fixture keeps customization separate from the browser contract. Chromium, Firefox, and WebKit retain the article content, TOC, heading anchors, tables, and navigation with JS disabled. Theme and copy controls disappear rather than becoming dead UI. |
+| 4 | Responsive layout does not widen the document | All three engines pass at 280, 320, 390, 768, 1280, and 2560px. Tests also inject long unbroken site titles, post titles, taglines, and footer identities. Wide tables and code scroll inside focusable regions. |
+| 5 | Automated accessibility scan | axe-core 4.13 reports zero violations across the five controlled HTML routes in Chromium, Firefox, and WebKit. Production smoke checks separately cover all seven demo routes. This complements; it does not replace, keyboard and screen-reader review. |
+| 6 | Skip navigation and keyboard flow | Activating “skip to content” focuses `main`; subsequent keyboard navigation bypasses the repeated header. TOC, heading permalinks, table/code scroll regions, theme, and copy controls are operable. Chromium and Firefox verify literal first-Tab order. WebKit verifies focus and activation without assuming macOS Keyboard Navigation; Safari's Option+Tab order remains a manual platform check. |
+| 7 | Targets do not overlap | Header and footer controls are real 44px-high boxes at every tested width. The code-copy control is isolated and may extend its hit area without colliding with another control. |
+| 8 | Reading measure and type | Desktop prose is 627px at 19px/30.4px. Representative body lines measure roughly 69–77 characters; the line that previously reached 87 now reaches 74. Body size remains 17–19px with 1.6 leading. |
+| 9 | Contrast and preferences | Token calculations remain: body 16.4:1 light / 13.7:1 dark; muted 6.7 / 6.9; accent 5.2 / 7.5. axe checks rendered contrast. Reduced-motion, increased-contrast, forced-colors, light, dark, and system styles are present; the three-state preference persists and rejects invalid stored values. |
+| 10 | Build-time content plumbing | Attributed headings retain custom ids/classes in the TOC and permalinks. Attributed tables retain their attributes inside labelled keyboard-scroll regions. Empty descriptions do not leave separators; image-only posts still show a one-minute minimum. |
+| 11 | Feed, sitemap, and metadata | The source feed template stays byte-for-byte aligned with jekyll-feed 0.17 except for two targeted role removals; the plugin still provides discovery metadata and deliberately skips the existing feed path. Strict XML checks cover full entry content, timestamps, authors, canonical/self/footer links, subpaths, footnote targets, and sitemap exclusion. jekyll-sitemap generates the sitemap. `last_modified_at` feeds visible and machine-readable update metadata. |
+| 12 | Images and print | The demo image loads at its declared 1200×675 intrinsic size. Print hides site chrome, theme, copy, TOC, and adjacent-post navigation and returns to black on white. |
+| 13 | Runtime budget | Generated-site checks report current payload sizes and fail above budgets of 20 KiB CSS, 1 KiB inline theme JS, and 2 KiB conditional copy JS. |
+| 14 | No unused theme payload | `theme: null` records the deliberate no-theme choice; generated pages link only this template's stylesheet. Source, docs, tests, lockfiles, and `node_modules` are excluded from `_site`. |
+| 15 | Cache and security policy is version-safe | CSS and conditional JS URLs receive a build version. `_headers` applies nosniff, a restrained referrer policy, disables camera/geolocation/microphone, sets `no-transform` for documents, and gives versioned CSS/JS one-year immutable caching. Asset rules detach the inherited cache header before replacing it, avoiding contradictory max-age values. |
 
-- **`theme.js` lives in `_includes/`, not `assets/js/`** — Jekyll can only
-  inline files from `_includes/`; the spec required build-time inlining, which wins.
-- **The shipped favicon is a plain "q" wordmark** — a template's default
-  mark should be obviously replaceable rather than decorative; `favicon`
-  and `apple_touch_icon` are config paths.
-- **Home page's visible title is the header wordmark** — a second visible
-  site title two lines under the wordmark read as a stutter; the h1 is
-  visually hidden but present for structure and screen readers.
-- **Hex fallbacks accompany the OKLCH tokens** — same measured values;
-  pre-2023 browsers get identical colors instead of broken ones. OKLCH
-  remains the authored source of truth.
-- **The update key is `last_modified_at`, not the spec's `updated`** —
-  it's the only key jekyll-feed / jekyll-seo-tag / jekyll-sitemap read,
-  so the visible date and the metadata can never disagree. `updated`
-  still displays if used, but doesn't reach feeds.
-- **Reading time uses ceiling, not rounding** — it never understates and
-  guarantees "1 min read" minimum; the demo snippet matches.
-- **The archive's date column is month + day** — the year lives in the
-  group heading; `date_format` governs posts and the home list.
-- **The default social image is set by file replacement or the
-  `defaults:` block** (both in `_config.yml`'s domain) — a bespoke
-  `og_image` key would be dead code, since jekyll-seo-tag only reads
-  per-page `image`.
-- **Chrome links reach ~44 px tall via invisible hit-area extensions**;
-  the narrowest labels ("rss") stay under 44 px *wide* so adjacent
-  targets never overlap — WCAG 2.5.8's 24 px floor is exceeded everywhere.
-- **README screenshots live in `docs/`** (excluded from the built site)
-  so they never ship to readers.
+## evidence boundary
+
+The 2026-08-19 v1.0 audit recorded Lighthouse 100/100/100/100 and zero CLS
+for its then-current build. Those numbers were not rerun for 1.1 and are not
+presented as current acceptance evidence. The retained suite now supplies the
+repeatable route, accessibility, browser, interaction, responsive, source,
+and budget checks that were previously only described in prose.
+
+The source build makes no third-party runtime request. Hosting can change that.
+Before promoting 1.1, the Cloudflare preview must also prove:
+
+1. deployment trigger is `github:push` for the exact reviewed commit;
+2. Ruby is 3.3.12, Bundler is frozen, and the build command is
+   `npm run verify:demo`;
+3. `_headers` is active, HTML includes `no-transform`, and CSS/JS return one
+   unambiguous immutable cache policy;
+4. no Bot Fight Mode/Javascript Detection bootstrap, `/cdn-cgi/` request,
+   hidden challenge iframe, or `cf_clearance` cookie is injected;
+5. canonical metadata remains `https://quiet.hjadmz.com`, routes return the
+   intended statuses, and the custom domain/TLS/DNS stay active.
+
+## deliberate deviations
+
+- The visible home title is the header wordmark; the structural h1 remains for
+  assistive technology without repeating the same words on screen.
+- The theme preference lives in the footer. It matters, but it is not a
+  reading destination and should not shift or crowd primary navigation.
+- Hex fallbacks accompany OKLCH tokens so older browsers receive a complete
+  palette rather than a broken one.
+- Reading time uses a 220-WPM estimate, rounded up with a one-minute minimum;
+  it never displays zero.
+- The archive date column omits the year because the year already labels each
+  group.
+- README screenshots stay under `docs/`, which is excluded from production.

@@ -8,7 +8,7 @@
 <link rel="icon" href="{{ _fav | relative_url }}"{% if _fav contains '.svg' %} type="image/svg+xml"{% endif %}>
 <link rel="alternate icon" href="{{ '/assets/img/favicon.ico' | relative_url }}" sizes="32x32">
 <link rel="apple-touch-icon" href="{{ site.apple_touch_icon | default: '/assets/img/apple-touch-icon.png' | relative_url }}">
-<link rel="stylesheet" href="{{ '/assets/css/main.css' | relative_url }}">
+<link rel="stylesheet" href="{{ '/assets/css/main.css' | relative_url }}?v={{ site.time | date: '%s' }}">
 {%- assign _accent_dark = site.accent_dark | default: site.accent -%}
 {%- if _accent_dark == "" %}{% assign _accent_dark = site.accent %}{% endif -%}
 {%- if site.accent and site.accent != "" %}

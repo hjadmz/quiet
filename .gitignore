@@ -1,8 +1,10 @@
 _site/
+_site-subpath/
+_site-test/
 .jekyll-cache/
 .jekyll-metadata
 .sass-cache/
 .bundle/
 vendor/
-Gemfile.lock
+node_modules/
 .DS_Store

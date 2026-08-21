@@ -7,6 +7,10 @@
     <a href="mailto:{{ site.footer.email }}">email</a>
     {%- endif %}
     <a href="{{ '/feed.xml' | relative_url }}">rss</a>
+    <button type="button" id="theme-toggle" class="theme-toggle" aria-live="polite">theme: <span id="theme-label">system</span></button>
   </p>
+  {%- if site.demo_notice and site.demo_notice != "" %}
+  <p class="footer-meta">{{ site.demo_notice | escape }}</p>
+  {%- endif %}
   <p class="footer-meta">© {{ 'now' | date: '%Y' }} {{ site.author.name | escape }}{% if site.show_credit %} · built with <a href="https://github.com/hjadmz/quiet">quiet</a>{% endif %}</p>
 </footer>

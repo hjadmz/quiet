@@ -1,0 +1,23 @@
+{
+  "name": "quiet-jekyll-template",
+  "private": true,
+  "scripts": {
+    "build": "bundle exec jekyll build --strict_front_matter",
+    "build:cloudflare": "bundle exec jekyll build --strict_front_matter --config _config.yml,_config.cloudflare.yml",
+    "build:test": "node tests/build-test-site.cjs",
+    "dev": "bundle exec jekyll serve --drafts --livereload",
+    "docs:screenshots": "npm run build:cloudflare && node tests/capture-screenshots.cjs",
+    "test:compat": "npm run build:test && SITE_ROOT=_site-test node tests/compatibility.cjs",
+    "test:edge": "node tests/edge-cases.cjs",
+    "test:feed": "bundle exec ruby tests/feed-smoke.rb",
+    "test:portable": "node tests/portability.cjs",
+    "test:site": "node tests/site-smoke.cjs",
+    "verify": "ruby --version && bundle --version && npm run test:edge && npm run build && EXPECT_DEMO=0 EXPECT_CLOUDFLARE=0 npm run test:site && npm run test:feed",
+    "verify:cloudflare": "ruby --version && bundle --version && npm run test:edge && npm run build:cloudflare && EXPECT_DEMO=0 EXPECT_CLOUDFLARE=1 npm run test:site && npm run test:feed",
+    "verify:demo": "ruby --version && bundle --version && npm run test:edge && npm run build:cloudflare && SITE_URL=https://quiet.hjadmz.com EXPECT_DEMO=1 EXPECT_CLOUDFLARE=1 npm run test:site && SITE_URL=https://quiet.hjadmz.com EXPECT_DEMO=1 npm run test:feed"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
+    "playwright": "1.62.1"
+  }
+}

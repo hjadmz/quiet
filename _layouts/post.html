@@ -2,13 +2,14 @@
 layout: default
 ---
 {%- comment %} Build-time transforms: wrap tables for horizontal scroll, make
-scrollable regions keyboard-focusable (tabindex), and drop the deprecated
-doc-endnote role that GitHub Pages' pinned kramdown still emits on footnote
-items (axe flags it; newer kramdown already removed it). No JS. {% endcomment %}
+scrollable regions keyboard-focusable (tabindex), and drop the misplaced
+Digital Publishing roles that GitHub Pages' pinned kramdown still emits on
+footnote wrappers (axe flags them; the links retain their semantics). No JS. {% endcomment %}
 {%- assign _content = content
-  | replace: '<table>', '<div class="table-wrap" tabindex="0"><table>'
+  | replace: '<table', '<div class="table-wrap" role="region" aria-label="scrollable table" tabindex="0"><table'
   | replace: '</table>', '</table></div>'
   | replace: '<pre class="highlight"><code', '<pre class="highlight" tabindex="0"><code'
+  | replace: ' role="doc-noteref"', ''
   | replace: ' role="doc-endnote"', '' -%}
 <article class="post">
   <header class="post-header">
@@ -16,7 +17,7 @@ items (axe flags it; newer kramdown already removed it). No JS. {% endcomment %}
     <p class="meta">
       <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: site.date_format }}</time>
       {%- if site.show_reading_time -%}
-        {%- assign _words = content | strip_html | number_of_words %} · {{ _words | plus: 219 | divided_by: 220 }} min read
+        {%- assign _words = content | strip_html | number_of_words %} · {{ _words | plus: 219 | divided_by: 220 | at_least: 1 }} min read
       {%- endif -%}
       {%- comment %} last_modified_at also updates the feed, sitemap, and
       JSON-LD via the whitelisted plugins; `updated` still displays. {% endcomment %}

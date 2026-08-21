@@ -1,8 +1,13 @@
 {
   "name": "quiet",
   "image": "mcr.microsoft.com/devcontainers/ruby:3.3",
-  "postCreateCommand": "bundle install",
-  "postAttachCommand": "bundle exec jekyll serve --host 0.0.0.0 --livereload",
+  "features": {
+    "ghcr.io/devcontainers/features/node:2": {
+      "version": "22"
+    }
+  },
+  "postCreateCommand": "gem install bundler -v 2.6.9 && bundle _2.6.9_ install && npm ci --ignore-scripts",
+  "postAttachCommand": "npm run dev -- --host 0.0.0.0",
   "forwardPorts": [4000],
   "portsAttributes": {
     "4000": { "label": "quiet preview", "onAutoForward": "openPreview" }

@@ -1,0 +1,81 @@
+name: Quality
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  BUNDLE_FROZEN: "true"
+  JEKYLL_ENV: production
+  LANG: C.UTF-8
+  LC_ALL: C.UTF-8
+
+jobs:
+  build:
+    name: Builds and generated-site checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+      - uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+
+      - run: npm ci --ignore-scripts
+      - run: npm run verify
+      - run: npm run test:portable
+
+      - name: Verify the public demo overlay
+        if: github.repository == 'hjadmz/quiet'
+        run: npm run verify:demo
+
+      - name: Verify project-subpath build
+        run: |
+          bundle exec jekyll build --strict_front_matter --destination _site-subpath --config _config.yml,tests/subpath.yml
+          SITE_ROOT=_site-subpath SITE_URL=https://example.com SITE_BASEURL=/quiet EXPECT_DEMO=0 node tests/site-smoke.cjs
+          SITE_ROOT=_site-subpath SITE_URL=https://example.com SITE_BASEURL=/quiet bundle exec ruby tests/feed-smoke.rb
+
+  compatibility:
+    name: ${{ matrix.browser }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+      - uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+
+      - run: npm ci --ignore-scripts
+      - run: npx playwright install --with-deps ${{ matrix.browser }}
+      - run: npm run test:compat
+        env:
+          COMPAT_BROWSER: ${{ matrix.browser }}
+
+      - name: Render README screenshots
+        if: matrix.browser == 'chromium' && github.repository == 'hjadmz/quiet'
+        run: npm run docs:screenshots
+
+      - name: Upload README screenshots
+        if: matrix.browser == 'chromium' && github.repository == 'hjadmz/quiet'
+        uses: actions/upload-artifact@v7
+        with:
+          name: quiet-readme-screenshots
+          path: docs/screenshot-*.png
+          if-no-files-found: error

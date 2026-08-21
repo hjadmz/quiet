@@ -1,32 +1,31 @@
 ---
-title: everything a post can do
-description: every element this template styles, on one page — a reference for writers and a regression test for tinkerers.
+title: post-content reference
+description: core post-content patterns on one page — a reference for writers and a regression test for tinkerers.
 toc: true
 last_modified_at: 2026-08-18
 ---
 
-This post exercises every element the template knows how to render.
+This post exercises the core supported elements inside a post's content.
 Keep it around as a reference while writing, or delete it with the other
 demo posts when you're ready.
 
 ## Text
 
 Body text is set on a fluid scale — 17px on phones easing to 19px on
-large screens — with a measure of about 66 characters, which is where
-long-form reading is most comfortable. Links are [always underlined](#text),
+large screens — with a deliberately restrained reading measure. Links in prose are [underlined](#text),
 emphasis comes in *italic* and **bold**, and inline code looks like
 `const reader = "first"`.
 
 Straight quotes become "smart" quotes automatically, dashes work — like
 this — and footnotes land at the bottom of the page with a way back.[^1]
 
-[^1]: And here it is. The return arrow takes you back to exactly where
-    you left off, and the target is highlighted so the jump is never
-    disorienting.
+[^1]: And here it is. The return arrow takes you back to the reference,
+    and the target highlight helps preserve orientation after the jump.
 
 ### Headings get anchors
+{: #deep-links .reference-heading}
 
-Hover any heading (or focus it with the keyboard) and a quiet `#`
+Hover an h2–h4 heading (or focus it with the keyboard) and a quiet `#`
 appears — a shareable deep link to that section, generated at build
 time with no JavaScript.
 
@@ -59,11 +58,12 @@ sideways on small screens instead of breaking the page.
 | 2024 |    12 |  14,320 |       11 min |
 | 2025 |    18 |  22,847 |        9 min |
 | 2026 |     7 |   9,105 |       14 min |
+{: .wide}
 
 ## Code
 
-Three languages, one restrained palette per theme. Every block gets a
-copy button (keyboard-operable, announces "copied") — unless JavaScript
+Three languages, one restrained palette per theme. Every fenced, highlighted
+code block gets a copy button (keyboard-operable, announces "copied") — unless JavaScript
 is off, in which case the button simply doesn't exist.
 
 ```js
@@ -75,7 +75,7 @@ function readingTime(text, wpm = 220) {
 ```
 
 ```css
-/* the entire theming system is custom properties */
+/* the screen palette is driven by custom properties */
 :root {
   --bg: oklch(98% 0.004 85);
   --fg: oklch(22% 0.005 85);
@@ -84,14 +84,14 @@ function readingTime(text, wpm = 220) {
 ```
 
 ```bash
-# preview locally without installing anything (see README for Codespaces)
+# in a prepared Codespace, or after the README's local setup
 bundle exec jekyll serve --livereload
 ```
 
 ## An image, with a caption
 
-Images declare their dimensions so the page never shifts while loading,
-and lazy-load below the fold.
+This example declares dimensions to reserve layout space and requests lazy
+loading below the fold; authors control both attributes in their markup.
 
 <figure>
   <img src="{{ '/assets/img/demo-figure.png' | relative_url }}"
@@ -102,16 +102,16 @@ and lazy-load below the fold.
 
 ## A quote
 
-> Good design is as little design as possible. Less, but better — because
-> it concentrates on the essential aspects, and the products are not
-> burdened with non-essentials.
+> Good design is as little design as possible.
+>
+> — Dieter Rams, [Ten Principles for Good Design](https://www.vitsoe.com/us/about/good-design)
 
 A horizontal rule, for when a section break is quieter than a heading:
 
 ---
 
-That's everything. If it isn't on this page, the template doesn't style
-it — and that's on purpose.[^2]
+That's the supported post-content set. Other site components live in their own
+layouts, and anything added by a fork needs an intentional style.[^2]
 
-[^2]: If you add elements of your own, this page is also your visual
-    regression test: one glance tells you if something broke.
+[^2]: If you add elements of your own, this page can help you spot visual
+    regressions alongside the retained automated checks.

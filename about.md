@@ -2,11 +2,14 @@
 layout: page
 title: about
 permalink: /about/
-description: who writes this, and why.
+description: what the quiet Jekyll template is designed to do.
 ---
 
-this is the about page. replace it with who you are — a few honest
-sentences beat a résumé.
+quiet is a minimal Jekyll blog template designed around the act of
+reading: one measured column, familiar links, no tracking, and no
+interface competing with the text.
 
-this blog is built with [quiet](https://github.com/hjadmz/quiet),
-a template with everything it needs and nothing it doesn't.
+this hosted copy is a demo. its three posts are sample content, including
+one page that exercises the supported post-content elements. the
+[source](https://github.com/hjadmz/quiet) includes the design rationale,
+acceptance checks, and instructions for replacing this page with your own.

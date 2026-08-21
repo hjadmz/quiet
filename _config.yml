@@ -1,7 +1,7 @@
 # ---------------------------------------------------------------
-# quiet — everything you personalize lives in this one file.
-# Edit a value, commit, and GitHub Pages rebuilds your site.
-# Any key you leave empty ("") simply renders nothing.
+# quiet — site-wide settings live in this one file.
+# Edit a value, commit, and your connected static host rebuilds the site.
+# Optional display keys note when an empty value hides their output.
 # ---------------------------------------------------------------
 
 # Site name. Appears in the header, the browser tab, and your feed.
@@ -20,9 +20,8 @@ description: a quiet blog template for GitHub Pages.
 author:
   name: Your Name
 
-# Your site's address — always https://username.github.io.
-# For a project site (a repo not named username.github.io), keep this the
-# same and set baseurl below.
+# Your site's canonical origin, without a trailing slash.
+# Example: https://username.github.io or https://blog.example.com.
 url: https://username.github.io
 
 # "" for a user site (username.github.io).
@@ -32,8 +31,8 @@ baseurl: ""
 # Language code for the whole site (html lang attribute).
 lang: en
 
-# Your one accent color. Used only for links, the focus ring, and
-# text selection — nothing else gets color. Any CSS color works.
+# Your one accent color. Used for links, focus, text selection, and the
+# targeted-footnote state — not as decoration. Any valid CSS color works.
 # Leave "" for the built-in restrained blue, oklch(52% 0.1 250).
 accent: ""
 
@@ -42,8 +41,8 @@ accent: ""
 #
 accent_dark: ""
 
-# Body typeface: "sans" or "serif". Both are system font stacks —
-# instant, private, and native-feeling on every OS.
+# Body typeface: "sans" or "serif". Both use system font stacks, so they
+# require no font download and follow the reader's platform typography.
 body_font: sans
 
 # Theme when a visitor first arrives: "system", "light", or "dark".
@@ -85,8 +84,8 @@ apple_touch_icon: /assets/img/apple-touch-icon.png
 # `image: /path.png` in their front matter.
 
 # Analytics are off by default and nothing is loaded from third
-# parties. If you must, paste a privacy-respecting snippet as a
-# single-quoted one-liner (real snippets contain double quotes), e.g.
+# parties. If you must, paste a provider snippet as a single-quoted
+# one-liner (real snippets contain double quotes), e.g.
 # analytics_html: '<script data-goatcounter="https://CODE.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>'
 analytics_html: ""
 
@@ -101,6 +100,9 @@ kramdown:
   # text-presentation arrow: without &#xfe0e; iOS renders ↩ as a blue emoji
   footnote_backlink: "&#8617;&#xfe0e;"
 highlighter: rouge
+
+# Explicitly use no packaged theme; the layouts link only this template's CSS.
+theme:
 
 permalink: /:year/:title/
 
@@ -124,9 +126,19 @@ defaults:
 
 exclude:
   - README.md
+  - THIRD_PARTY_NOTICES.md
   - LICENSE
   - Gemfile
   - Gemfile.lock
   - docs
   - .devcontainer
   - .editorconfig
+  - .github
+  - .ruby-version
+  - .bundle
+  - vendor
+  - node_modules
+  - package.json
+  - package-lock.json
+  - tests
+  - _site-test

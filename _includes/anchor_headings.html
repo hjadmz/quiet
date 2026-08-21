@@ -8,26 +8,32 @@
 {%- assign _out = include.html -%}
 {%- assign _levels = "2|3|4" | split: "|" -%}
 {%- for _lv in _levels -%}
-  {%- capture _open %}<h{{ _lv }} id="{% endcapture -%}
+  {%- capture _open %}<h{{ _lv }}{% endcapture -%}
   {%- capture _close %}</h{{ _lv }}>{% endcapture -%}
   {%- assign _parts = _out | split: _open -%}
   {%- if _parts.size > 1 -%}
     {%- capture _rebuilt -%}
       {{- _parts[0] -}}
       {%- for _p in _parts offset: 1 -%}
-        {%- assign _id = _p | split: '"' | first -%}
-        {%- assign _segs = _p | split: _close -%}
-        {%- comment %} Text is already kramdown-escaped; only neutralize
-        quotes so the attribute can never break. {% endcomment %}
-        {%- assign _txt = _segs | first | remove_first: _id | remove_first: '">' | strip_html | strip | replace: '"', '&quot;' -%}
-        {{- _open -}}
-        {%- for _s in _segs -%}
-          {%- if forloop.first -%}
-            {{- _s -}}<a class="anchor" href="#{{ _id }}" aria-label="permalink to {{ _txt }}">#</a>{{- _close -}}
-          {%- else -%}
-            {{- _s -}}{%- unless forloop.last -%}{{- _close -}}{%- endunless -%}
-          {%- endif -%}
-        {%- endfor -%}
+        {%- assign _tag = _p | split: '>' | first -%}
+        {%- assign _id_parts = _tag | split: ' id="' -%}
+        {%- if _id_parts.size > 1 -%}
+          {%- assign _id = _id_parts[1] | split: '"' | first -%}
+          {%- assign _segs = _p | split: _close -%}
+          {%- comment %} Text is already kramdown-escaped; only neutralize
+          quotes so the attribute can never break. {% endcomment %}
+          {%- assign _txt = _segs | first | remove_first: _tag | remove_first: '>' | strip_html | strip | replace: '"', '&quot;' -%}
+          {{- _open -}}{{- _tag -}}>
+          {%- for _s in _segs -%}
+            {%- if forloop.first -%}
+              {{- _s | remove_first: _tag | remove_first: '>' -}}<a class="anchor" href="#{{ _id }}" aria-label="permalink to {{ _txt }}">#</a>{{- _close -}}
+            {%- else -%}
+              {{- _s -}}{%- unless forloop.last -%}{{- _close -}}{%- endunless -%}
+            {%- endif -%}
+          {%- endfor -%}
+        {%- else -%}
+          {{- _open -}}{{- _p -}}
+        {%- endif -%}
       {%- endfor -%}
     {%- endcapture -%}
     {%- assign _out = _rebuilt -%}

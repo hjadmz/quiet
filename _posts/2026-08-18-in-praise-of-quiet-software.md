@@ -22,24 +22,22 @@ you refuse to ship anything that doesn't serve the person using it.
 
 ## attention is the budget
 
-Every interface spends its user's attention, and most spend it like it's
-free. A badge here, a nudge there, a "we've updated our look!" modal on
+My premise is that every interface spends some of its user's attention. A
+badge here, a nudge there, a "we've updated our look!" modal on
 a Tuesday. Each one is small. Together they're a tax on the exact
 resource the software was supposed to protect — the user's ability to
 think about their own work.
 
-The economics explain it. Attention captured is revenue measured, so the
-loudest patterns win A/B tests even when they lose users' trust. Nobody
-ships a growth chart labeled "interruptions people forgave us for." But
-forgiveness runs out silently, and when it does, people don't file a
-complaint. They just leave, and they can't quite say why.
+In engagement-funded products, captured attention can become a measured input,
+so loud patterns may win short-term A/B tests even when they weaken trust.
+Growth charts may not account for interruptions people tolerated. Some users
+leave without filing a complaint, and their reasons are not always explicit.
 
 Quiet software inverts the budget. It treats every demand on attention
 as a cost to be justified, the way an engineer treats memory or latency.
 Does this notification serve the reader, or the metric? Does this
-animation communicate state, or decorate a delay? Run that audit
-honestly and most interfaces lose half their weight — and nothing of
-value goes with it.
+animation communicate state, or decorate a delay? That audit can reveal
+interface weight that contributes little to the person's goal.
 
 ## boring on purpose
 
@@ -49,10 +47,10 @@ loading. Boring means the surprises are gone, and surprise is exactly
 what you don't want from infrastructure.
 
 Getting to boring is brutally hard work. It means saying no to features
-that would demo well. It means spending a week on a failure case one
-user in a thousand will hit. It means the craftsmanship is invisible
-almost by definition — effort you can only detect by noticing that
-nothing ever goes wrong.
+that would demo well. It means spending serious time on rare failure cases.
+It means the craftsmanship is invisible
+almost by definition — effort you detect when routine use produces few
+surprises or failures.
 
 That's why quiet is a discipline, not an aesthetic. You can't add quiet
 at the end the way you'd add a coat of paint. It has to be the default
@@ -60,17 +58,15 @@ answer to every question along the way: *no, unless it earns its place.*
 
 ## what this costs
 
-I want to be honest about the trade. Quiet software is harder to market,
-because restraint doesn't screenshot. It grows slower, because it
-refuses the loops that make growth charts steep. Building it is a bet
-that respect compounds — that the person you didn't interrupt today is
-the person who's still with you in ten years, and who brought a friend.
+I want to be honest about the trade. Quiet software can be harder to market,
+because restraint is less obvious in a screenshot. It may grow more slowly
+when it refuses aggressive engagement loops. Building it is a bet that respect
+can strengthen long-term trust, even when the payoff is difficult to measure.
 
-I think the bet is right. The tools that have lasted decades — the ones
-people defend with real feeling — are almost all quiet ones. Nobody
-loves a dashboard. People love the pen that always writes.
+I think the bet is worth making. The tools I return to tend to be quiet ones;
+their value is dependable use, not the interface demanding attention.
 
-This blog is a small attempt to practice what it praises: text, set
-carefully, served fast, asking nothing of you but your reading. If you
+This blog is a small attempt to practice what it praises: text, set carefully,
+served as a small static payload, asking nothing of you but your reading. If you
 noticed the design, I have work to do. If you didn't — good. That was
 the point.

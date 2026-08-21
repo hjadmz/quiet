@@ -4,39 +4,43 @@
   Usage: {% include toc.html html=content %}
 {% endcomment %}
 {%- assign _chunks = include.html | split: '<h' -%}
-{%- assign _crumbs = "" -%}
+{%- assign _has_toc = false -%}
 {%- for _c in _chunks offset: 1 -%}
-  {%- assign _lead = _c | slice: 0, 6 -%}
-  {%- if _lead == '2 id="' or _lead == '3 id="' -%}
-    {%- assign _lvl = _c | slice: 0, 1 -%}
-    {%- assign _q = _c | split: '"' -%}
-    {%- comment %} Heading inner HTML may itself contain quoted attributes
-    (inline code, links), so peel off the known prefix instead of
-    splitting on quotes: `2 id="`, then the id, then `">`. {% endcomment %}
-    {%- assign _head = _c | split: '</h' | first -%}
-    {%- assign _t = _head | remove_first: _lead | remove_first: _q[1] | remove_first: '">' | strip_html | strip -%}
-    {%- capture _crumbs -%}{{ _crumbs }}{{ _lvl }}|||{{ _q[1] }}|||{{ _t }}@@@{%- endcapture -%}
+  {%- assign _lvl = _c | slice: 0, 1 -%}
+  {%- if _lvl == '2' or _lvl == '3' -%}
+    {%- assign _tag = _c | split: '>' | first -%}
+    {%- assign _id_parts = _tag | split: ' id="' -%}
+    {%- if _id_parts.size > 1 %}{% assign _has_toc = true %}{% endif -%}
   {%- endif -%}
 {%- endfor -%}
-{%- if _crumbs != "" -%}
-{%- assign _items = _crumbs | split: '@@@' -%}
+{%- if _has_toc -%}
 <nav class="toc" aria-label="contents">
   <p class="toc-title">contents</p>
   <ul>
     {%- assign _open3 = false -%}
     {%- assign _openli = false -%}
-    {%- for _it in _items -%}
-      {%- assign _f = _it | split: '|||' -%}
-      {%- if _f[0] == '2' -%}
-        {%- if _open3 %}</ul>{% assign _open3 = false %}{% endif -%}
-        {%- if _openli %}</li>{% endif -%}
-        <li><a href="#{{ _f[1] }}">{{ _f[2] }}</a>
-        {%- assign _openli = true -%}
-      {%- else -%}
-        {%- unless _open3 -%}
-          {%- if _openli %}<ul>{% assign _open3 = true %}{% else %}<li>{% assign _openli = true %}{% endif -%}
-        {%- endunless -%}
-        {%- if _open3 %}<li><a href="#{{ _f[1] }}">{{ _f[2] }}</a></li>{% else %}<a href="#{{ _f[1] }}">{{ _f[2] }}</a>{% endif -%}
+    {%- for _c in _chunks offset: 1 -%}
+      {%- assign _lvl = _c | slice: 0, 1 -%}
+      {%- if _lvl == '2' or _lvl == '3' -%}
+        {%- assign _tag = _c | split: '>' | first -%}
+        {%- assign _id_parts = _tag | split: ' id="' -%}
+        {%- if _id_parts.size > 1 -%}
+          {%- assign _id = _id_parts[1] | split: '"' | first -%}
+          {%- capture _close %}</h{{ _lvl }}>{% endcapture -%}
+          {%- assign _head = _c | split: _close | first -%}
+          {%- assign _text = _head | remove_first: _tag | remove_first: '>' | strip_html | strip -%}
+          {%- if _lvl == '2' -%}
+            {%- if _open3 %}</ul>{% assign _open3 = false %}{% endif -%}
+            {%- if _openli %}</li>{% endif -%}
+            <li><a href="#{{ _id }}">{{ _text }}</a>
+            {%- assign _openli = true -%}
+          {%- elsif _openli -%}
+            {%- unless _open3 %}<ul>{% assign _open3 = true %}{% endunless -%}
+            <li><a href="#{{ _id }}">{{ _text }}</a></li>
+          {%- else -%}
+            <li><a href="#{{ _id }}">{{ _text }}</a></li>
+          {%- endif -%}
+        {%- endif -%}
       {%- endif -%}
     {%- endfor -%}
     {%- if _open3 %}</ul>{% endif -%}

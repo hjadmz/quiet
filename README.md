@@ -1,12 +1,12 @@
 # quiet
 
-A blog template for GitHub Pages. Everything it needs, nothing it doesn't.
+A reading-first Jekyll blog template for GitHub Pages and static hosts.
+[See the live demo](https://quiet.hjadmz.com).
 
 **The philosophy in three sentences.** Function first, then convenience,
-then aesthetics — never the other way around. The reader outranks the
-writer, and the writer outranks the customizer. If you notice the design,
-it has failed; if you read for twenty minutes without friction, it has
-succeeded.
+then aesthetics. The reader outranks the writer, and the writer outranks
+the customizer. If the interface pulls attention away from reading, it has
+failed; if its details make reading feel effortless, it has succeeded.
 
 | light | dark |
 |-------|------|
@@ -14,19 +14,20 @@ succeeded.
 
 ## quickstart
 
-1. Click **Use this template** (or fork) and name the new repo
-   `username.github.io`, using your GitHub username.
+1. Click **Use this template** and name the new repo `username.github.io`,
+   using your GitHub username. If you fork instead, rename the fork afterward.
 2. In the repo settings, under **Pages**, make sure the source is
-   "Deploy from a branch" with the `main` branch selected (this is the
-   default for `username.github.io` repos).
-3. Edit `_config.yml` — every key is commented. Set at least `title`,
+   "Deploy from a branch" with the `main` branch selected and `/ (root)`
+   as the publishing folder.
+3. Edit `_config.yml` — every user-facing setting is explained. Set at least `title`,
    `author.name`, and `url`.
 4. Delete the three demo posts in `_posts/`, and rewrite `about.md`
    in your own words.
 5. Write Markdown files in `_posts/` named `YYYY-MM-DD-your-title.md`.
 
-Your site is live at `https://username.github.io` about a minute after
-each push. No build tools, no dependencies, nothing to install.
+GitHub Pages rebuilds after each push to `main`; the exact wait varies.
+The hosted path requires no local build tools. Local preview and the
+maintainer checks use the pinned Ruby and Node dependencies in this repo.
 
 ## writing posts
 
@@ -51,13 +52,16 @@ Front matter reference:
 | `last_modified_at` | no  | `last_modified_at: 2026-09-01` shows an "updated" date and updates the feed, sitemap, and page metadata |
 | `image`       | no       | path to a social-preview image for this post, overriding the site default |
 
-Drafts live in `_drafts/` (no date in the filename) and never publish.
-Preview them locally with `bundle exec jekyll serve --drafts`.
+Files in `_drafts/` (no date in the filename) are not rendered by a normal
+build. They are still visible if committed to a public repository, so never
+put secrets or genuinely private writing there. Preview them with
+`npm run dev`.
 
 ## customization
 
-Everything personalizable lives in `_config.yml`, and every key is
-commented in place. The short version:
+Site-wide settings live in `_config.yml`, and every user-facing setting is
+explained in place. Posts, the About page, and image files remain ordinary
+content. The short version:
 
 | key | effect |
 |-----|--------|
@@ -65,7 +69,7 @@ commented in place. The short version:
 | `author.name` | feed and metadata attribution |
 | `url`, `baseurl` | your address; `baseurl: /repo` for project sites |
 | `lang` | html language code |
-| `accent`, `accent_dark` | the one accent color (links, focus ring, selection) |
+| `accent`, `accent_dark` | the one accent color (links, focus, selection, targeted footnotes) |
 | `body_font` | `sans` or `serif` — both system stacks |
 | `theme_default` | `system`, `light`, or `dark` |
 | `posts_on_home` | how many posts the home page lists |
@@ -83,7 +87,7 @@ point the `image:` path in the config's `defaults:` block somewhere else.
 
 ### changing the accent
 
-Set `accent` in `_config.yml` to any CSS color. Pick something that
+Set `accent` in `_config.yml` to any valid CSS color. Pick something that
 keeps at least 4.5:1 contrast against both backgrounds (`#faf8f5` light,
 `#121416` dark), or set `accent_dark` for a separate dark-mode value —
 lighter and slightly desaturated usually works.
@@ -99,63 +103,101 @@ in sync, once per theme).
 
 ## custom domain
 
-Add a `CNAME` file containing your domain (e.g. `blog.example.com`),
-point your DNS at GitHub Pages per
+For GitHub Pages, add a `CNAME` file containing your domain (for example,
+`blog.example.com`), point DNS at GitHub Pages per
 [GitHub's guide](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site),
 and update `url` in `_config.yml`.
 
+For Cloudflare Pages, connect the custom domain in the Pages dashboard;
+do not add a GitHub Pages `CNAME` file. In either case, choose one canonical
+hostname and set `url` to it.
+
 ## hosting somewhere else
 
-Nothing here depends on GitHub. The build is plain Jekyll producing plain
-static files, so any host works:
+The repository uses GitHub Pages' pinned Jekyll dependency set, but the
+generated HTML, CSS, JavaScript, XML, and assets are host-independent:
 
-- **Cloudflare Pages / Netlify** — connect the repo, set the build command
-  to `jekyll build` and the output directory to `_site`, then set `url` in
-  `_config.yml` to your final address. Nothing else changes.
+- **Cloudflare Pages** — replace `_config.cloudflare.yml` with your own URL
+  and identity; clear or rewrite its `description`, `demo_notice`, and footer,
+  while keeping `include: ["_headers"]`. Connect the repo, set the
+  production branch to `main`, build command to `npm run verify:cloudflare`,
+  and output directory to `_site`. Set `RUBY_VERSION=3.3.12`,
+  `JEKYLL_ENV=production`, and `BUNDLE_FROZEN=true` in production and previews.
+  Branch pushes then deploy automatically.
+- **Netlify or another static host** — run `npm run build` and publish
+  `_site`. That generic build emits no host-specific response policy; add a
+  host-native header configuration separately if you need one.
 - **Any static host, or your own server** — run `bundle exec jekyll build`
   and upload the `_site` folder.
 - **Served from a subfolder** (e.g. `example.com/blog`) — set
-  `baseurl: "/blog"`. Every internal link and asset already goes through
-  `relative_url`, so no code changes are needed.
+  `baseurl: "/blog"`. Template URLs use baseurl-aware filters, so no code
+  changes are needed. CI includes this build mode.
+
+`_config.cloudflare.yml` contains only the settings for the public
+`quiet.hjadmz.com` demo. A fork should delete it or replace it with its own
+overlay; it is not loaded by a normal build. The public demo's Pages project
+must use `npm run verify:demo` so deployment validates that overlay and the
+sample-content disclosure.
 
 ## local preview
 
-You usually don't need one — push and look. When you want one:
+You usually don't need a local preview. When you want one:
 
-- **Codespaces (no install):** open the repo in a GitHub Codespace. The
-  included devcontainer installs everything and starts the preview on
-  port 4000 automatically.
-- **Ruby, if you insist:** `bundle install`, then
-  `bundle exec jekyll serve`, then open `http://localhost:4000`.
+- **Codespaces (no local install):** open the repo in a GitHub Codespace. The
+  included devcontainer installs the Ruby and Node dependencies and starts the
+  preview on port 4000 automatically.
+- **Local:** use Ruby 3.3.12 and Node 22. If needed, install the pinned
+  Bundler with `gem install bundler -v 2.6.9`; then run
+  `bundle _2.6.9_ install`, `npm ci`, and `npm run dev`. Open
+  `http://localhost:4000`.
+
+Before the first browser-matrix run on a machine or Codespace, install its
+binaries once with `npx playwright install chromium firefox webkit` (on a
+minimal Linux image, use `npx playwright install --with-deps`).
+
+Before publishing template changes, run `npm run verify`,
+`npm run test:portable`, and `npm run test:compat`. They validate the actual
+site, simulate a customized fork with its demo content removed, and exercise
+a controlled browser fixture in Chromium, Firefox, and WebKit (including
+no-JavaScript, keyboard, print, responsive, and axe checks). That separation
+means deleting the demos or changing supported config values does not make a
+fork's test suite fail for the wrong reason.
+
+Maintainers can regenerate the two README images from the current demo build
+with `npm run docs:screenshots`; it does not require a local web server.
 
 ## recipes
 
-The template ships with zero third-party requests — no fonts, no
-analytics, no trackers, and therefore no cookie banner. If you need
-more, add it deliberately:
+The template itself ships with zero third-party runtime requests—no fonts,
+analytics, or trackers. Host-level security products can still inject code.
+The Cloudflare overlay sends `no-transform`, which [Cloudflare documents](https://developers.cloudflare.com/cloudflare-challenges/challenge-types/javascript-detections/)
+as disabling JavaScript Detections injection on matched responses. If you add
+third-party services, reassess privacy and consent needs:
 
-- **Comments** — [giscus](https://giscus.app) (GitHub Discussions-backed).
-  Generate your snippet and paste it at the end of `_layouts/post.html`.
-- **Analytics** — [GoatCounter](https://www.goatcounter.com) or
-  [Plausible](https://plausible.io) are privacy-respecting. Paste the
-  script tag into `analytics_html` in `_config.yml`.
+- **Analytics** — leave it off unless a concrete question justifies the
+  collection. If it does, put the provider snippet in `analytics_html`.
+  Generated-HTML checks allow external runtime there explicitly. Outside it,
+  external `src` URLs on script, iframe, img, source, video, and audio elements,
+  plus external stylesheet, icon, and preload links, fail the build.
 - **A custom font** — put the `.woff2` in `assets/`, add an
   `@font-face` rule at the top of `assets/css/main.css`, and change
   `--font-sans`. Self-host; never a font CDN.
 
 ## why it's built this way
 
-Every decision here traces to something measurable — Hick's and Fitts's
-laws, Gestalt grouping, contrast arithmetic, reading-measure research —
-and a few popular blog features are deliberately refused.
+Decisions follow an evidence hierarchy: accessibility requirements and
+measured behavior first, the reading task second, and named design heuristics
+only as lenses. Rams's principles, Benji Taylor's emphasis on simplicity and
+continuity, Nielsen's heuristics, and familiar perception principles inform
+the work; none is treated as automatic proof.
 [docs/DESIGN-PRINCIPLES.md](docs/DESIGN-PRINCIPLES.md) records the
-reasoning, the measured numbers, and the refusals.
-[docs/ACCEPTANCE.md](docs/ACCEPTANCE.md) is the measured test report:
-Lighthouse, axe, contrast ratios, byte budgets, and the device widths
-this was verified against.
+reasoning, sources, measured numbers, and refusals.
+[docs/ACCEPTANCE.md](docs/ACCEPTANCE.md) records the current retained test
+matrix and separates automated evidence from older point-in-time audits.
 
 ## license
 
 [MIT](LICENSE). Use it, change it, sell things built with it. The
 "built with quiet" footer credit is one config key to remove —
-guilt-free.
+guilt-free. The small feed-template derivation is covered in
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
