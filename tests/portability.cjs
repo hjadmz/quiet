@@ -10,9 +10,9 @@ const ROOT = path.resolve(__dirname, '..');
 const temporary = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), 'quiet-portable-'));
 const source = path.join(temporary, 'source');
 
-function run(command, args, env = {}) {
+function run(command, args, env = {}, cwd = source) {
   execFileSync(command, args, {
-    cwd: source,
+    cwd,
     env: { ...process.env, ...env },
     stdio: 'pipe'
   });
@@ -51,17 +51,18 @@ try {
   }
   fs.writeFileSync(configPath, config);
 
-  run('bundle', ['_2.6.9_', 'exec', 'jekyll', 'build', '--strict_front_matter'], {
+  run('bundle', ['_2.6.9_', 'exec', 'jekyll', 'build',
+    '--strict_front_matter', '--source', source, '--destination', path.join(source, '_site')], {
     JEKYLL_ENV: 'production'
-  });
+  }, ROOT);
   const home = fs.readFileSync(path.join(source, '_site/index.html'), 'utf8');
   assert.equal((home.match(/<!-- quiet:analytics:start -->/g) || []).length, 1,
     'configured analytics must pass through its one explicit policy boundary');
   assert.match(home, /https:\/\/analytics\.example\/count\.js/,
     'configured analytics script is missing from the generated head');
-  run('node', ['tests/site-smoke.cjs'], { EXPECT_DEMO: '0', EXPECT_CLOUDFLARE: '0' });
-  run('bundle', ['_2.6.9_', 'exec', 'ruby', 'tests/feed-smoke.rb']);
-  run('node', ['tests/edge-cases.cjs']);
+  run('node', [path.join(source, 'tests/site-smoke.cjs')], { EXPECT_DEMO: '0', EXPECT_CLOUDFLARE: '0' });
+  run('bundle', ['_2.6.9_', 'exec', 'ruby', path.join(source, 'tests/feed-smoke.rb')], {}, ROOT);
+  run('node', [path.join(source, 'tests/edge-cases.cjs')]);
 
   process.stdout.write('PASS portable fork: no demo posts or Cloudflare overlay, supported config edits\n');
 } finally {
