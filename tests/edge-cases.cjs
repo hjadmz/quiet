@@ -7,6 +7,9 @@ const path = require('node:path');
 const { execFileSync } = require('node:child_process');
 
 const ROOT = path.resolve(__dirname, '..');
+const BUNDLE_CWD = process.env.QUIET_BUNDLE_CWD
+  ? path.resolve(process.env.QUIET_BUNDLE_CWD)
+  : ROOT;
 const temporary = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), 'quiet-edge-'));
 const source = path.join(temporary, 'source');
 const output = path.join(temporary, 'site');
@@ -46,7 +49,7 @@ The home list should show only this post's date.
   execFileSync('bundle', ['_2.6.9_', 'exec', 'jekyll', 'build',
     '--strict_front_matter', '--source', source, '--destination', output,
     '--config', `${path.join(source, '_config.yml')},${path.join(source, 'tests/fixture.yml')}`], {
-    cwd: ROOT,
+    cwd: BUNDLE_CWD,
     env: { ...process.env, JEKYLL_ENV: 'production' },
     stdio: 'pipe'
   });

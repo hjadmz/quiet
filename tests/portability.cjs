@@ -62,7 +62,7 @@ try {
     'configured analytics script is missing from the generated head');
   run('node', [path.join(source, 'tests/site-smoke.cjs')], { EXPECT_DEMO: '0', EXPECT_CLOUDFLARE: '0' });
   run('bundle', ['_2.6.9_', 'exec', 'ruby', path.join(source, 'tests/feed-smoke.rb')], {}, ROOT);
-  run('node', [path.join(source, 'tests/edge-cases.cjs')]);
+  run('node', [path.join(source, 'tests/edge-cases.cjs')], { QUIET_BUNDLE_CWD: ROOT });
 
   process.stdout.write('PASS portable fork: no demo posts or Cloudflare overlay, supported config edits\n');
 } finally {

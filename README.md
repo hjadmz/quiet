@@ -122,6 +122,9 @@ in sync, once per theme).
 
 ## custom domain
 
+This template intentionally ships without a `CNAME` file so forks do not
+inherit someone else's domain accidentally.
+
 For GitHub Pages, add a `CNAME` file containing your domain (for example,
 `blog.example.com`), point DNS at GitHub Pages per
 [GitHub's guide](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site),
