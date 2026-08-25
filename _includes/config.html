@@ -535,6 +535,15 @@
   {%- assign q_problems = q_problems | append: "author.name is still the template's placeholder, so the feed, the copyright line and this page's metadata all credit “Your Name”." | append: _SEP -%}
 {%- endif -%}
 
+{%- comment -%} The tagline is quiet's own line, and it is the most visible sentence
+  on the home page after the title. It is not a broken value — it works perfectly,
+  which is exactly why it reaches production unnoticed: the README says change four
+  settings and stop, and this is not one of them. An unfinished value, like the two
+  above, so it is said in the same place. {%- endcomment -%}
+{%- if q_tagline == "everything it needs, nothing it doesn't." -%}
+  {%- assign q_problems = q_problems | append: "tagline is still the template's placeholder line, so your home page introduces itself in quiet's words rather than yours, directly under your name. Write one sentence of your own, or empty it to leave it out." | append: _SEP -%}
+{%- endif -%}
+
 {%- comment -%} ---------- result ---------- {%- endcomment -%}
 {%- assign q_problem_list = q_problems | split: _SEP -%}
 {%- assign q_problem_count = q_problem_list | size -%}

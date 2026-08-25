@@ -191,6 +191,26 @@ description: what quiet made of your settings and your posts, and anything it ha
     judge. Computed here, once per build, rather than in config.html, which runs
     on every page.
   {%- endcomment -%}
+  {%- comment -%} The other half of the nav's honesty. It drops the link to a page that
+  is not there, which is right; this says which one, so removing a page by accident is
+  not silent. {%- endcomment -%}
+  {%- capture _built -%},{{ site.pages | map: "url" | join: "," }},{%- endcapture -%}
+  {%- assign _gone = "" -%}
+  {%- unless _built contains ",/about/," -%}{%- assign _gone = _gone | append: "about.md‖" -%}{%- endunless -%}
+  {%- unless _built contains ",/archive/," -%}{%- assign _gone = _gone | append: "archive.html‖" -%}{%- endunless -%}
+  {%- assign _gone_list = _gone | split: "‖" -%}
+  {%- if _gone_list.size > 0 %}
+  <h2>pages the header expected</h2>
+  <p>
+    The header links to a page only when that page exists, so removing one removes its
+    link instead of leaving a dead link on every page of the site. Not in this build:
+  </p>
+  <ul class="config-extras">
+    {%- for _g in _gone_list %}<li><code>{{ _g }}</code></li>{% endfor -%}
+  </ul>
+  <p>If that was not deliberate, the file belongs at the repository root.</p>
+  {%- endif %}
+
   {%- assign _TEMPLATE_PAGES = "index.html|about.md|archive.html|404.html|site-check.html|feed.xml" | split: "|" -%}
   {%- assign _extra = "" -%}
   {%- for _p in site.pages -%}

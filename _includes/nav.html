@@ -1,9 +1,21 @@
+{%- comment -%}
+  Link to a page only when that page is in the build. Deleting about.md is an ordinary
+  thing to do with a template, and a hardcoded link to a page that is gone puts a 404
+  in the header of every page on the site while the build stays green and says nothing.
+  The nav asks instead of assuming; /site-check/ names what went, so an accidental
+  deletion is not silent either. Commas on both ends so /about/ cannot match /x/about/.
+{%- endcomment -%}
+{%- capture _nav_pages -%},{{ site.pages | map: "url" | join: "," }},{%- endcapture -%}
 <header class="site-header">
   <nav aria-label="site">
     <a class="wordmark" href="{{ '/' | relative_url }}"{% if page.url == '/' %} aria-current="page"{% endif %}>{{ q_title | escape }}</a>
     <div class="site-links">
+      {%- if _nav_pages contains ",/archive/," %}
       <a href="{{ '/archive/' | relative_url }}"{% if page.url == '/archive/' %} aria-current="page"{% endif %}>archive</a>
+      {%- endif %}
+      {%- if _nav_pages contains ",/about/," %}
       <a href="{{ '/about/' | relative_url }}"{% if page.url == '/about/' %} aria-current="page"{% endif %}>about</a>
+      {%- endif %}
     </div>
   </nav>
 </header>

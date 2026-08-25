@@ -65,7 +65,66 @@ The home list should show only this post's date.
   const postCount = (home.match(/<li>\s*<a/g) || []).length;
   assert.ok(postCount >= 1, 'home must show at least one post');
 
-  process.stdout.write('PASS edge-case build: minimum reading time and empty descriptions\n');
+  // ---- day one in a fork ----
+  //
+  // The first two things anyone does with a template are delete the demo posts and
+  // decide whether they want an /about/ page. An empty site was already fine; the
+  // deleted page was not. The nav links were hardcoded, so removing about.md left a
+  // dead link in the header of *every* page while the build stayed green and said
+  // nothing — and the README is right that a hosted fork never runs this suite, so
+  // the link checker could not be the answer. The header now links to a page only
+  // when that page is in the build, and /site-check/ names the one that went so an
+  // accidental deletion is not silent either.
+  const forkSource = path.join(temporary, 'fork');
+  const forkOutput = path.join(temporary, 'fork-site');
+  fs.cpSync(source, forkSource, { recursive: true });
+  fs.rmSync(path.join(forkSource, 'about.md'), { force: true });
+  for (const name of fs.readdirSync(path.join(forkSource, '_posts'))) {
+    fs.rmSync(path.join(forkSource, '_posts', name), { force: true });
+  }
+
+  jekyllBuild({
+    source: forkSource,
+    destination: forkOutput,
+    config: [path.join(forkSource, '_config.yml')],
+    cwd: BUNDLE_CWD
+  });
+
+  const walk = (dir) => fs.readdirSync(dir, { withFileTypes: true })
+    .flatMap((entry) => entry.isDirectory()
+      ? walk(path.join(dir, entry.name))
+      : [path.join(dir, entry.name)]);
+
+  const forkHome = fs.readFileSync(path.join(forkOutput, 'index.html'), 'utf8');
+  assert.match(forkHome, /nothing here yet/,
+    'a site with no posts yet needs a real empty state, not a blank column');
+  assert.match(forkHome, /href="[^"]*\/archive\/"/,
+    'the archive link must survive — only the deleted page loses its link');
+
+  const forkArchive = fs.readFileSync(path.join(forkOutput, 'archive/index.html'), 'utf8');
+  assert.match(forkArchive, /nothing here yet/, 'the archive needs the same empty state');
+
+  for (const file of walk(forkOutput).filter((name) => name.endsWith('.html'))) {
+    assert.doesNotMatch(
+      fs.readFileSync(file, 'utf8'),
+      /href="[^"]*\/about\/"/,
+      `${path.relative(forkOutput, file)} links to /about/, which this fork deleted. ` +
+      'A hardcoded nav link puts that 404 on every page of the site.'
+    );
+  }
+
+  const forkCheck = fs.readFileSync(path.join(forkOutput, 'site-check/index.html'), 'utf8');
+  assert.match(forkCheck, /about\.md/,
+    'site-check must name the page the header expected, so removing one is not silent');
+
+  const forkFeed = fs.readFileSync(path.join(forkOutput, 'feed.xml'), 'utf8');
+  assert.match(forkFeed, /<feed[\s>]/, 'the feed must still be valid Atom with no posts');
+  assert.doesNotMatch(forkFeed, /<entry>/, 'no posts means no entries, not a broken feed');
+
+  process.stdout.write(
+    'PASS edge-case build: minimum reading time, empty descriptions, ' +
+    'and a day-one fork with no posts and no about page\n'
+  );
 } finally {
   fs.rmSync(temporary, { recursive: true, force: true });
 }
