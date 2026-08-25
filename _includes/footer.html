@@ -1,0 +1,93 @@
+<footer class="site-footer">
+  <p class="footer-links">
+    {%- if q_github != "" %}
+    {%- comment -%} rel="me" lets the linked profile link back and verify this is
+    the same person — the cheapest identity claim on the web, and the only piece
+    of IndieWeb machinery that needs no server. {%- endcomment -%}
+    <a href="https://github.com/{{ q_github | escape }}" rel="me">github</a>
+    {%- endif %}
+    {%- if q_email != "" %}
+    <a href="mailto:{{ q_email | escape }}">email</a>
+    {%- endif %}
+    <a href="{{ '/feed.xml' | relative_url }}">rss</a>
+    {%- comment -%}
+      Reads as “[icon] system”. The word “theme” is still there, carried in the
+      accessible name rather than on screen, and it is load-bearing twice over:
+      a screen reader announces “theme: system, button” instead of the mystery
+      meat that “system, button” would be, and find-in-page still lands on the
+      control when a reader types “theme” — verified in Chromium, Firefox and
+      WebKit, where clip-hidden text is matched and display:none text is not.
+
+      So the shorter label costs nothing. Icon plus state is what shows; the
+      label that makes both unambiguous is still in the page for the two things
+      that need it. The starting value is rendered here rather than left to
+      script, so the button never shows a state that disagrees with the page.
+
+      No aria-live. The label is the button's own accessible name, so changing
+      it is announced on activation by the same mechanism that announces any
+      renamed control — while a live region here also fired on every page load
+      for anyone who had ever set a theme, reading a bare "dark" into the middle
+      of the page. A three-state control also rules out aria-pressed, which is
+      boolean and would call "system" either pressed or not.
+    {%- endcomment -%}
+    <button type="button" id="theme-toggle" class="theme-toggle">
+      {%- comment -%}
+        Three states, three silhouettes, and the one showing is the one you are
+        in. Sun, crescent and half-filled circle share one construction — a
+        circle in a 24px box, 2px stroke — so they read as a set, and differ in
+        outline so they are told apart at a glance rather than by inspection.
+
+        The set this replaced drew light and dark as two near-identical suns,
+        which at 16px is the mystery-meat failure an icon exists to prevent: a
+        wrong icon is worse than none. The half-circle for "follow the system"
+        is the mark macOS and Android use for appearance, and it is the one
+        state with no universal symbol — which is exactly why the word is beside
+        it and always has been.
+
+        Cost, measured rather than assumed: 886 B raw and about 272 B gzipped
+        per page for the two icons not currently shown. That is the price of the
+        control announcing its own state at a glance instead of only in words,
+        and it is worth it.
+      {%- endcomment -%}
+      <svg class="theme-icon theme-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4.25"/><path d="M12 2.5v2.25M12 19.25v2.25M4.22 4.22l1.6 1.6M18.18 18.18l1.6 1.6M2.5 12h2.25M19.25 12h2.25M4.22 19.78l1.6-1.6M18.18 5.82l1.6-1.6"/></svg>
+      <svg class="theme-icon theme-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20.5 14.5A8.9 8.9 0 0 1 9.5 3.5a8.9 8.9 0 1 0 11 11Z"/></svg>
+      <svg class="theme-icon theme-system" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5a8.5 8.5 0 0 0 0 17Z" fill="currentColor" stroke="none"/></svg>
+      <span class="theme-text"><span class="visually-hidden">theme: </span><span id="theme-label">{{ q_theme_default }}</span></span>
+    </button>
+  </p>
+  {%- comment -%}
+    Editing config on GitHub Pages has no feedback loop: you commit, you wait,
+    you hope. /site-check/ answers that, but only for someone who remembers it
+    exists, and the problem count otherwise travels in an HTML comment nobody
+    reads.
+
+    So during local preview — and only there, since GitHub Pages and every other
+    host build with JEKYLL_ENV=production — a problem says so on every page,
+    where the person who caused it is looking. Readers of the published site
+    never see this line.
+  {%- endcomment -%}
+  {%- if jekyll.environment != "production" and q_problem_count > 0 %}
+  <p class="footer-meta config-notice">
+    <a href="{{ '/site-check/' | relative_url }}">{{ q_problem_count }} setting{% if q_problem_count > 1 %}s{% endif %} in your config could not be used as written →</a>
+    <span class="config-unset">shown while previewing locally; never on the published site</span>
+  </p>
+  {%- endif %}
+  {%- if site.demo_notice and site.demo_notice != "" %}
+  <p class="footer-meta">{{ site.demo_notice | escape }}</p>
+  {%- endif %}
+  {%- comment -%}
+    The year comes from the writing, not from the clock. A site whose last build
+    was today but whose first post was in 2019 printed "© 2026", quietly claiming
+    to be a year old — and a site that stops being rebuilt freezes its own date.
+    The span is what is actually true, and it needs no maintenance.
+  {%- endcomment -%}
+  {%- assign _this_year = 'now' | date: '%Y' -%}
+  {%- assign _years = _this_year -%}
+  {%- if site.posts.size > 0 -%}
+    {%- assign _first_year = site.posts.last.date | date: '%Y' -%}
+    {%- if _first_year != _this_year -%}
+      {%- assign _years = _first_year | append: "–" | append: _this_year -%}
+    {%- endif -%}
+  {%- endif -%}
+  <p class="footer-meta">© {{ _years }}{% if q_author != "" %} {{ q_author | escape }}{% endif %}{% if q_show_credit %} · built with <a href="https://github.com/hjadmz/quiet">quiet</a>{% endif %}</p>
+</footer>

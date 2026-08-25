@@ -1,0 +1,530 @@
+{%- comment -%}
+  quiet — the one place raw _config.yml values become safe values.
+
+  Nothing else in this template reads a user-facing `site.<setting>` directly.
+  Templates read the `q_*` variables defined here, so every setting is
+  validated once, in one place, and a bad value can only ever produce the
+  documented fallback — never a broken page.
+
+  Three rules, applied to every setting:
+    1. Normalize — trim, lowercase, coerce to the expected type.
+    2. Fall back — an unusable value is replaced by the documented default.
+    3. Say so    — every substitution appends one plain sentence to
+                   `q_problems`, which /site-check/ and the <head> comment
+                   report. Silence means the config is clean.
+
+  Escaping happens where a value is printed, not here, so the q_* values stay
+  usable in both text and attribute positions.
+
+  Usage: {% include config.html %} before any q_* variable is read. Cheap to
+  repeat. Page content renders before its layout, and each layout renders
+  before the layout wrapping it, so index.html, archive.html, post.html and
+  default.html each include it.
+{%- endcomment -%}
+
+{%- assign q_problems = "" -%}
+{%- assign _SEP = "‖" -%}
+
+{%- comment -%} ---------- YAML read it as something other than text ----------
+  YAML turns `no`, `yes`, `on`, `off`, `y` and `n` into true and false before any
+  of this runs. That is not a hypothetical: `no` is the language code for
+  Norwegian, so `lang: no` was silently producing <html lang="false"> — a valid
+  attribute value, a plausible-looking page, and nothing to tell anyone. Same
+  shape for `title: on` rendering as "true", and `author.name: yes` printing
+  "© 2026 true" in the footer.
+
+  Nothing downstream can see this, because by then the boolean has been read as
+  the text "false" and passes every check. So it is caught here, before any
+  setting is read, and those keys fall back to their defaults.
+{%- endcomment -%}
+{%- assign _yaml_bools = "" -%}
+{%- assign _TEXT_KEYS = "title,tagline,description,lang,timezone" | split: "," -%}
+{%- for _k in _TEXT_KEYS -%}
+  {%- assign _v = site[_k] -%}
+  {%- if _v == true or _v == false -%}
+    {%- assign _yaml_bools = _yaml_bools | append: _k | append: "," -%}
+    {%- if _k == "lang" -%}
+      {%- assign q_problems = q_problems | append: 'lang was read as a true/false value rather than as text. In YAML the bare words no, yes, on and off mean true or false — which is exactly why the language code for Norwegian has to be written lang: "no", in quotes. Using en.' | append: _SEP -%}
+    {%- else -%}
+      {%- assign q_problems = q_problems | append: _k | append: " was read as a true/false value rather than as text. In YAML the bare words no, yes, on and off mean true or false. Put quotes around the value and it stays text. Using the default." | append: _SEP -%}
+    {%- endif -%}
+  {%- endif -%}
+{%- endfor -%}
+{%- assign _BOOL_KEYS = _yaml_bools | split: "," -%}
+
+{%- if site.author.name == true or site.author.name == false -%}
+  {%- assign _author_is_bool = true -%}
+  {%- assign q_problems = q_problems | append: "author.name was read as a true/false value rather than as text — in YAML the bare words no, yes, on and off do that. Put quotes around your name. Leaving the credit unattributed." | append: _SEP -%}
+{%- else -%}
+  {%- assign _author_is_bool = false -%}
+{%- endif -%}
+
+{%- comment -%} ---------- footer, as a shape ----------
+  `footer: octocat` and a bulleted list under `footer:` both parse fine and both
+  make site.footer.github unreadable, so every footer link vanished with nothing
+  said. The keys have to be nested under it, and if they are not, that is worth a
+  sentence rather than a silently emptier page.
+{%- endcomment -%}
+{%- if site.footer -%}
+  {%- if site.footer.github == nil and site.footer.email == nil -%}
+    {%- assign q_problems = q_problems | append: "footer is set but has no github or email under it, so both footer links were left out. It takes two indented lines — footer: then github: and email: beneath it, each indented two spaces." | append: _SEP -%}
+  {%- endif -%}
+{%- endif -%}
+
+{%- comment -%} ---------- title ---------- {%- endcomment -%}
+{%- comment -%} Zero-width characters survive `strip`, so a title made only of
+  them is not empty and the "home" fallback never fires — leaving a header link
+  that is present, clickable, and invisible. {%- endcomment -%}
+{%- assign q_title = site.title | append: "" | replace: "​", "" | replace: "‌", "" | replace: "‍", "" | replace: "﻿", "" | strip -%}
+{%- if _BOOL_KEYS contains "title" -%}{%- assign q_title = "" -%}{%- endif -%}
+{%- assign q_title_is_fallback = false -%}
+{%- if q_title == "" -%}
+  {%- assign q_title = "home" -%}
+  {%- assign q_title_is_fallback = true -%}
+  {%- assign q_problems = q_problems | append: "title is empty. The header link is how a reader gets back to the front page, and a link with no text cannot be seen or announced, so it reads “home” instead. Set title in _config.yml." | append: _SEP -%}
+{%- endif -%}
+
+{%- comment -%} ---------- tagline and description ---------- {%- endcomment -%}
+{%- assign q_tagline = site.tagline | append: "" | strip -%}
+{%- if _BOOL_KEYS contains "tagline" -%}{%- assign q_tagline = "" -%}{%- endif -%}
+{%- assign q_description = site.description | append: "" | strip -%}
+{%- if _BOOL_KEYS contains "description" -%}{%- assign q_description = "" -%}{%- endif -%}
+
+{%- comment -%} ---------- author ----------
+  `author` may be a map (author: {name: ...}) or a bare string. Both spellings
+  are common and jekyll-feed accepts both, so accept both here.
+{%- endcomment -%}
+{%- assign q_author = "" -%}
+{%- if _author_is_bool -%}
+{%- elsif site.author.name -%}
+  {%- assign q_author = site.author.name | append: "" | strip -%}
+{%- elsif site.author.name == nil and site.author -%}
+  {%- comment -%} A bare string, not a map. A map whose name is empty stops
+  here rather than falling through, which would print the map itself. {%- endcomment -%}
+  {%- unless site.author.first -%}
+    {%- assign q_author = site.author | append: "" | strip -%}
+  {%- endunless -%}
+{%- endif -%}
+{%- if q_author contains '"' or q_author contains "<" or q_author contains ">" -%}
+  {%- assign q_author = q_author | replace: '"', "" | replace: "<", "" | replace: ">", "" | strip -%}
+  {%- assign q_problems = q_problems | append: "author.name contains a quote or an angle bracket. Those were removed here, but jekyll-seo-tag reads this setting straight from your config and prints it into a meta tag unescaped, so remove them in _config.yml too." | append: _SEP -%}
+{%- endif -%}
+{%- if q_author == "" -%}
+  {%- assign q_problems = q_problems | append: "author.name is empty, so the feed and the copyright line have no one to credit. Set author: name: Your Name in _config.yml." | append: _SEP -%}
+{%- endif -%}
+
+{%- comment -%} ---------- lang ----------
+  A BCP-47 tag is letters, digits and hyphens. Anything else is either a typo
+  or an attempt to break out of the attribute; both get the same answer.
+{%- endcomment -%}
+{%- assign _ALNUM_DASH = "abcdefghijklmnopqrstuvwxyz0123456789-" -%}
+{%- assign _lang = site.lang | append: "" | strip | downcase -%}
+{%- if _BOOL_KEYS contains "lang" -%}{%- assign _lang = "" -%}{%- endif -%}
+{%- assign q_lang = "en" -%}
+{%- if _lang != "" -%}
+  {%- comment -%} A language tag has a shape, not just an alphabet: two or three
+    letters, then optional subtags of one to eight letters or digits. Checking
+    only the characters accepted "english" and "false" — the two values a person
+    is most likely to end up with — and both leave every screen reader and
+    translation engine guessing. {%- endcomment -%}
+  {%- assign _lang_ok = true -%}
+  {%- assign _subtags = _lang | split: "-" -%}
+  {%- if _subtags.size < 1 or _subtags.size > 5 -%}{%- assign _lang_ok = false -%}{%- endif -%}
+  {%- for _sub in _subtags -%}
+    {%- if forloop.first -%}
+      {%- if _sub.size < 2 or _sub.size > 3 -%}{%- assign _lang_ok = false -%}{%- endif -%}
+    {%- else -%}
+      {%- if _sub.size < 1 or _sub.size > 8 -%}{%- assign _lang_ok = false -%}{%- endif -%}
+    {%- endif -%}
+    {%- assign _sub_chars = _sub | split: "" -%}
+    {%- for _c in _sub_chars -%}
+      {%- unless _ALNUM_DASH contains _c -%}{%- assign _lang_ok = false -%}{%- endunless -%}
+    {%- endfor -%}
+  {%- endfor -%}
+  {%- if _lang_ok -%}
+    {%- assign q_lang = _lang -%}
+  {%- else -%}
+    {%- assign q_problems = q_problems | append: "lang is “" | append: _lang | append: "”, which is not a language code. A code is two or three letters, optionally followed by a region — en, en-GB, ja, pt-BR. The word for the language is not the code for it. Using en here, but jekyll-seo-tag reads this setting straight from your config and prints it into a meta tag unescaped, so fix it in _config.yml." | append: _SEP -%}
+  {%- endif -%}
+{%- endif -%}
+
+{%- comment -%} ---------- writing direction ----------
+  Derived, not configured. `lang` already says which language this is, and for
+  these scripts the direction follows from it — asking the author to state it
+  twice is one more thing to get wrong. Without `dir`, a site set to `ar` renders
+  Arabic left-to-right with its bullets, quote rules and table columns on the
+  wrong side: correct metadata over a layout that contradicts it.
+{%- endcomment -%}
+{%- assign _RTL = "ar,arc,ckb,dv,fa,he,ks,ku,ps,sd,ug,ur,yi" | split: "," -%}
+{%- assign _base_lang = q_lang | split: "-" | first -%}
+{%- assign q_dir = "ltr" -%}
+{%- if _RTL contains _base_lang -%}{%- assign q_dir = "rtl" -%}{%- endif -%}
+
+{%- comment -%} ---------- body_font ---------- {%- endcomment -%}
+{%- assign _font = site.body_font | append: "" | strip | downcase -%}
+{%- assign q_body_font = "sans" -%}
+{%- if _font == "serif" or _font == "sans" -%}
+  {%- assign q_body_font = _font -%}
+{%- elsif _font != "" -%}
+  {%- assign q_problems = q_problems | append: "body_font is " | append: _font | append: ". The only values are sans and serif. Using sans." | append: _SEP -%}
+{%- endif -%}
+
+{%- comment -%} ---------- theme_default ---------- {%- endcomment -%}
+{%- assign _theme = site.theme_default | append: "" | strip | downcase -%}
+{%- assign q_theme_default = "system" -%}
+{%- if _theme == "light" or _theme == "dark" or _theme == "system" -%}
+  {%- assign q_theme_default = _theme -%}
+{%- elsif _theme != "" -%}
+  {%- assign q_problems = q_problems | append: "theme_default is " | append: _theme | append: ". The only values are system, light and dark. Using system." | append: _SEP -%}
+{%- endif -%}
+
+{%- comment -%} ---------- posts_on_home ----------
+  The setting most likely to be typed wrong, so it gets the strictest reading:
+  a whole number from 1 to 100, or the word all. One rule, one fallback.
+
+  `.first` is non-nil only for arrays — Liquid has no type filter, and without
+  that check the list [5, 10] stringifies to "510" and is read as five hundred
+  and ten. `1e3`, `0x20`, "3.7" and "abc" all fail the round-trip test below
+  because their canonical integer form is not the text that was written.
+{%- endcomment -%}
+{%- assign _POSTS_DEFAULT = 5 -%}
+{%- assign _POSTS_MAX = 100 -%}
+{%- assign _raw_n = site.posts_on_home -%}
+{%- assign q_posts_on_home = _POSTS_DEFAULT -%}
+{%- assign _in_n = _raw_n | append: "" | strip -%}
+{%- assign _in_n_lower = _in_n | downcase -%}
+{%- if _raw_n == nil -%}
+{%- elsif _in_n == "" -%}
+  {%- assign q_problems = q_problems | append: "posts_on_home is empty. Using " | append: _POSTS_DEFAULT | append: "." | append: _SEP -%}
+{%- elsif _raw_n.first != nil -%}
+  {%- assign q_problems = q_problems | append: "posts_on_home is a list. It takes one whole number from 1 to " | append: _POSTS_MAX | append: ", or the word all. Using " | append: _POSTS_DEFAULT | append: "." | append: _SEP -%}
+{%- elsif _in_n_lower == "all" -%}
+  {%- assign q_posts_on_home = site.posts.size | at_least: 1 -%}
+{%- else -%}
+  {%- assign _n = _in_n | plus: 0 | round -%}
+  {%- assign _canon_n = _n | append: "" -%}
+  {%- if _in_n != _canon_n -%}
+    {%- assign q_problems = q_problems | append: "posts_on_home is " | append: _in_n | append: ", which is not a whole number. It takes a whole number from 1 to " | append: _POSTS_MAX | append: ", or the word all. Using " | append: _POSTS_DEFAULT | append: "." | append: _SEP -%}
+  {%- elsif _n < 1 -%}
+    {%- assign q_posts_on_home = 1 -%}
+    {%- assign q_problems = q_problems | append: "posts_on_home is " | append: _n | append: ". A home page with no posts has nothing to read on it, so the lowest value is 1. Using 1." | append: _SEP -%}
+  {%- elsif _n > _POSTS_MAX -%}
+    {%- assign q_posts_on_home = _POSTS_MAX -%}
+    {%- assign q_problems = q_problems | append: "posts_on_home is " | append: _n | append: ", above the maximum of " | append: _POSTS_MAX | append: ". Using " | append: _POSTS_MAX | append: ". If you meant every post, write posts_on_home: all." | append: _SEP -%}
+  {%- else -%}
+    {%- assign q_posts_on_home = _n -%}
+  {%- endif -%}
+{%- endif -%}
+
+{%- comment -%} ---------- date_format ----------
+  strftime has too many directives to check by hand, so ask the formatter
+  instead: run a known date through it. Output identical to the format string
+  means nothing was substituted and this is not a date format at all.
+{%- endcomment -%}
+{%- assign _DATE_DEFAULT = "%b %-d, %Y" -%}
+{%- assign _fmt = site.date_format | append: "" | strip -%}
+{%- comment -%} Three names for the three formats almost everyone wants, because
+  "%b %-d, %Y" is something you look up rather than something you recognise. The
+  raw strftime string still works for anyone who wants a fourth. {%- endcomment -%}
+{%- assign _fmt_name = _fmt | downcase -%}
+{%- if _fmt_name == "long" -%}{%- assign _fmt = "%B %-d, %Y" -%}
+{%- elsif _fmt_name == "short" -%}{%- assign _fmt = "%b %-d, %Y" -%}
+{%- elsif _fmt_name == "iso" -%}{%- assign _fmt = "%Y-%m-%d" -%}
+{%- endif -%}
+{%- assign q_date_format = _DATE_DEFAULT -%}
+{%- if _fmt != "" -%}
+  {%- comment -%} A date format is printed as text. It is escaped on output, so markup
+  here cannot inject anything — it would just render as visible angle brackets in every
+  date on the site, which is a mistake worth naming rather than silently displaying. {%- endcomment -%}
+  {%- if _fmt contains "<" or _fmt contains ">" or _fmt contains "&" -%}
+    {%- assign q_problems = q_problems | append: "date_format contains markup characters, which would show up literally in every date. Using the default " | append: _DATE_DEFAULT | append: "." | append: _SEP -%}
+    {%- assign _fmt = "" -%}
+  {%- endif -%}
+{%- endif -%}
+{%- if _fmt != "" -%}
+  {%- assign _probe = site.time | date: _fmt -%}
+  {%- assign _has_pct = false -%}
+  {%- if _fmt contains "%" -%}{%- assign _has_pct = true -%}{%- endif -%}
+  {%- if _probe == _fmt or _has_pct == false -%}
+    {%- assign q_problems = q_problems | append: "date_format is " | append: _fmt | append: ", which produced no date. A format is made of strftime directives, like %b %-d, %Y. Using the default." | append: _SEP -%}
+  {%- else -%}
+    {%- assign q_date_format = _fmt -%}
+    {%- if _probe contains "%" -%}
+      {%- assign q_problems = q_problems | append: "date_format is " | append: _fmt | append: ", and part of it did not resolve — today renders as “" | append: _probe | append: "”. Check it against the strftime directives. Keeping your value." | append: _SEP -%}
+    {%- endif -%}
+  {%- endif -%}
+{%- elsif site.date_format != nil -%}
+  {%- assign q_problems = q_problems | append: "date_format is empty, which prints a raw timestamp. Using the default " | append: _DATE_DEFAULT | append: "." | append: _SEP -%}
+{%- endif -%}
+
+{%- comment -%} ---------- switches ----------
+  YAML false is a boolean; YAML "false" is a five-character string, and every
+  non-empty string is true in Liquid. That one pair of quotes is the most
+  common way a template's off switch silently stays on, so honour the written
+  intent and report the quoting rather than obeying the accident.
+{%- endcomment -%}
+{%- assign _FALSEY = "false,no,off,0,none,disabled" | split: "," -%}
+
+{%- assign q_show_reading_time = true -%}
+{%- if site.show_reading_time == false -%}
+  {%- assign q_show_reading_time = false -%}
+{%- elsif site.show_reading_time != nil and site.show_reading_time != true -%}
+  {%- assign _v = site.show_reading_time | append: "" | strip | downcase -%}
+  {%- if _FALSEY contains _v -%}
+    {%- assign q_show_reading_time = false -%}
+    {%- assign q_problems = q_problems | append: "show_reading_time is “" | append: _v | append: "” rather than false. Anything other than the bare word false counts as true in a template, so the switch would have stayed on. Reading it as off — write false, with no quotes, to make that certain." | append: _SEP -%}
+  {%- endif -%}
+{%- endif -%}
+
+{%- assign q_show_credit = true -%}
+{%- if site.show_credit == false -%}
+  {%- assign q_show_credit = false -%}
+{%- elsif site.show_credit != nil and site.show_credit != true -%}
+  {%- assign _v = site.show_credit | append: "" | strip | downcase -%}
+  {%- if _FALSEY contains _v -%}
+    {%- assign q_show_credit = false -%}
+    {%- assign q_problems = q_problems | append: "show_credit is “" | append: _v | append: "” rather than false. Anything other than the bare word false counts as true in a template, so the switch would have stayed on. Reading it as off — write false, with no quotes, to make that certain." | append: _SEP -%}
+  {%- endif -%}
+{%- endif -%}
+
+{%- comment -%} ---------- accent color ----------
+  One color, not two. The dark-mode accent is derived from it in CSS rather than
+  asked for again, because the old default — reuse the light accent in dark mode
+  — is wrong for essentially every color: measured across 36 hues and chromas,
+  36 of 36 fell below 4.5:1 on the dark background, ranging 1.32:1 to 3.56:1.
+  The derived value failed none of them, ranging 6.90:1 to 8.24:1. A setting
+  whose default is always wrong is a setting that shifts the work to the author,
+  and this one can be computed correctly instead.
+
+  The accent is also the only setting written into a stylesheet, so it is the
+  only one that could rewrite the page rather than merely mislabel it. Two gates:
+
+    here   — reject any character that could end the declaration, the rule, or
+             the <style> element. What survives cannot restructure CSS.
+    in CSS — wrap the declaration in @supports (color: VALUE), so the browser
+             itself decides whether the value is a real color. An invented one
+             is skipped and the built-in accent stays.
+
+  A hostile value is dropped here; a merely wrong one is dropped by the browser.
+  Neither reaches the reader as a broken page.
+{%- endcomment -%}
+{%- comment -%}
+  Blocked characters, and why each one: < > end the <style> element;
+  { } ; end the declaration or the rule; @ starts an at-rule; * would open a
+  /* comment; ` = ! and the quote pair cannot appear in a color and are the
+  usual ingredients of an escape attempt. A CSS backslash escape needs none of
+  these and cannot terminate a block, so it is left alone.
+{%- endcomment -%}
+{%- assign _CSS_UNSAFE = "<|>|{|}|;|@|*|&|=|`|!" | split: "|" -%}
+{%- assign q_accent = "" -%}
+
+{%- assign _accent_in = site.accent | append: "" | strip -%}
+{%- if _accent_in != "" -%}
+  {%- assign _ok = true -%}
+  {%- for _bad in _CSS_UNSAFE -%}
+    {%- if _accent_in contains _bad -%}{%- assign _ok = false -%}{%- endif -%}
+  {%- endfor -%}
+  {%- if _accent_in contains '"' or _accent_in contains "'" -%}{%- assign _ok = false -%}{%- endif -%}
+  {%- comment -%} Liquid's split drops a trailing empty field, so a value that
+  ends in ")" would count one close too few. The sentinel keeps both counts
+  honest without changing the value. {%- endcomment -%}
+  {%- assign _fenced = "." | append: _accent_in | append: "." -%}
+  {%- assign _opens = _fenced | split: "(" | size -%}
+  {%- assign _closes = _fenced | split: ")" | size -%}
+  {%- if _opens != _closes -%}{%- assign _ok = false -%}{%- endif -%}
+  {%- if _ok == false -%}
+    {%- assign q_problems = q_problems | append: "accent contains characters that are not part of a CSS color, so it was ignored to keep the stylesheet intact. Use a plain color value — #386ca0, oklch(52% 0.1 250), rebeccapurple." | append: _SEP -%}
+  {%- endif -%}
+
+  {%- comment -%}
+    Values that are syntactically colors and are not colors. @supports (color: V)
+    asks "is this valid where a color goes", which every CSS-wide keyword answers
+    yes to — so `inherit` passed both gates and rendered links in body-text ink,
+    and `transparent` passed both and rendered them invisible, with nothing
+    reported either time. A gate that admits the thing it exists to exclude is
+    worse than no gate, because the documentation then promises something untrue.
+  {%- endcomment -%}
+  {%- if _ok -%}
+    {%- assign _acc_lower = _accent_in | downcase -%}
+    {%- assign _acc_head_char = _acc_lower | slice: 0, 1 -%}
+    {%- assign _acc_starts_with_digit = false -%}
+    {%- if "0123456789" contains _acc_head_char -%}{%- assign _acc_starts_with_digit = true -%}{%- endif -%}
+    {%- assign _NOT_A_COLOR = "inherit,initial,unset,revert,revert-layer,currentcolor,transparent,none,auto" | split: "," -%}
+    {%- if _NOT_A_COLOR contains _acc_lower -%}
+      {%- assign _ok = false -%}
+      {%- assign q_problems = q_problems | append: "accent is “" | append: _accent_in | append: "”, which is a CSS keyword rather than a color. It would leave links in the body text color or invisible, so it was ignored. Name an actual color." | append: _SEP -%}
+    {%- elsif _acc_lower contains "var(" -%}
+      {%- assign _ok = false -%}
+      {%- assign q_problems = q_problems | append: "accent points at another custom property, whose value quiet cannot see and therefore cannot check for contrast. Write the color itself." | append: _SEP -%}
+    {%- elsif _acc_starts_with_digit -%}
+      {%- assign _ok = false -%}
+      {%- assign q_problems = q_problems | append: 'accent is “' | append: _accent_in | append: '”, which starts with a digit — no CSS color does. A hex color needs its # and quotes around it, like accent: "#386ca0". The quotes matter: an unquoted # starts a YAML comment, which deletes the value instead of setting it.' | append: _SEP -%}
+    {%- else -%}
+      {%- comment -%} Transparency: a link you can see through cannot be held to a
+      contrast ratio, and this is the accent that carries link, focus and selection. {%- endcomment -%}
+      {%- assign _has_alpha = false -%}
+      {%- if _accent_in contains "/" -%}{%- assign _has_alpha = true -%}{%- endif -%}
+      {%- if _acc_lower contains "rgba(" -%}{%- assign _has_alpha = true -%}{%- endif -%}
+      {%- if _acc_lower contains "hsla(" -%}{%- assign _has_alpha = true -%}{%- endif -%}
+      {%- assign _acc_head = _accent_in | slice: 0, 1 -%}
+      {%- if _acc_head == "#" -%}
+        {%- if _accent_in.size == 5 or _accent_in.size == 9 -%}{%- assign _has_alpha = true -%}{%- endif -%}
+      {%- endif -%}
+      {%- if _has_alpha -%}
+        {%- assign _ok = false -%}
+        {%- assign q_problems = q_problems | append: "accent has transparency in it. Link text you can see through cannot be held to a contrast ratio, so it was ignored. Use a solid color." | append: _SEP -%}
+      {%- endif -%}
+    {%- endif -%}
+  {%- endif -%}
+
+  {%- if _ok -%}
+    {%- assign q_accent = _accent_in -%}
+  {%- endif -%}
+{%- endif -%}
+
+{%- comment -%} A setting that used to exist. Saying so beats ignoring it. {%- endcomment -%}
+{%- assign _accent_dark_in = site.accent_dark | append: "" | strip -%}
+{%- if _accent_dark_in != "" -%}
+  {%- assign q_problems = q_problems | append: "accent_dark is no longer a setting. The dark-mode accent is now worked out from accent — lighter and a little less saturated — which lands above 4.5:1 contrast for any hue, where reusing the light accent did not. Delete the line." | append: _SEP -%}
+{%- endif -%}
+
+{%- comment -%} ---------- footer identities ----------
+  Both become the href of a link. A wrong value here does not break the page;
+  it ships a link that goes nowhere, which is worse for a reader than no link
+  at all — so a value that cannot be a username or an address is dropped
+  rather than printed.
+{%- endcomment -%}
+{%- assign _gh = site.footer.github | append: "" | strip -%}
+{%- assign q_github = "" -%}
+{%- if _gh != "" -%}
+  {%- assign _gh_ok = true -%}
+  {%- assign _gh_chars = _gh | downcase | split: "" -%}
+  {%- for _c in _gh_chars -%}
+    {%- unless _ALNUM_DASH contains _c -%}
+      {%- assign _gh_ok = false -%}
+    {%- endunless -%}
+  {%- endfor -%}
+  {%- if _gh.size > 39 -%}{%- assign _gh_ok = false -%}{%- endif -%}
+  {%- if _gh_ok -%}
+    {%- assign q_github = _gh -%}
+  {%- else -%}
+    {%- assign q_problems = q_problems | append: "footer.github is “" | append: _gh | append: "”, which is not a GitHub username, so the link was left out rather than shipped broken. Use the username on its own — octocat, not the profile URL." | append: _SEP -%}
+  {%- endif -%}
+{%- endif -%}
+
+{%- assign _em = site.footer.email | append: "" | strip -%}
+{%- assign q_email = "" -%}
+{%- if _em != "" -%}
+  {%- assign _em_ok = true -%}
+  {%- assign _em_parts = _em | split: "@" -%}
+  {%- if _em_parts.size != 2 -%}{%- assign _em_ok = false -%}{%- endif -%}
+  {%- if _em_ok -%}
+    {%- assign _em_user = _em_parts | first -%}
+    {%- assign _em_domain = _em_parts | last -%}
+    {%- unless _em_domain contains "." -%}{%- assign _em_ok = false -%}{%- endunless -%}
+    {%- if _em_user == "" -%}{%- assign _em_ok = false -%}{%- endif -%}
+  {%- endif -%}
+  {%- if _em contains " " or _em contains "<" or _em contains ">" or _em contains '"' -%}
+    {%- assign _em_ok = false -%}
+  {%- endif -%}
+  {%- if _em_ok -%}
+    {%- assign q_email = _em -%}
+  {%- else -%}
+    {%- assign q_problems = q_problems | append: "footer.email is “" | append: _em | append: "”, which is not an email address, so the link was left out rather than shipped broken." | append: _SEP -%}
+  {%- endif -%}
+{%- endif -%}
+
+{%- comment -%} ---------- retired settings ----------
+  Keys that used to exist. Ignoring a line someone already wrote is the failure
+  this whole reporting mechanism exists to prevent, so each one says what
+  replaced it. favicon and apple_touch_icon only ever let you move a file that
+  the template ships at a fixed path and the docs already tell you to replace in
+  place — two settings whose entire purpose was avoiding a rename.
+{%- endcomment -%}
+{%- if site.favicon -%}
+  {%- assign q_problems = q_problems | append: "favicon is no longer a setting. Replace the file at assets/img/favicon.svg (and favicon.ico beside it) instead, and delete the line." | append: _SEP -%}
+{%- endif -%}
+{%- if site.apple_touch_icon -%}
+  {%- assign q_problems = q_problems | append: "apple_touch_icon is no longer a setting. Replace the file at assets/img/apple-touch-icon.png instead, and delete the line." | append: _SEP -%}
+{%- endif -%}
+{%- if site.analytics_html -%}
+  {%- assign q_problems = q_problems | append: "analytics_html is no longer a setting. Markup inside YAML is a quoting trap; paste the provider snippet into _includes/analytics.html instead, and delete the line." | append: _SEP -%}
+{%- endif -%}
+
+{%- comment -%} ---------- feed length ----------
+  Read here rather than raw in feed.xml, so the one number that decides what
+  every subscriber receives gets the same treatment as everything else.
+{%- endcomment -%}
+{%- assign q_feed_limit = 10 -%}
+{%- assign _raw_feed = site.feed.posts_limit -%}
+{%- if _raw_feed != nil -%}
+  {%- assign _in_feed = _raw_feed | append: "" | strip -%}
+  {%- assign _nf = _in_feed | plus: 0 | round -%}
+  {%- assign _canon_feed = _nf | append: "" -%}
+  {%- if _in_feed != _canon_feed or _nf < 1 -%}
+    {%- assign q_problems = q_problems | append: "feed.posts_limit is " | append: _in_feed | append: ". It takes a whole number of at least 1. Using 10." | append: _SEP -%}
+  {%- else -%}
+    {%- assign q_feed_limit = _nf -%}
+  {%- endif -%}
+{%- endif -%}
+
+{%- comment -%} ---------- url and baseurl ----------
+  Jekyll tolerates most spellings of these. The value in reporting them is
+  that a wrong url produces canonical links and a feed pointing somewhere
+  else, which is invisible in the browser and expensive to discover later.
+{%- endcomment -%}
+{%- assign _url = site.url | append: "" | strip -%}
+{%- if _url != "" -%}
+  {%- unless _url contains "://" -%}
+    {%- assign q_problems = q_problems | append: "url is “" | append: _url | append: "” and has no scheme. Write the whole origin, like https://username.github.io." | append: _SEP -%}
+  {%- endunless -%}
+  {%- assign _url_tail = _url | slice: -1, 1 -%}
+  {%- if _url_tail == "/" -%}
+    {%- assign q_problems = q_problems | append: "url ends with a slash, which doubles the slash in canonical links and in the feed. Remove it." | append: _SEP -%}
+  {%- endif -%}
+{%- else -%}
+  {%- assign q_problems = q_problems | append: "url is empty. Canonical links, the feed, and social previews all need the site's own address. Set url to your origin, like https://username.github.io." | append: _SEP -%}
+{%- endif -%}
+
+{%- assign _base = site.baseurl | append: "" | strip -%}
+{%- if _base != "" -%}
+  {%- assign _base_head = _base | slice: 0, 1 -%}
+  {%- assign _base_tail = _base | slice: -1, 1 -%}
+  {%- if _base_head != "/" or _base_tail == "/" -%}
+    {%- assign q_problems = q_problems | append: "baseurl is “" | append: _base | append: "”. It should start with a slash and not end with one, like /repo-name. Jekyll corrects this spelling; other tools reading your config may not." | append: _SEP -%}
+  {%- endif -%}
+{%- endif -%}
+
+{%- comment -%} ---------- date validation helper ----------
+  Set q_date_in, then read q_date_ok. Liquid has no functions, so this is an include
+  used as one: post.html and site-check.html both need it and neither should own it.
+
+  It exists because a date Ruby cannot parse does not degrade — it raises, and the
+  whole site stops building over one typo in one post's front matter, with an error
+  that names the layout rather than the post. Checking the shape first means the date
+  is either used or ignored, and either way the other posts still publish.
+{%- endcomment -%}
+
+{%- comment -%} ---------- the state every fork starts in ----------
+  The validator survived 146 hostile inputs and then said "No problems" about the
+  one configuration every new user actually publishes: the shipped placeholders.
+  A fork that pushes before editing gets canonical links, a feed, a sitemap and
+  social cards all pointing at a site the author does not own — invisible in a
+  browser, and the kind of thing found weeks later when the feed will not
+  subscribe. Not a wrong value; an unfinished one, which needs saying just as much.
+{%- endcomment -%}
+{%- assign _placeholders = "" -%}
+{%- if _url contains "username.github.io" -%}
+  {%- assign _placeholders = _placeholders | append: ", url" -%}
+{%- endif -%}
+{%- if q_author == "Your Name" -%}
+  {%- assign _placeholders = _placeholders | append: ", author.name" -%}
+{%- endif -%}
+{%- if _placeholders != "" -%}
+  {%- assign _placeholders = _placeholders | remove_first: ", " -%}
+  {%- assign q_problems = q_problems | append: "Still set to the template's placeholder: " | append: _placeholders | append: ". Until url is your own address, every canonical link, the feed, the sitemap and every social preview point somewhere you do not control — which looks fine in a browser and is wrong everywhere it counts." | append: _SEP -%}
+{%- endif -%}
+
+{%- comment -%} ---------- result ---------- {%- endcomment -%}
+{%- assign q_problem_list = q_problems | split: _SEP -%}
+{%- assign q_problem_count = q_problem_list | size -%}

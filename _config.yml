@@ -1,0 +1,212 @@
+# ---------------------------------------------------------------
+# quiet — every setting lives in this one file.
+#
+# Change the four in the first block and you have a working site. Everything
+# below them already has a sensible value and can be left alone.
+#
+# Nothing here can break the site. A value quiet cannot use is replaced by the
+# default noted beside it, and the substitution is written out in plain English
+# at /site-check/ on your own site.
+#
+# When in doubt, put quotes around a value. YAML does three surprising things,
+# and quotes fix all of them:
+#   • the bare words no, yes, on and off become true and false — which is why
+#     Norwegian has to be lang: "no"
+#   • a # starts a comment mid-line, so  tagline: C# notes  loses everything
+#     from the # onward
+#   • a colon-space inside a value stops the build — tagline: "notes: on design"
+# Quoted values are always safe, including ones that did not need it.
+# ---------------------------------------------------------------
+
+
+# ===============================================================
+# 1. Make it yours. Change these four.
+# ===============================================================
+
+# The site's name. Header, browser tab, feed.
+# Empty falls back to the word "home", so the link back to the front page
+# always has something to click.
+title: quiet
+
+# Who wrote it. Feed, copyright line, page metadata.
+# `author: Your Name` also works. Avoid quotes and angle brackets: jekyll-seo-tag
+# prints this straight into a meta tag without escaping it.
+author:
+  name: Your Name
+
+# Where the site lives, without a trailing slash.
+# https://username.github.io, or your own domain.
+# Worth getting right the first time: it is invisible in the browser and wrong
+# everywhere it matters — canonical links, the feed, the sitemap, social previews.
+url: https://username.github.io
+
+# Leave empty unless the repo is NOT named username.github.io.
+# For a project site served at username.github.io/repo-name, put "/repo-name".
+baseurl: ""
+
+
+# ===============================================================
+# 2. Make it read the way you want. All optional.
+# ===============================================================
+
+# One line under your name on the home page. "" hides it.
+# Use double quotes if you quote it — a single-quoted value cannot contain
+# an apostrophe, and the error it causes points at the wrong line.
+tagline: "everything it needs, nothing it doesn't."
+
+# How search results and social cards describe the site as a whole.
+# Posts use their own `description` front matter. Often the same as the tagline.
+description: a quiet blog template for GitHub Pages.
+
+# Your one accent color: links, focus, text selection. Not decoration.
+# Any CSS color, in quotes — "#386ca0", rebeccapurple, "oklch(52% 0.1 250)".
+# The quotes matter for a hex value: an unquoted # starts a YAML comment, so
+# accent: #386ca0 deletes the value instead of setting it.
+# "" keeps the built-in restrained blue.
+#
+# Pick any color you like and stop thinking about it. Light and dark modes each
+# keep your hue and set their own lightness, which holds both above 4.5:1
+# contrast — across 33 real-world colors, none fell below it, where the raw value
+# failed in 16 of them in light mode and 21 in dark.
+#
+# Something that is not a color cannot break the page: characters that could
+# rewrite the stylesheet are refused, CSS keywords like `inherit` and
+# `transparent` are refused, and the browser checks the rest. You get the
+# built-in accent and a line at /site-check/.
+accent: ""
+
+# Body typeface: sans or serif. Both are system stacks — nothing to download,
+# and it renders in the reader's own typography.
+body_font: sans
+
+# What a first-time visitor sees: system, light, or dark.
+# `system` follows their device. Choosing light or dark overrides that on the
+# first visit — their own setting is usually the better one to respect.
+# Either way the footer control lets them change it, and it is remembered.
+theme_default: system
+
+# How many posts the HOME PAGE lists before the "all posts →" link.
+# A whole number from 1 to 100, or the word `all`.
+#
+# This is not a limit on how many posts you can have — there is none. The
+# archive always lists every post you have ever written, and nothing is ever
+# deleted or hidden. Measured on a 500-post site: builds in 6 seconds, the
+# archive lists all 500 and loads in under 50 ms on a phone.
+posts_on_home: 5
+
+# How dates read: long (August 18, 2026), short (Aug 18, 2026), or iso
+# (2026-08-18). A raw strftime string also works if you want something else.
+# The archive always shows month and day, since its headings carry the year.
+date_format: short
+
+# Footer links. Each appears only if you fill it in, and only if it is usable —
+# a value that cannot be a username or an address is left out rather than
+# shipped as a link that goes nowhere.
+#
+# The email is more than a footer link: with no comments and no reactions, it is
+# the only way a reader can answer you, and it appears under every post.
+footer:
+  github: ""            # your username alone, e.g. octocat
+  email: ""             # e.g. you@example.com
+
+# "· 6 min read" on posts.
+# Write false, not "false" — quoted, it is text, and text counts as true. quiet
+# reads the obvious intent anyway and tells you at /site-check/.
+show_reading_time: true
+
+# "built with quiet" in the footer. false removes it — guilt-free, it's MIT.
+show_credit: true
+
+
+# ===============================================================
+# 3. Rarely touched.
+# ===============================================================
+
+# Language of the site, as a code: en, en-GB, ja, ar.
+# Right-to-left languages set the page direction too, so the layout follows.
+lang: en
+
+# IANA timezone for post dates and feed timestamps.
+# America/New_York, Europe/Berlin, Asia/Tokyo. `npm run blog:new` reads it too,
+# so new files get the right day.
+timezone: Etc/UTC
+
+# Icons and the social-preview image are files, not settings. Replace them in
+# place: assets/img/favicon.svg, favicon.ico, apple-touch-icon.png, and
+# og-default.png (1200×630).
+#
+# Analytics is off, and adding it means editing _includes/analytics.html —
+# which explains what it costs before you do.
+
+# ---------------------------------------------------------------
+# Engine settings. You shouldn't need to touch anything below,
+# except the social-image path in `defaults:` if you moved yours.
+# ---------------------------------------------------------------
+
+markdown: kramdown
+kramdown:
+  input: GFM            # fenced code, tables, autolinks
+  # text-presentation arrow: without &#xfe0e; iOS renders ↩ as a blue emoji
+  footnote_backlink: "&#8617;&#xfe0e;"
+highlighter: rouge
+
+# Explicitly use no packaged theme; the layouts link only this template's CSS.
+theme:
+
+permalink: /:year/:title/
+
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+  - jekyll-sitemap
+
+# The feed carries the 10 most recent posts in full. Raise it if your readers
+# want more history in their reader; the whole archive is always on the site.
+feed:
+  posts_limit: 10
+
+# Give every page the default social image unless it sets its own,
+# and give posts the post layout so front matter stays minimal.
+defaults:
+  - scope:
+      path: ""
+    values:
+      image: /assets/img/og-default.png
+  - scope:
+      path: ""
+      type: posts
+    values:
+      layout: post
+
+# Files kept out of the published site. Setting this key REPLACES Jekyll's own
+# default list rather than adding to it, so the defaults it would have applied
+# (.sass-cache, .jekyll-cache, gemfiles, vendor/bundle) are repeated here.
+# Anything you add to the repo that is not content belongs in this list — a
+# missing entry is published to the live web, quietly.
+exclude:
+  - README.md
+  - THIRD_PARTY_NOTICES.md
+  - LICENSE
+  - Gemfile
+  - Gemfile.lock
+  - docs
+  - .devcontainer
+  - .editorconfig
+  - .github
+  - .ruby-version
+  - .bundle
+  - vendor
+  - node_modules
+  - package.json
+  - package-lock.json
+  - tests
+  - scripts
+  - _site-test
+  - _site-subpath
+  - .sass-cache
+  - .jekyll-cache
+  - gemfiles
+  - vendor/bundle
+  - vendor/cache
+  - vendor/gems
+  - vendor/ruby

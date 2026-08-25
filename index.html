@@ -1,0 +1,36 @@
+---
+layout: default
+---
+{%- include config.html -%}
+{%- comment -%}
+  posts_on_home has already been read, checked and clamped by config.html, so
+  the only number that can reach this page is a usable one. See that file for
+  what happens to 0, -10, 1000, "abc", an empty value or a list.
+{%- endcomment -%}
+<div class="home">
+  {%- comment %} The header wordmark is the visible site title; repeating
+  it here would stutter. The h1 stays for structure and screen readers. {% endcomment %}
+  <h1 class="visually-hidden">{{ q_title | escape }}</h1>
+  {%- if q_tagline != "" %}
+  <p class="tagline">{{ q_tagline | escape }}</p>
+  {%- endif %}
+  {%- if site.posts.size == 0 %}
+  <p class="empty">nothing here yet.</p>
+  {%- else %}
+  <ul class="post-list">
+    {%- for post in site.posts limit: q_posts_on_home %}
+    <li>
+      <a class="post-list-title" href="{{ post.url | relative_url }}">{{ post.title | escape }}</a>
+      <p class="post-list-meta">
+        <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: q_date_format | escape }}</time>
+        {%- assign _desc = post.description | append: "" | strip -%}
+        {%- if _desc != "" %} — {{ _desc | escape }}{% endif %}
+      </p>
+    </li>
+    {%- endfor %}
+  </ul>
+  {%- if site.posts.size > q_posts_on_home %}
+  <p class="all-posts"><a href="{{ '/archive/' | relative_url }}">all posts →</a></p>
+  {%- endif %}
+  {%- endif %}
+</div>

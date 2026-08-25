@@ -1,0 +1,71 @@
+{%- comment -%}
+  An interactive demo, inlined into the page at build time.
+
+  Usage, one line in a post:
+    {% include demo.html src="demos/hue-mixer.html" title="Hue mixer"
+       height="220" caption="Drag to change the swatch." %}
+
+  The demo itself is an ordinary HTML file under _includes/demos/ — a whole
+  document, with its own CSS and script, that the author can open in a browser
+  and work on normally. Nothing about it is special until it is included.
+
+  Why srcdoc rather than a file the browser fetches:
+    - It is inlined at build time, so the page makes no extra request and the
+      "no third-party runtime" promise holds by construction rather than by
+      policy.
+    - `sandbox="allow-scripts"` without `allow-same-origin` gives the frame an
+      opaque origin: its scripts cannot read this page, its cookies, or its
+      storage, and nothing it does can reach the site around it.
+    - Files under _includes/ never become URLs, so a demo cannot be crawled,
+      linked, or mistaken for a page.
+
+  With JavaScript off the frame still renders the demo's static initial state,
+  and the caption still says what it would have done — so write the demo so
+  its starting state means something, the same discipline alt text asks for.
+
+  Two things a demo cannot do, both by design: reach storage or cookies (the
+  opaque origin denies them, and the attempt throws), and navigate the page
+  around it. If a demo needs to remember something, keep it in a variable.
+
+  It also cannot see the site's theme toggle, so it follows the reader's system
+  setting instead. Give the demo `color-scheme: light dark` and it reads well
+  either way.
+
+  `height` is fixed, because an iframe cannot size itself to its content without
+  script on both sides. Give it headroom: if a reader has raised their default
+  text size the content grows, and a frame with slack absorbs that instead of
+  scrolling inside itself.
+
+  Add class="wide" on the figure by passing wide=true when the demo needs more
+  room than the reading measure.
+{%- endcomment -%}
+{%- comment -%}
+  Every parameter is treated as something a person typed, because it is.
+  `height: 220px` used to render as height:220pxpx; `height: "150\" onload=..."`
+  used to add an attribute to the iframe; `wide="false"` pulled the figure wide,
+  because every non-empty string is true in Liquid; an unescaped caption let a
+  <style> tag in a figcaption restyle the page; and a missing title shipped an
+  iframe with no accessible name.
+{%- endcomment -%}
+{%- assign _h_in = include.height | default: 220 | append: "" | strip | replace: "px", "" -%}
+{%- assign _h = _h_in | plus: 0 | round -%}
+{%- assign _h_canon = _h | append: "" -%}
+{%- if _h_in != _h_canon or _h < 40 -%}{%- assign _h = 220 -%}{%- endif -%}
+{%- if _h > 2000 -%}{%- assign _h = 2000 -%}{%- endif -%}
+{%- assign _title = include.title | default: "" | append: "" | strip -%}
+{%- if _title == "" -%}{%- assign _title = "demo" -%}{%- endif -%}
+{%- assign _wide = false -%}
+{%- if include.wide -%}
+  {%- assign _w = include.wide | append: "" | strip | downcase -%}
+  {%- assign _w_falsey = "false,no,off,0,none" | split: "," -%}
+  {%- unless _w == "" or _w_falsey contains _w -%}{%- assign _wide = true -%}{%- endunless -%}
+{%- endif -%}
+{%- capture _demo -%}{%- include {{ include.src }} -%}{%- endcapture -%}
+<figure class="demo{% if _wide %} wide{% endif %}">
+  <iframe class="demo-frame" title="{{ _title | escape }}" loading="lazy"
+    style="height:{{ _h }}px"
+    sandbox="allow-scripts" srcdoc="{{ _demo | escape }}"></iframe>
+  {%- if include.caption %}
+  <figcaption>{{ include.caption | escape }}</figcaption>
+  {%- endif %}
+</figure>

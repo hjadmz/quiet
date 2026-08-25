@@ -1,0 +1,39 @@
+{%- comment -%}
+  Answers one question: can Ruby's date parser be handed this value safely?
+
+  Usage: {% include valid_date.html value=page.last_modified_at %}
+         then read q_date_ok (true/false) and q_date_value (the trimmed text).
+
+  Four digits, a hyphen, two digits, a hyphen, two digits, and sane ranges. That
+  accepts what YAML produces for an unquoted `2026-09-01` (which stringifies with a
+  time and an offset) and what a person writes by hand; it rejects "not a date", "",
+  and "03/04/2026" — the last being the dangerous one, because Ruby parses it happily
+  as the fourth of March or the third of April depending on nothing the author can see.
+
+  The site check uses this to name posts whose date will be read differently than
+  written. The layouts deliberately do not: the metadata plugins read the raw value,
+  so a guard in a layout would only make the visible date disagree with the feed.
+{%- endcomment -%}
+{%- assign q_date_value = include.value | append: "" | strip -%}
+{%- assign q_date_ok = false -%}
+{%- if q_date_value.size >= 10 -%}
+  {%- assign _sep1 = q_date_value | slice: 4, 1 -%}
+  {%- assign _sep2 = q_date_value | slice: 7, 1 -%}
+  {%- if _sep1 == "-" and _sep2 == "-" -%}
+    {%- assign _yy = q_date_value | slice: 0, 4 -%}
+    {%- assign _mm = q_date_value | slice: 5, 2 -%}
+    {%- assign _dd = q_date_value | slice: 8, 2 -%}
+    {%- assign _all_digits = true -%}
+    {%- assign _digits = _yy | append: _mm | append: _dd | split: "" -%}
+    {%- for _c in _digits -%}
+      {%- unless "0123456789" contains _c -%}{%- assign _all_digits = false -%}{%- endunless -%}
+    {%- endfor -%}
+    {%- if _all_digits -%}
+      {%- assign _m = _mm | plus: 0 -%}
+      {%- assign _d = _dd | plus: 0 -%}
+      {%- if _m >= 1 and _m <= 12 and _d >= 1 and _d <= 31 -%}
+        {%- assign q_date_ok = true -%}
+      {%- endif -%}
+    {%- endif -%}
+  {%- endif -%}
+{%- endif -%}

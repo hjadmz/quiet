@@ -1,0 +1,51 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<script>{% include theme.js %}</script>
+{%- comment -%}
+  jekyll-seo-tag emits no <title> at all when site.title is blank, which leaves the
+  page with no name in the tab, in a bookmark, in search results, or to a screen
+  reader (WCAG 2.4.2). Take that one tag over and build it from the validated title,
+  which always has a value, in seo-tag's own "page | site" shape.
+{%- endcomment -%}
+<title>{% if page.title %}{{ page.title | escape }} | {{ q_title | escape }}{% else %}{{ q_title | escape }}{% if q_tagline != "" %} | {{ q_tagline | escape }}{% endif %}{% endif %}</title>
+{% seo title=false %}
+{% feed_meta %}
+{%- if page.noindex %}
+<meta name="robots" content="noindex, follow">
+{%- endif %}
+{%- comment -%} Fixed paths, not settings. Replacing three files is a smaller
+  ask than remembering three keys, and it is what the docs said to do anyway. {%- endcomment -%}
+<link rel="icon" href="{{ '/assets/img/favicon.svg' | relative_url }}" type="image/svg+xml">
+<link rel="alternate icon" href="{{ '/assets/img/favicon.ico' | relative_url }}" sizes="32x32">
+<link rel="apple-touch-icon" href="{{ '/assets/img/apple-touch-icon.png' | relative_url }}">
+<link rel="stylesheet" href="{{ '/assets/css/main.css' | relative_url }}?v={{ site.time | date: '%s' }}">
+{%- comment -%}
+  The accent is the one setting written into CSS. config.html has already rejected
+  anything that could restructure a stylesheet, any CSS keyword that is not a
+  color, and anything with transparency in it; the first @supports asks the
+  browser whether what remains is a real color, so an invented one is skipped and
+  the built-in accent stays rather than the links losing their color.
+
+  The second block fixes the lightness in each theme, keeping the author's hue and
+  chroma. That is what makes one setting enough: measured across 33 plausible
+  accents, 12 failed 4.5:1 on the light background and 21 of 25 failed on the dark
+  one when used raw; bounded this way, none of them fail either. The author picks
+  a colour, the stylesheet keeps it legible. A browser without relative colour
+  syntax skips the whole block and uses the raw value, which is what this template
+  did before — no worse than it was, better wherever it is supported.
+{%- endcomment -%}
+{%- if q_accent != "" %}
+{%- capture _accent_light %}oklch(from {{ q_accent }} clamp(0.3, l, 0.5) c h){% endcapture -%}
+{%- capture _accent_dark %}oklch(from {{ q_accent }} 0.72 calc(c * 0.8) h){% endcapture -%}
+<style>@supports (color:{{ q_accent }}){:root{--accent:{{ q_accent }}}@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--accent:{{ q_accent }}}}:root[data-theme=dark]{--accent:{{ q_accent }}}}@supports (color:{{ _accent_dark }}){:root{--accent:{{ _accent_light }}}@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--accent:{{ _accent_dark }}}}:root[data-theme=dark]{--accent:{{ _accent_dark }}}}</style>
+{%- endif %}
+{%- comment -%}
+  A config problem costs the reader nothing and must not be shown to them, but
+  the author needs to find out somehow. The count and the path travel in a
+  comment; the page at /site-check/ has the detail.
+{%- endcomment -%}
+{%- if q_problem_count > 0 %}
+<!-- quiet: {{ q_problem_count }} config problem{% if q_problem_count > 1 %}s{% endif %} — see {{ '/site-check/' | relative_url }} -->
+{%- endif %}
+{%- include analytics.html %}

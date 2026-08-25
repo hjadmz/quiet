@@ -1,0 +1,76 @@
+---
+layout: default
+---
+{%- include config.html -%}
+{%- comment %} Build-time transforms: wrap tables for horizontal scroll, make
+scrollable regions keyboard-focusable (tabindex), and drop the misplaced
+Digital Publishing roles that GitHub Pages' pinned kramdown still emits on
+footnote wrappers (axe flags them; the links retain their semantics). No JS.
+
+The table wrapper is focusable but not a landmark: `replace` cannot count, so
+every table got the same landmark name, and two tables in one post produced two
+indistinguishable rotor entries and a real axe violation. The <table> inside
+already gives assistive technology its structure. The code scroller keeps a
+name, as `role="group"` rather than `region`, so it explains its tab stop
+without joining the landmark list. {% endcomment %}
+{%- assign _content = content
+  | replace: '<table', '<div class="table-wrap" tabindex="0"><table'
+  | replace: '</table>', '</table></div>'
+  | replace: '<pre class="highlight"><code', '<pre class="highlight" tabindex="0" role="group" aria-label="code"><code'
+  | replace: ' role="doc-noteref"', ''
+  | replace: ' role="doc-endnote"', '' -%}
+<article class="post">
+  <header class="post-header">
+    <h1>{{ page.title | escape }}</h1>
+    <p class="meta">
+      <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: q_date_format | escape }}</time>
+      {%- if q_show_reading_time -%}
+        {%- assign _words = content | strip_html | number_of_words %} · {{ _words | plus: 219 | divided_by: 220 | at_least: 1 }} min read
+      {%- endif -%}
+      {%- comment %} last_modified_at also updates the feed, sitemap, and JSON-LD via
+      the whitelisted plugins, which read the raw value. Deliberately unguarded: a
+      shape check here would only make the visible date disagree with the metadata,
+      since the plugins would still use their own reading. One reading, reported on
+      /site-check/ when it looks ambiguous. {% endcomment %}
+      {%- assign _upd = page.last_modified_at | default: page.updated -%}
+      {%- if _upd %} · updated <time datetime="{{ _upd | date_to_xmlschema }}">{{ _upd | date: q_date_format | escape }}</time>
+      {%- endif %}
+    </p>
+  </header>
+  {%- comment -%} `toc: "false"` in front matter is a string, and every non-empty
+  string is true in Liquid — the same trap as the config switches, read the same way. {%- endcomment -%}
+  {%- assign _toc = false -%}
+  {%- if page.toc == true -%}
+    {%- assign _toc = true -%}
+  {%- elsif page.toc and page.toc != false -%}
+    {%- assign _toc_v = page.toc | append: "" | strip | downcase -%}
+    {%- assign _toc_falsey = "false,no,off,0,none,disabled" | split: "," -%}
+    {%- unless _toc_v == "" or _toc_falsey contains _toc_v -%}{%- assign _toc = true -%}{%- endunless -%}
+  {%- endif -%}
+  {%- if _toc %}
+  {% include toc.html html=_content %}
+  {%- endif %}
+  <div class="post-content">
+    {% include anchor_headings.html html=_content %}
+  </div>
+</article>
+{%- comment -%}
+  The only way to answer a post. There are no comments, no reactions and no
+  counter, all of which need a server or someone else's; what is left is the
+  thing people used before any of those existed. It appears only when the author
+  has set an address, carries the post's title so a reply arrives with context,
+  and asks a question rather than issuing a call to action.
+{%- endcomment -%}
+{%- if q_email != "" %}
+<p class="post-reply">thoughts on this? <a href="mailto:{{ q_email | escape }}?subject={{ page.title | escape | cgi_escape }}">reply by email</a></p>
+{%- endif %}
+{%- if page.previous or page.next %}
+<nav class="post-nav" aria-label="more posts">
+  {%- if page.next %}
+  <a class="post-nav-newer" href="{{ page.next.url | relative_url }}"><span class="post-nav-label">← newer</span>{{ page.next.title | escape }}</a>
+  {%- endif %}
+  {%- if page.previous %}
+  <a class="post-nav-older" href="{{ page.previous.url | relative_url }}"><span class="post-nav-label">older →</span>{{ page.previous.title | escape }}</a>
+  {%- endif %}
+</nav>
+{%- endif %}

@@ -1,0 +1,48 @@
+{% comment %}
+  Injects a quiet "#" permalink into every h2–h4 that kramdown gave an id.
+  Pure Liquid, runs at build time, no JavaScript.
+  Usage: {% include anchor_headings.html html=content %}
+  Safe around code blocks: Rouge HTML-escapes code, so literal "</h2>"
+  text inside a snippet can never match here.
+
+  The anchor is hidden from assistive technology, and that is the point of it.
+  An accessible name on a descendant is folded into its ancestor's name, so a
+  labelled anchor made every heading announce itself twice — "A table permalink
+  to A table" — which doubles the length of the one thing screen reader users
+  navigate an article by. It is a pointer affordance for grabbing a section's
+  URL; the heading's id already gives that URL to everyone else, and the
+  browser's own address bar carries it after a click. tabindex="-1" travels
+  with aria-hidden so the hidden element is never also a tab stop.
+{% endcomment %}
+{%- assign _out = include.html -%}
+{%- assign _levels = "2|3|4" | split: "|" -%}
+{%- for _lv in _levels -%}
+  {%- capture _open %}<h{{ _lv }}{% endcapture -%}
+  {%- capture _close %}</h{{ _lv }}>{% endcapture -%}
+  {%- assign _parts = _out | split: _open -%}
+  {%- if _parts.size > 1 -%}
+    {%- capture _rebuilt -%}
+      {{- _parts[0] -}}
+      {%- for _p in _parts offset: 1 -%}
+        {%- assign _tag = _p | split: '>' | first -%}
+        {%- assign _id_parts = _tag | split: ' id="' -%}
+        {%- if _id_parts.size > 1 -%}
+          {%- assign _id = _id_parts[1] | split: '"' | first -%}
+          {%- assign _segs = _p | split: _close -%}
+          {{- _open -}}{{- _tag -}}>
+          {%- for _s in _segs -%}
+            {%- if forloop.first -%}
+              {{- _s | remove_first: _tag | remove_first: '>' -}}<a class="anchor" href="#{{ _id }}" aria-hidden="true" tabindex="-1">#</a>{{- _close -}}
+            {%- else -%}
+              {{- _s -}}{%- unless forloop.last -%}{{- _close -}}{%- endunless -%}
+            {%- endif -%}
+          {%- endfor -%}
+        {%- else -%}
+          {{- _open -}}{{- _p -}}
+        {%- endif -%}
+      {%- endfor -%}
+    {%- endcapture -%}
+    {%- assign _out = _rebuilt -%}
+  {%- endif -%}
+{%- endfor -%}
+{{ _out }}

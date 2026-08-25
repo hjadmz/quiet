@@ -1,0 +1,34 @@
+{%- comment -%}
+  The one place a third-party request is allowed into these pages, and it is
+  empty on purpose.
+
+  quiet makes no outside request of any kind. If you decide you need analytics,
+  paste the provider's snippet between the two marker comments at the bottom of
+  this file — inside them, not inside this note.
+
+  The markers are not decoration. tests/site-smoke.cjs forbids external script,
+  iframe, image, media, stylesheet and preload URLs everywhere in the generated
+  site, and allows them only between those two comments, in <head>. That keeps
+  the exception one visible, deliberate hole rather than a general permission.
+
+  Two things to know before you paste:
+
+  - This file is HTML, and everything in it is real. A missing quote here is a
+    missing quote in the <head> of every page, which can render the whole site
+    blank. Check one page after you commit.
+  - Liquid runs over this file. If your snippet contains double curly braces, or
+    curly-percent tags — some providers use them as placeholders — Liquid will
+    evaluate them and quietly emit nothing where the value should be. Wrap the
+    snippet in a raw block (curly-percent raw … curly-percent endraw) to stop it.
+    That is also why this note spells those characters out instead of printing
+    them: Liquid reads its own syntax even inside a comment.
+
+  Analytics is a claim on your readers, not just on your curiosity. Have a
+  question you actually intend to answer, and check whether your host's own logs
+  answer it already.
+
+  Example, GoatCounter, which is cookieless:
+    <script data-goatcounter="https://CODE.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+{%- endcomment -%}
+<!-- quiet:analytics:start -->
+<!-- quiet:analytics:end -->

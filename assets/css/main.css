@@ -1,0 +1,609 @@
+/* quiet — one stylesheet.
+   Type, space, fonts, and radius live in the first :root block.
+   Colors are authored in OKLCH inside the @supports blocks (edit
+   those); the adjacent hex values are fallbacks for pre-2023 browsers
+   — keep them in sync. Dark values appear twice on purpose: once for
+   the system preference, once for the forced data-theme toggle.
+   Text colors are measured for contrast: body ≥ 7:1, other text ≥ 4.5:1. */
+
+/* ---------- tokens ---------- */
+:root {
+  color-scheme: light dark;
+
+  /* type scale — only the steps actually used */
+  --fs-meta: 0.875rem;
+  --fs-h3: 1.2rem;
+  --fs-h2: 1.44rem;
+  --fs-h1: 1.7rem;
+
+  /* space — 8px scale */
+  --s1: 0.25rem; --s2: 0.5rem; --s3: 0.75rem; --s4: 1rem;
+  --s5: 1.5rem;  --s6: 2rem;   --s7: 3rem;    --s8: 4rem;
+
+  --radius: 4px;
+  --measure: 36rem;
+  --gutter: var(--s5);
+  /* How much of the accent the link underline carries. Softening the underline
+     drops noise in light mode, where accent already separates from body text at
+     3.16:1. In dark mode that separation is 1.83:1 — the underline is doing
+     nearly all the work of saying "link", so it keeps closer to full ink. */
+  --underline-ink: 55%;
+
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-serif: Charter, "Bitstream Charter", "Iowan Old Style", Georgia, serif;
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace;
+
+  /* light */
+  --bg: #faf8f5;
+  --fg: #1c1a18;          /* 16.4:1 on bg */
+  --fg-muted: #5a5853;    /*  6.7:1 on bg */
+  --surface: #f1f0ed;
+  --border: #dad9d6;
+  --accent: #386ca0;      /*  5.2:1 on bg */
+  --focus: var(--accent);
+  --code-kw: #4c4f86;
+  --code-str: #286037;
+  --code-num: #85491a;
+}
+@supports (color: oklch(50% 0 0)) {
+  :root {
+    --bg: oklch(98% 0.004 85);
+    --fg: oklch(22% 0.005 85);
+    --fg-muted: oklch(46% 0.008 85);
+    --surface: oklch(95.5% 0.004 85);
+    --border: oklch(88.5% 0.004 85);
+    --accent: oklch(52% 0.1 250);
+    --code-kw: oklch(45% 0.09 280);
+    --code-str: oklch(44% 0.09 150);
+    --code-num: oklch(47% 0.1 55);
+  }
+}
+
+/* dark — system preference (unless the toggle forces light) */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --underline-ink: 80%;
+    --bg: #121416;
+    --fg: #dcdee1;        /* 13.7:1 on bg */
+    --fg-muted: #9b9fa3;  /*  6.9:1 on bg */
+    --surface: #1c1e21;
+    --border: #313336;
+    --accent: #7ea9d5;    /*  7.5:1 on bg */
+    --code-kw: #acb1f0;
+    --code-str: #88ca95;
+    --code-num: #e5a880;
+  }
+  @supports (color: oklch(50% 0 0)) {
+    :root:not([data-theme="light"]) {
+      --bg: oklch(19% 0.005 260);
+      --fg: oklch(90% 0.004 260);
+      --fg-muted: oklch(70% 0.008 260);
+      --surface: oklch(23.5% 0.006 260);
+      --border: oklch(32% 0.006 260);
+      --accent: oklch(72% 0.08 250);
+      --code-kw: oklch(78% 0.09 280);
+      --code-str: oklch(78% 0.1 150);
+      --code-num: oklch(78% 0.09 55);
+    }
+  }
+}
+/* dark — forced by the toggle */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --underline-ink: 80%;
+  --bg: #121416;
+  --fg: #dcdee1;
+  --fg-muted: #9b9fa3;
+  --surface: #1c1e21;
+  --border: #313336;
+  --accent: #7ea9d5;
+  --code-kw: #acb1f0;
+  --code-str: #88ca95;
+  --code-num: #e5a880;
+}
+@supports (color: oklch(50% 0 0)) {
+  :root[data-theme="dark"] {
+    --bg: oklch(19% 0.005 260);
+    --fg: oklch(90% 0.004 260);
+    --fg-muted: oklch(70% 0.008 260);
+    --surface: oklch(23.5% 0.006 260);
+    --border: oklch(32% 0.006 260);
+    --accent: oklch(72% 0.08 250);
+    --code-kw: oklch(78% 0.09 280);
+    --code-str: oklch(78% 0.1 150);
+    --code-num: oklch(78% 0.09 55);
+  }
+}
+:root[data-theme="light"] { color-scheme: light; }
+
+/* ---------- base ---------- */
+* { box-sizing: border-box; }
+
+html {
+  font-size: clamp(1.0625rem, 1rem + 0.35vw, 1.1875rem); /* 17 → 19px */
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  line-height: 1.6;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+body.font-serif { font-family: var(--font-serif); }
+
+main, .site-header nav, .site-footer {
+  width: 100%;
+  max-width: var(--measure);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+/* On the narrowest phones (folded foldables, older small screens) reading
+   width is the scarce resource — give the text back 16px. */
+@media (max-width: 22.5rem) {
+  :root { --gutter: var(--s4); }
+}
+
+/* Display cutouts. On body, not on the column, and physical on purpose.
+   Why: docs/DESIGN-PRINCIPLES.md, "environments this is verified against". */
+body {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+/* One spacing owns the content-to-footer distance — main padding. The footer
+   adds no top margin, so the two never compound into an arbitrary total. */
+main { flex: 1 0 auto; padding-top: var(--s6); padding-bottom: var(--s7); }
+
+::selection { background: rgba(56, 108, 160, 0.25); }
+@supports (background: color-mix(in srgb, red 50%, blue)) {
+  ::selection { background: color-mix(in srgb, var(--accent) 25%, transparent); }
+}
+
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+/* The skip link moves focus here. Suppressing the ring entirely and calling the
+   scroll the indicator fails on any page shorter than the window, where nothing
+   scrolls and nothing happens. Drawn inside the column so it marks the
+   destination rather than framing the page, and only for :focus-visible, so a
+   click landing on main (Safari focuses tabindex="-1") does not ring it. */
+main:focus:not(:focus-visible) { outline: none; }
+main:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
+
+a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.15em;
+}
+a:hover { text-decoration-thickness: 2px; }
+/* softened underlines: the affordance stays, the noise drops;
+   full strength returns on hover/focus. Older browsers keep solid. */
+@supports (text-decoration-color: color-mix(in srgb, red 50%, blue)) {
+  a { text-decoration-color: color-mix(in srgb, var(--accent) var(--underline-ink), transparent); }
+  a:hover, a:focus-visible { text-decoration-color: var(--accent); }
+}
+
+a, .copy-btn, .theme-toggle, .anchor {
+  transition: color 150ms ease-out, background-color 150ms ease-out,
+    border-color 150ms ease-out, opacity 150ms ease-out;
+}
+
+h1, h2, h3, h4 {
+  font-weight: 600;
+  line-height: 1.2;
+  text-wrap: balance;
+}
+h1 { font-size: var(--fs-h1); letter-spacing: -0.01em; line-height: 1.15; margin: 0; }
+h2 { font-size: var(--fs-h2); letter-spacing: -0.01em; }
+h3 { font-size: var(--fs-h3); }
+h4 { font-size: 1rem; }
+
+p { text-wrap: pretty; }
+time { font-variant-numeric: tabular-nums; }
+
+/* Every kind of replaced content, not just <img>. One <video width="1280"> or a
+   bare <iframe> otherwise sets the width of the whole document: measured 1,417px
+   of content inside a 280px viewport, scrolling the entire page sideways at every
+   width up to 1280. The single-column promise has to hold for what authors embed,
+   not only for what the template ships. */
+img, svg, video, iframe, canvas, object, embed { max-width: 100%; }
+img, video { height: auto; border-radius: var(--radius); }
+video, iframe { display: block; width: 100%; border: 0; }
+/* A block image inside a figure so the caption's distance is the token that sets
+   it, rather than the token plus an inline descender strut. */
+figure > img, figure > svg { display: block; }
+
+.visually-hidden, .skip-link:not(:focus) {
+  position: absolute; width: 1px; height: 1px; margin: -1px;
+  overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+}
+
+/* ---------- chrome ---------- */
+/* Clipped rather than parked off-screen (an offset that is harmless in LTR adds
+   ~17,000px of sideways scroll in RTL), and the only element positioned against
+   the physical viewport, so the only one a cutout can reach. Plain offset first,
+   max() second, so a browser without max() still shows a reachable link.
+   Why: docs/DESIGN-PRINCIPLES.md, "what a reading surface owes an RTL language". */
+.skip-link:focus {
+  position: absolute; z-index: 1;
+  inset-inline-start: var(--s4);
+  inset-inline-start: max(var(--s4), env(safe-area-inset-left), env(safe-area-inset-right));
+  top: var(--s4);
+  top: max(var(--s4), env(safe-area-inset-top));
+  background: var(--bg); padding: var(--s2) var(--s4);
+  border: 1px solid var(--border); border-radius: var(--radius);
+}
+
+.site-header nav {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--s3);
+  padding-top: var(--s3); padding-bottom: var(--s3);
+}
+.wordmark { font-size: 1rem; font-weight: 600; color: var(--fg); text-decoration: none; }
+.wordmark:hover { text-decoration: underline; text-decoration-thickness: 1px; }
+.site-links { display: flex; align-items: center; gap: var(--s3); font-size: var(--fs-meta); }
+.wordmark { min-width: 0; overflow-wrap: anywhere; }
+.site-links { flex: 0 0 auto; }
+/* the page you're on is a location, not a link: label weight, full ink */
+.site-links a[aria-current="page"] { color: var(--fg); font-weight: 600; text-decoration: none; }
+
+/* Real hit areas do not overlap when the viewport is narrow. */
+.wordmark, .site-links a, .footer-links a, .footer-links .theme-toggle {
+  display: inline-flex; align-items: center; min-height: 44px;
+}
+.site-links a, .footer-links a { padding-inline: 0.125rem; }
+
+.theme-toggle {
+  font: inherit; font-size: var(--fs-meta); color: var(--fg-muted);
+  background: none; border: 0; padding: 0; cursor: pointer;
+  position: relative;
+  text-decoration: underline; text-decoration-thickness: 1px;
+  text-underline-offset: 0.15em;
+  white-space: nowrap; /* never break "theme: system" mid-label */
+}
+.theme-toggle:hover { color: var(--fg); text-decoration-thickness: 2px; }
+@supports (text-decoration-color: color-mix(in srgb, red 50%, blue)) {
+  .theme-toggle { text-decoration-color: color-mix(in srgb, var(--fg-muted) 55%, transparent); }
+  .theme-toggle:hover, .theme-toggle:focus-visible { text-decoration-color: var(--fg); }
+}
+.theme-toggle { display: inline-flex; align-items: center; gap: 0.25em; }
+/* One icon visible at a time, chosen by the state the document is actually in.
+   html:not([data-theme]) is the system case — theme.js removes the attribute
+   rather than setting it to "system", so there is no [data-theme="system"] rule
+   to write; it could never match. */
+.theme-icon { display: none; width: 1em; height: 1em; vertical-align: middle; }
+html:not([data-theme]) .theme-system,
+html[data-theme="light"] .theme-light,
+html[data-theme="dark"] .theme-dark { display: inline; }
+.theme-text { font-size: var(--fs-meta); }
+/* The isolated copy control can use an invisible extension safely. */
+.copy-btn::after {
+  content: ""; position: absolute; inset: -12px;
+}
+html:not(.js) .theme-toggle { display: none; }
+
+/* The rule matters: on a page too short to scroll, the leftover window space
+   sits ABOVE this line, so it reads as the page bottom band rather than as a
+   random gap that changes with the window height. */
+.site-footer {
+  flex-shrink: 0;
+  border-top: 1px solid var(--border);
+  padding-top: var(--s5); padding-bottom: var(--s6);
+  font-size: var(--fs-meta); color: var(--fg-muted);
+}
+.footer-links {
+  display: flex; align-items: center; flex-wrap: wrap;
+  gap: 0 var(--s4); margin: 0;
+}
+.footer-meta { margin: var(--s2) 0 0; }
+
+/* ---------- home & archive ---------- */
+.tagline { color: var(--fg-muted); margin: 0; }
+.empty { color: var(--fg-muted); }
+
+.post-list { list-style: none; margin: var(--s7) 0 0; padding: 0; }
+/* Weight, not size: a post title is the thing to pick on this page, and it was
+   rendering at the same 19px/400 as body text — grouped correctly by spacing,
+   but with no rank at all. Weight leaves the measured 9px/29px grouping ratio
+   untouched, which a size step would not. */
+.post-list-title { font-weight: 600; }
+.post-list li + li { margin-top: var(--s5); }
+.post-list-meta { margin: var(--s1) 0 0; font-size: var(--fs-meta); color: var(--fg-muted); }
+.all-posts { margin: var(--s6) 0 0; }
+
+.archive h1 { margin-bottom: var(--s6); }
+.archive-year h2 { font-size: 1rem; margin: var(--s6) 0 var(--s3); }
+.archive-list { list-style: none; margin: 0; padding: 0; }
+.archive-list li { padding: var(--s2) 0; }
+.archive-entry {
+  display: flex; justify-content: space-between; align-items: baseline;
+  gap: var(--s4); margin: 0;
+}
+.archive-desc { margin: var(--s1) 0 0; font-size: var(--fs-meta); color: var(--fg-muted); }
+.archive-list time { color: var(--fg-muted); font-size: var(--fs-meta); white-space: nowrap; }
+
+/* Markdown pages (about, 404) get the same title-to-content rhythm as posts,
+   where .post-header supplies it. Without this the first line sits flush
+   against the heading — measured 0px on /about/ against 34px on a post. */
+.page h1 { margin-bottom: var(--s6); }
+
+/* ---------- post ---------- */
+.post-header { margin-bottom: var(--s6); }
+.meta { margin: var(--s2) 0 0; font-size: var(--fs-meta); color: var(--fg-muted); }
+
+/* Sits above the adjacent-post links because it is about the post just read,
+   not about the next one. Muted, because it is an offer and not a demand. */
+.post-reply { margin-top: var(--s7); font-size: var(--fs-meta); color: var(--fg-muted); }
+.post-reply + .post-nav { margin-top: var(--s5); }
+
+.post-nav {
+  display: flex; justify-content: space-between; flex-wrap: wrap; gap: var(--s4);
+  margin-top: var(--s8); padding-top: var(--s5); border-top: 1px solid var(--border);
+}
+/* inline-block stops the link's underline from painting through the
+   label — only the title reads as the link */
+.post-nav-label {
+  display: inline-block; width: 100%;
+  font-size: var(--fs-meta); color: var(--fg-muted); margin-bottom: var(--s1);
+}
+.post-nav-older { margin-inline-start: auto; text-align: end; }
+/* narrow screens: a quiet left-aligned stack instead of a scattered wrap */
+@media (max-width: 36rem) {
+  .post-nav { flex-direction: column; gap: var(--s5); }
+  .post-nav-older { margin-inline-start: 0; text-align: start; }
+}
+
+/* ---------- prose ---------- */
+/* One prose rhythm, wherever prose lives — .post-content on posts and
+   Markdown pages, .page on hand-written pages like 404. Without the second
+   selector those paragraphs fall back to the browser default (1em) and sit
+   measurably tighter than every other paragraph on the site. */
+.post-content > *, .page > * { margin-block: 0; }
+.post-content > * + *, .page > * + * { margin-block-start: 1.35em; }
+/* Nested prose containers too. Without this a paragraph inside a blockquote,
+   a list item or a footnote keeps the browser default 1em margin, which
+   collapses outward and silently overrides the spacing set around it —
+   measured as a 1.0rem gap under one heading where every other was 0.6rem. */
+.post-content blockquote > *, .post-content li > * { margin-block: 0; }
+.post-content blockquote > * + *, .post-content li > * + * { margin-block-start: 1.35em; }
+.post-content > h2, .post-content > h3, .post-content > h4 { margin-block-start: 2.2em; }
+.post-content > h2 + *, .post-content > h3 + *, .post-content > h4 + * { margin-block-start: 0.6em; }
+.post-content > hr, .post-content > hr + * { margin-block-start: var(--s7); }
+
+/* Writers paste long URLs and identifiers. Without this, one unbreakable
+   string sets the width of the whole page: measured 882px of content inside a
+   323px column, which scrolls the entire document sideways on a phone.
+   Code blocks are excluded on purpose — they scroll in their own box. */
+.post-content, .post-list-title, .post-list-meta, .archive-list a,
+.post-nav a, .toc a, .post-header h1, .page h1, .tagline,
+.footer-meta { overflow-wrap: anywhere; }
+.post-content pre { overflow-wrap: normal; }
+
+h2[id], h3[id], h4[id], sup[id], .footnotes li[id] { scroll-margin-top: var(--s6); }
+
+.anchor { margin-inline-start: var(--s2); font-weight: 400; text-decoration: none; opacity: 0; }
+h2:hover .anchor, h3:hover .anchor, h4:hover .anchor,
+.anchor:hover, .anchor:focus { opacity: 1; }
+@media (hover: none) { .anchor { opacity: 1; } }
+
+blockquote {
+  margin: 0; padding-inline-start: var(--s4);
+  border-inline-start: 2px solid var(--border); color: var(--fg-muted);
+}
+
+hr { border: 0; border-top: 1px solid var(--border); }
+
+/* The browser default is pure #ff0 — on the dark theme, the loudest thing on the
+   site. The accent at low strength marks the phrase without shouting. */
+mark { background: rgba(56, 108, 160, 0.22); color: inherit; }
+@supports (background: color-mix(in srgb, red 50%, blue)) {
+  mark { background: color-mix(in srgb, var(--accent) 22%, transparent); }
+}
+
+/* A task item carries its own checkbox, so the bullet is a second marker for the
+   same thing. Kramdown gives no class, so target the shape. */
+.post-content li:has(> input[type="checkbox"]) { list-style: none; margin-inline-start: -1.1em; }
+.post-content li > input[type="checkbox"] { margin-inline-end: 0.4em; }
+
+ul, ol { padding-inline-start: var(--s5); }
+li + li { margin-top: var(--s1); }
+
+figure { margin: 0; }
+figcaption { font-size: var(--fs-meta); color: var(--fg-muted); margin-top: var(--s2); }
+
+/* The one way out of the measure, opt-in per figure. Capped at 52rem so an
+   ultrawide does not stretch it; the gutter subtraction keeps a classic
+   scrollbar from turning 100vw into overflow.
+   Why: docs/DESIGN-PRINCIPLES.md, "showing work, not just describing it". */
+.post-content > .wide {
+  width: min(52rem, 100vw - 2 * var(--gutter));
+  margin-inline: auto;
+  position: relative; left: 50%; transform: translateX(-50%);
+}
+/* The figure gets the extra width; its caption does not. A caption is still
+   prose, and 52rem is past the measure the rest of the page is set to. */
+.post-content > .wide figcaption { max-width: var(--measure); }
+
+/* A demo is a figure whose content runs. The frame is inlined at build time and
+   sandboxed without allow-same-origin, so it shares no origin with the page. */
+.demo-frame { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
+
+.table-wrap { overflow-x: auto; }
+/* Without this the table shrinks to fit instead of overflowing, so the scroll
+   box never scrolls — it had been in place and doing nothing the whole time.
+   max-content is the table's own width, so small tables stay small. */
+.table-wrap table { min-width: max-content; }
+/* Code blocks are the only place a reader scrolls sideways, and overscrolling one
+   chains to the document, which a trackpad or edge swipe reads as "go back" —
+   navigating away mid-read. Unsupported browsers behave as before. */
+/* Every pre, not just the highlighted ones. A writer who pastes terminal output
+   into a raw <pre> gets no Rouge wrapper and no scroll box, and one long line
+   then scrolls the whole document sideways — measured 1,296px of content in a
+   280px viewport. */
+pre { overflow-x: auto; max-width: 100%; }
+.table-wrap, pre { overscroll-behavior-x: contain; }
+table { border-collapse: collapse; font-variant-numeric: tabular-nums; }
+th, td { padding: var(--s2); padding-inline: 0 var(--s5); text-align: start; border-bottom: 1px solid var(--border); }
+th { font-weight: 600; }
+
+/* ---------- toc ---------- */
+/* Spacing and one rule, like the rest of the page — not the design's only
+   bordered box, which was also its only ad-shaped silhouette.
+   Why: docs/DESIGN-PRINCIPLES.md, "a map of the post, not of the page". */
+.toc {
+  border-block: 1px solid var(--border);
+  padding-block: var(--s3); margin-bottom: var(--s6);
+  font-size: var(--fs-meta);
+}
+.toc-title { margin: 0 0 var(--s2); font-weight: 600; color: var(--fg-muted); }
+.toc ul { list-style: none; margin: 0; padding: 0; }
+/* Measured: at 280-390px, where entries wrap, the gap between two entries was
+   4.3px against 6.5px between the two lines of one entry — grouping backwards,
+   so a six-item list read as eleven undifferentiated lines. This puts the three
+   levels in the right order, the way .post-list already is. */
+.toc li { margin: var(--s2) 0; line-height: 1.4; }
+.toc a { color: var(--fg); }
+@supports (text-decoration-color: color-mix(in srgb, red 50%, blue)) {
+  .toc a { text-decoration-color: var(--border); }
+}
+.toc a:hover, .toc a:focus-visible { color: var(--accent); text-decoration-color: var(--accent); }
+
+/* ---------- footnotes ---------- */
+.footnotes {
+  margin-top: var(--s7); padding-top: var(--s5);
+  border-top: 1px solid var(--border);
+  font-size: var(--fs-meta); color: var(--fg-muted);
+}
+.footnote, .reversefootnote { text-decoration-thickness: 1px; }
+li:target, sup:target { background: rgba(56, 108, 160, 0.14); border-radius: 2px; }
+@supports (background: color-mix(in srgb, red 50%, blue)) {
+  li:target, sup:target { background: color-mix(in srgb, var(--accent) 14%, transparent); }
+}
+
+/* ---------- code ---------- */
+/* Code reads left-to-right even inside an RTL document; isolate stops the
+   surrounding direction from reordering operators and punctuation. */
+code, pre { font-family: var(--font-mono); direction: ltr; unicode-bidi: isolate; }
+:not(pre) > code {
+  font-size: 0.9em; background: var(--surface);
+  padding: 0.1em 0.35em; border-radius: var(--radius);
+}
+div.highlighter-rouge { position: relative; background: var(--surface); border-radius: var(--radius); }
+pre.highlight {
+  margin: 0; padding: var(--s4) var(--s5); overflow-x: auto;
+  font-size: var(--fs-meta); line-height: 1.5; tab-size: 2;
+}
+pre.highlight code { font-size: 1em; }
+
+.copy-btn {
+  position: absolute; top: var(--s2); inset-inline-end: var(--s2);
+  font-family: var(--font-sans); font-size: 0.75rem; color: var(--fg-muted);
+  background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: var(--s1) var(--s3); cursor: pointer;
+}
+.copy-btn:hover { color: var(--fg); border-color: var(--fg-muted); }
+/* When JS adds the button, clear the first code line out from under it, in the
+   button's own units (0.75rem text plus --s1 padding, ~1.5rem tall). A pixel
+   constant stops tracking the moment a reader raises their browser's default
+   text size, and the button then covers the first line of every snippet. */
+div.highlighter-rouge.has-copy pre.highlight { padding-top: calc(var(--s2) * 2 + 1.5rem); }
+
+/* rouge tokens — one restrained palette per theme, all ≥ 4.5:1 */
+.highlight .c, .highlight .c1, .highlight .cm, .highlight .cs, .highlight .cp
+  { color: var(--fg-muted); font-style: italic; }
+.highlight .k, .highlight .kd, .highlight .kn, .highlight .kp, .highlight .kr,
+.highlight .kt, .highlight .kv, .highlight .nt
+  { color: var(--code-kw); }
+.highlight .s, .highlight .s1, .highlight .s2, .highlight .sb, .highlight .sc,
+.highlight .dl, .highlight .sd, .highlight .se, .highlight .sh, .highlight .si,
+.highlight .sx, .highlight .sr, .highlight .ss
+  { color: var(--code-str); }
+.highlight .m, .highlight .mi, .highlight .mf, .highlight .mh, .highlight .mo,
+.highlight .mb, .highlight .mx, .highlight .il, .highlight .kc, .highlight .no
+  { color: var(--code-num); }
+.highlight .err { color: inherit; background: transparent; }
+
+/* ---------- config check ---------- */
+/* The unlinked author-facing page at /config-check/. It borrows the site's
+   tokens rather than introducing a palette: a diagnostic that looked like a
+   different product would be one more thing to trust. */
+.config-verdict {
+  border-inline-start: 2px solid var(--border);
+  padding-inline-start: var(--s4);
+}
+.config-verdict-warn { border-inline-start-color: var(--accent); }
+.config-problems { padding-inline-start: var(--s5); }
+.config-problems li + li { margin-top: var(--s3); }
+.config-unset { color: var(--fg-muted); }
+/* Local-preview only. Marked out with the accent rather than a warning colour:
+   the site is working, one setting is not being used as written. */
+.config-notice { border-inline-start: 2px solid var(--accent); padding-inline-start: var(--s3); }
+.config-notice .config-unset { display: block; }
+.config-swatch {
+  display: inline-block; width: 0.75em; height: 0.75em;
+  border: 1px solid var(--border); border-radius: 2px;
+  vertical-align: baseline;
+}
+
+/* ---------- motion ---------- */
+/* Page-to-page navigation cross-fades (View Transitions, CSS-only).
+   The header holds still while content transitions — motion as
+   continuity, never decoration. Browsers without support, and anyone
+   preferring reduced motion, get instant navigation as before. */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition { navigation: auto; }
+  ::view-transition-old(root), ::view-transition-new(root) {
+    animation-duration: 150ms;
+    animation-timing-function: ease-out;
+  }
+  .site-header { view-transition-name: site-header; }
+}
+
+/* ---------- preference modes ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after { transition: none !important; animation: none !important; }
+}
+
+@media (prefers-contrast: more) {
+  /* :not() keeps specificity (0,2,0) so this wins in every theme state */
+  :root, :root:not([data-theme="light"]) { --fg-muted: var(--fg); --border: var(--fg); }
+  /* the softened underline is a low-contrast affordance; restore it fully */
+  a { text-decoration-color: var(--accent); }
+  /* the 25% tint selection is invisible at this contrast; swap the pair
+     so the selection is unambiguous */
+  ::selection { background: var(--accent); color: var(--bg); }
+}
+
+@media (forced-colors: active) {
+  .copy-btn, .theme-toggle { border: 1px solid ButtonText; }
+  .anchor { opacity: 1; }
+  li:target, sup:target { outline: 2px solid Highlight; outline-offset: 2px; }
+}
+
+/* ---------- print ---------- */
+@media print {
+  /* A reader who forced dark mode must not print dark ink tokens onto white
+     paper. Match the (0,2,0) specificity of the dark blocks so this wins. */
+  :root, :root:not([data-theme="light"]), :root[data-theme="dark"] {
+    /* color-scheme must go back to light too: a dark scheme paints the root
+       canvas, which then blocks the body background from propagating and
+       frames the page in black. */
+    color-scheme: light;
+    --bg: #fff; --fg: #000; --fg-muted: #333;
+    --surface: #fff; --border: #999; --accent: #000;
+  }
+  html { background: #fff; }
+
+  .site-header, .site-footer, .skip-link, .theme-toggle,
+  .copy-btn, .post-nav, .toc, .anchor { display: none; }
+  body { background: #fff; color: #000; display: block; }
+  main { max-width: 100%; padding: 0; }
+  a { color: inherit; }
+  .post-content a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 0.875em; }
+  pre.highlight { white-space: pre-wrap; word-break: break-word; border: 1px solid #ccc; }
+}

@@ -1,0 +1,18 @@
+{%- include config.html -%}
+<!DOCTYPE html>
+<html lang="{{ q_lang | escape }}" dir="{{ q_dir }}"{% if q_theme_default != 'system' %} data-theme="{{ q_theme_default | escape }}"{% endif %}>
+<head>
+  {%- include head.html -%}
+</head>
+<body class="font-{{ q_body_font | escape }}">
+  <a class="skip-link" href="#main">skip to content</a>
+  {%- include nav.html %}
+  <main id="main" tabindex="-1">
+    {{ content }}
+  </main>
+  {%- include footer.html %}
+  {%- if content contains 'class="highlight"' %}
+  <script src="{{ '/assets/js/copy.js' | relative_url }}?v={{ site.time | date: '%s' }}" defer></script>
+  {%- endif %}
+</body>
+</html>

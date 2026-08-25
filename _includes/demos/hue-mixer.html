@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Hue mixer</title>
+<style>
+  /* A demo cannot see the site's theme toggle, so it follows the reader's
+     system setting. Declaring both keeps it readable either way. */
+  :root { color-scheme: light dark; }
+  /* The frame's height is fixed by the include, so fill it and centre: whatever
+     slack the author left then reads as deliberate rather than bottom-heavy. */
+  html, body { height: 100%; }
+  body {
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    margin: 0; padding: 1rem;
+    box-sizing: border-box;
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .row { display: flex; align-items: center; gap: 0.75rem; }
+  input { flex: 1; min-width: 0; }
+  output { font-variant-numeric: tabular-nums; min-width: 3ch; }
+  #swatch { height: 4rem; margin-top: 0.75rem; border-radius: 4px; background: hsl(200 60% 50%); }
+</style>
+<div class="row">
+  <label for="hue">hue</label>
+  <input id="hue" type="range" min="0" max="360" value="200">
+  <output id="out" for="hue">200</output>
+</div>
+<div id="swatch"></div>
+<script>
+  var hue = document.getElementById("hue");
+  var out = document.getElementById("out");
+  var swatch = document.getElementById("swatch");
+  hue.addEventListener("input", function () {
+    out.textContent = hue.value;
+    swatch.style.background = "hsl(" + hue.value + " 60% 50%)";
+  });
+</script>
+</html>

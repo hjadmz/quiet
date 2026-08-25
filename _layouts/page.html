@@ -1,0 +1,15 @@
+---
+layout: default
+---
+{%- assign _content = content
+  | replace: '<table', '<div class="table-wrap" tabindex="0"><table'
+  | replace: '</table>', '</table></div>'
+  | replace: '<pre class="highlight"><code', '<pre class="highlight" tabindex="0" role="group" aria-label="code"><code'
+  | replace: ' role="doc-noteref"', ''
+  | replace: ' role="doc-endnote"', '' -%}
+<article class="page">
+  <h1>{{ page.title | escape }}</h1>
+  <div class="post-content">
+    {% include anchor_headings.html html=_content %}
+  </div>
+</article>

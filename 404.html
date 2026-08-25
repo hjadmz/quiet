@@ -1,0 +1,23 @@
+---
+layout: default
+title: page not found
+permalink: /404.html
+sitemap: false
+# Kept out of search results as well as out of the sitemap. A canonical link on
+# an error page is an invitation to index it, and a 404 in a result list wastes
+# the one click it gets.
+noindex: true
+---
+<div class="page">
+  <h1>nothing here.</h1>
+  <p>there's no page at this address — it may have moved, or never existed.</p>
+  {%- comment -%}
+    Two ways out, not one. Someone reading this followed a dead link to a
+    specific post, and the home page shows only the newest few; the archive
+    lists everything and is the page find-in-page is meant to be used on.
+  {%- endcomment -%}
+  <p>
+    <a href="{{ '/archive/' | relative_url }}">look through every post →</a><br>
+    <a href="{{ '/' | relative_url }}">go home →</a>
+  </p>
+</div>

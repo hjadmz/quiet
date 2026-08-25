@@ -1,0 +1,22 @@
+# Stable values for template contract tests. User customization in _config.yml
+# must not weaken or break the maintainer's edge and browser fixtures.
+title: quiet test fixture
+tagline: a controlled reading interface fixture.
+description: a controlled fixture for quiet's retained tests.
+author:
+  name: Test Author
+url: https://example.com
+baseurl: ""
+lang: en
+body_font: sans
+theme_default: system
+posts_on_home: 5
+date_format: "%b %-d, %Y"
+timezone: Etc/UTC
+show_reading_time: true
+show_credit: true
+footer:
+  github: ""
+  email: ""
+permalink: /:year/:title/
+demo_notice: ""

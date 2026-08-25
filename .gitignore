@@ -1,0 +1,13 @@
+_site/
+_site-subpath/
+_site-test/
+.jekyll-cache/
+.jekyll-metadata
+.sass-cache/
+.bundle/
+vendor/
+node_modules/
+.DS_Store
+
+# Local editor/agent tooling, not part of the template.
+.claude/

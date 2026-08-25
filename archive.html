@@ -1,0 +1,40 @@
+---
+layout: default
+title: archive
+permalink: /archive/
+---
+{%- include config.html -%}
+{%- comment -%}
+  Every post on one page, on purpose. This is the page that stands in for a
+  search box, so it carries each post's description as well as its title:
+  find-in-page can only match text that is on the page, and titles alone are a
+  narrow thing to search. On a measured 53-post build that is the difference
+  between 1,828 and 5,571 searchable characters, for about 7 KB of HTML.
+{%- endcomment -%}
+<div class="archive">
+  <h1>archive</h1>
+  {%- if site.posts.size == 0 %}
+  <p class="empty">nothing here yet.</p>
+  {%- else %}
+  {%- assign _by_year = site.posts | group_by_exp: "post", "post.date | date: '%Y'" %}
+  {%- for _year in _by_year %}
+  <section class="archive-year">
+    <h2>{{ _year.name }}</h2>
+    <ul class="archive-list">
+      {%- for post in _year.items %}
+      <li>
+        <p class="archive-entry">
+          <a href="{{ post.url | relative_url }}">{{ post.title | escape }}</a>
+          <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%b %-d" }}</time>
+        </p>
+        {%- assign _desc = post.description | append: "" | strip -%}
+        {%- if _desc != "" %}
+        <p class="archive-desc">{{ _desc | escape }}</p>
+        {%- endif %}
+      </li>
+      {%- endfor %}
+    </ul>
+  </section>
+  {%- endfor %}
+  {%- endif %}
+</div>

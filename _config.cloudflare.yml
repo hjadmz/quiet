@@ -1,0 +1,10 @@
+url: "https://quiet.hjadmz.com"
+baseurl: ""
+include: ["_headers"]
+description: "a live demo of quiet, a minimal Jekyll blog template."
+author:
+  name: "hjadmz"
+demo_notice: "template demo · sample content · built with substantial AI assistance"
+footer:
+  github: "hjadmz"
+  email: ""

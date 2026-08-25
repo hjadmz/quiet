@@ -1,0 +1,9 @@
+<header class="site-header">
+  <nav aria-label="site">
+    <a class="wordmark" href="{{ '/' | relative_url }}"{% if page.url == '/' %} aria-current="page"{% endif %}>{{ q_title | escape }}</a>
+    <div class="site-links">
+      <a href="{{ '/archive/' | relative_url }}"{% if page.url == '/archive/' %} aria-current="page"{% endif %}>archive</a>
+      <a href="{{ '/about/' | relative_url }}"{% if page.url == '/about/' %} aria-current="page"{% endif %}>about</a>
+    </div>
+  </nav>
+</header>

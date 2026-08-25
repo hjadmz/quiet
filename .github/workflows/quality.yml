@@ -1,0 +1,94 @@
+name: Quality
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  BUNDLE_FROZEN: "true"
+  JEKYLL_ENV: production
+  LANG: C.UTF-8
+  LC_ALL: C.UTF-8
+
+jobs:
+  build:
+    name: Builds and generated-site checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+      - uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+
+      - run: npm ci --ignore-scripts
+
+      # The default GitHub Pages build, a customized fork with the demo content and
+      # the hjadmz overlay removed, and a project site served from /quiet.
+      - run: npm run verify
+      - run: npm run test:portable
+      - run: npm run test:subpath
+
+      # The Cloudflare overlay is the documented production path for the public demo,
+      # and it is the only build that emits _headers. Nothing exercised it, so the
+      # entire response-header contract could break and CI would stay green.
+      - run: npm run verify:cloudflare
+
+  # This suite passes or fails depending on the machine, not only on the code: file
+  # name case matters on Linux and not on macOS, `bundle` is a batch file on Windows,
+  # and Ruby's default encoding follows the locale. The template promises to work
+  # everywhere, so its own checks are held to the same standard.
+  hosts:
+    name: Test suite on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest]
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+      - uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+
+      - run: npm ci --ignore-scripts
+      - run: npm run verify
+
+  compatibility:
+    name: ${{ matrix.browser }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+      - uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+
+      - run: npm ci --ignore-scripts
+      - run: npx playwright install --with-deps ${{ matrix.browser }}
+      - run: npm run test:compat
+        env:
+          COMPAT_BROWSER: ${{ matrix.browser }}

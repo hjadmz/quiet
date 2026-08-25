@@ -1,0 +1,183 @@
+---
+layout: default
+title: site check
+permalink: /site-check/
+sitemap: false
+noindex: true
+description: what quiet made of your settings and your posts, and anything it had to correct.
+---
+{%- include config.html -%}
+{%- comment -%}
+  The author-facing half of config handling. config.html guarantees the site
+  keeps working; this page is where it says what it had to do to keep working.
+
+  It exists as a page, rather than as a build error, because the person most
+  likely to mistype a setting is editing _config.yml in the GitHub web editor
+  and has no terminal, no build log, and no npm. A URL they can open is the
+  only channel that reaches them. It is unlinked, kept out of the sitemap and
+  out of search results, and costs a reader who never visits it nothing.
+{%- endcomment -%}
+<div class="page site-check">
+  <h1>site check</h1>
+
+  <h2>settings</h2>
+  {%- if q_problem_count > 0 %}
+  <p class="config-verdict config-verdict-warn">
+    {{ q_problem_count }} setting{% if q_problem_count > 1 %}s in <code>_config.yml</code> could not be used as written{% else %} in <code>_config.yml</code> could not be used as written{% endif %}.
+    The site is still working — each one fell back to the value shown below.
+  </p>
+  <ol class="config-problems">
+    {%- for problem in q_problem_list %}
+    <li>{{ problem | escape }}</li>
+    {%- endfor %}
+  </ol>
+  {%- else %}
+  <p class="config-verdict config-verdict-ok">
+    No problems. Every setting in <code>_config.yml</code> was used exactly as written.
+  </p>
+  {%- endif %}
+
+  <h3>what the site is using</h3>
+  <p>The value on the right is what actually rendered, after any fallback above.</p>
+  <div class="table-wrap" tabindex="0">
+    <table>
+      <thead><tr><th scope="col">setting</th><th scope="col">in use</th></tr></thead>
+      <tbody>
+        <tr><td><code>title</code></td><td>{{ q_title | escape }}</td></tr>
+        <tr><td><code>tagline</code></td><td>{% if q_tagline == "" %}<span class="config-unset">not set</span>{% else %}{{ q_tagline | escape }}{% endif %}</td></tr>
+        <tr><td><code>author.name</code></td><td>{% if q_author == "" %}<span class="config-unset">not set</span>{% else %}{{ q_author | escape }}{% endif %}</td></tr>
+        <tr><td><code>url</code></td><td>{{ site.url | escape }}{{ site.baseurl | escape }}</td></tr>
+        <tr><td><code>lang</code></td><td>{{ q_lang | escape }}</td></tr>
+        <tr><td><code>accent</code></td><td>{% if q_accent == "" %}<span class="config-unset">built-in</span>{% else %}<code>{{ q_accent | escape }}</code> <span class="config-swatch" style="background:var(--accent)"></span> <span class="config-unset">dark mode derives its own</span>{% endif %}</td></tr>
+        <tr><td><code>body_font</code></td><td>{{ q_body_font }}</td></tr>
+        <tr><td><code>theme_default</code></td><td>{{ q_theme_default }}</td></tr>
+        <tr><td><code>posts_on_home</code></td><td>{{ q_posts_on_home }} — you have {{ site.posts.size }} post{% if site.posts.size != 1 %}s{% endif %}, so the home page lists {% if site.posts.size < q_posts_on_home %}all {{ site.posts.size }}{% else %}{{ q_posts_on_home }}{% endif %}</td></tr>
+        <tr><td><code>date_format</code></td><td><code>{{ q_date_format | escape }}</code> → {{ site.time | date: q_date_format | escape }}</td></tr>
+        {%- comment -%} Both facts, because Liquid cannot check an IANA name: an
+        unknown zone does not fail, Ruby just falls back to UTC, and echoing the
+        requested name alone would report a typo as though it were in use. {%- endcomment -%}
+        <tr><td><code>timezone</code></td><td>{{ site.timezone | default: "Etc/UTC" | escape }} — dates are currently rendering at {{ site.time | date: "%z" }}</td></tr>
+        <tr><td><code>show_reading_time</code></td><td>{{ q_show_reading_time }}</td></tr>
+        <tr><td><code>show_credit</code></td><td>{{ q_show_credit }}</td></tr>
+        <tr><td><code>footer.github</code></td><td>{% if q_github == "" %}<span class="config-unset">no link</span>{% else %}{{ q_github | escape }}{% endif %}</td></tr>
+        <tr><td><code>footer.email</code></td><td>{% if q_email == "" %}<span class="config-unset">no link</span>{% else %}{{ q_email | escape }}{% endif %}</td></tr>
+        <tr><td><code>feed.posts_limit</code></td><td>{{ q_feed_limit }}</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  {%- comment -%}
+    Two ways a post can be wrong that nothing else on the site would ever mention.
+
+    A duplicate URL is the worse one: two files whose titles slugify the same way in
+    the same year resolve to one permalink, so the home page lists both, both links go
+    to the same place, and one post simply does not exist. Jekyll reports nothing.
+  {%- endcomment -%}
+  {%- comment -%}
+    A post can claim any address, including one the site already uses. Jekyll
+    writes the post over the top without a word: permalink: / replaces the home
+    page, /about/ replaces the about page, /feed.xml turns the Atom feed into an
+    HTML document, and /site-check/ replaces this page with the post that broke it.
+  {%- endcomment -%}
+  {%- assign _RESERVED = "/|/about/|/archive/|/site-check/|/404.html|/feed.xml|/sitemap.xml|/robots.txt" | split: "|" -%}
+  {%- assign _stolen = "" -%}
+  {%- for post in site.posts -%}
+    {%- if _RESERVED contains post.url -%}
+      {%- assign _stolen = _stolen | append: post.url | append: "→" | append: post.title | append: "‖" -%}
+    {%- endif -%}
+    {%- assign _u = post.url | append: "" -%}
+    {%- assign _u_head = _u | slice: 0, 8 -%}
+    {%- if _u_head == "/assets/" -%}
+      {%- assign _stolen = _stolen | append: post.url | append: "→" | append: post.title | append: "‖" -%}
+    {%- endif -%}
+  {%- endfor -%}
+  {%- assign _stolen_list = _stolen | split: "‖" -%}
+  {%- assign _urls = site.posts | map: "url" -%}
+  {%- assign _unique_urls = _urls | uniq -%}
+  {%- assign _untitled = 0 -%}
+  {%- assign _bad_dates = "" -%}
+  {%- assign _drafts = 0 -%}
+  {%- for post in site.posts -%}
+    {%- assign _t = post.title | append: "" | strip -%}
+    {%- if _t == "" -%}{%- assign _untitled = _untitled | plus: 1 -%}{%- endif -%}
+    {%- if post.draft -%}{%- assign _drafts = _drafts | plus: 1 -%}{%- endif -%}
+    {%- assign _upd = post.last_modified_at | default: post.updated -%}
+    {%- if _upd -%}
+      {%- include valid_date.html value=_upd -%}
+      {%- unless q_date_ok -%}
+        {%- assign _bad_dates = _bad_dates | append: post.title | append: "‖" -%}
+      {%- endunless -%}
+    {%- endif -%}
+  {%- endfor -%}
+  {%- assign _bad_date_list = _bad_dates | split: "‖" -%}
+  <h2>posts</h2>
+  {%- if _urls.size == _unique_urls.size and _untitled == 0 and _bad_date_list.size == 0 and _drafts == 0 and _stolen_list.size == 0 %}
+  <p class="config-verdict config-verdict-ok">
+    All {{ site.posts.size }} post{% if site.posts.size != 1 %}s{% endif %} have their own
+    address, their own title, and dates that read the way they are written.
+  </p>
+  {%- else %}
+  <p class="config-verdict config-verdict-warn">Some posts are not doing what their front matter says.</p>
+  <ol class="config-problems">
+    {%- if _urls.size != _unique_urls.size -%}
+    {%- for url in _unique_urls -%}
+      {%- assign _sharing = site.posts | where: "url", url -%}
+      {%- if _sharing.size > 1 %}
+      <li>
+        {{ _sharing.size }} posts share the address <code>{{ url | escape }}</code>, so only
+        the last one exists —
+        {% for post in _sharing %}<em>{{ post.title | escape }}</em>{% unless forloop.last %}, {% endunless %}{% endfor %}.
+        Two titles in the same year that reduce to the same words produce the same
+        permalink. Change one title, or give it its own <code>permalink:</code>.
+      </li>
+      {%- endif -%}
+    {%- endfor -%}
+    {%- endif -%}
+    {%- for entry in _stolen_list %}
+    {%- assign _parts = entry | split: "→" %}
+    <li>
+      <em>{{ _parts | last | escape }}</em> sets <code>permalink: {{ _parts | first | escape }}</code>,
+      an address this site already uses. Jekyll writes the post over the top of it
+      without complaining, so whatever was there — the home page, the about page,
+      the feed, this page — is gone from the built site. Give the post its own
+      address.
+    </li>
+    {%- endfor %}
+    {%- for title in _bad_date_list %}
+    <li>
+      <em>{{ title | escape }}</em> has a <code>last_modified_at</code> that is not
+      written as <code>YYYY-MM-DD</code>. It still builds, but the date is guessed —
+      <code>03/04/2026</code> is read as the third of April in one place and the fourth
+      of March in another, and your feed and sitemap will carry whichever it picked.
+    </li>
+    {%- endfor %}
+    {%- if _drafts > 0 %}
+    <li>
+      {{ _drafts }} post{% if _drafts != 1 %}s set{% else %} sets{% endif %}
+      <code>draft: true</code>, which only hides
+      {% if _drafts != 1 %}them{% else %}it{% endif %} from the feed.
+      {% if _drafts != 1 %}They are{% else %}It is{% endif %} still published at
+      {% if _drafts != 1 %}their addresses{% else %}its address{% endif %}, listed on
+      the archive, and submitted to search engines in the sitemap. To actually hide a
+      post use <code>published: false</code>, or move the file to <code>_drafts/</code>.
+    </li>
+    {%- endif %}
+    {%- if _untitled > 0 %}
+    <li>
+      {{ _untitled }} post{% if _untitled != 1 %}s have{% else %} has{% endif %} no
+      <code>title</code>, so {% if _untitled != 1 %}they appear{% else %}it appears{% endif %}
+      in the list and the feed as a blank line.
+    </li>
+    {%- endif %}
+  </ol>
+  {%- endif %}
+
+  <h2>about this page</h2>
+  <p>
+    It is generated from your settings and your posts at build time, so it is
+    always current.
+    Nothing links to it, it is excluded from the sitemap and from search
+    results, and readers will not find it. Delete
+    <code>site-check.html</code> if you would rather it did not exist.
+  </p>
+</div>
