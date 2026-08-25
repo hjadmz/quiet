@@ -129,11 +129,184 @@ async function goto(page, baseURL, route, expectedStatus = 200) {
 
 async function assertNoOverflow(page, label) {
   const dimensions = await page.evaluate(() => ({
-    client: document.documentElement.clientWidth,
+    // The root element's own border box, not clientWidth. `scrollbar-gutter: stable`
+    // reserves the scrollbar's width on pages that do not scroll, and clientWidth
+    // counts that reserved strip as usable: measured on the home page at 1280px, a
+    // 1272px element inside a 1265px layout left scrollWidth (1272) under clientWidth
+    // (1280), so seven real pixels of overflow read as clean. The border box is the
+    // width the layout actually got.
+    layout: document.documentElement.getBoundingClientRect().width,
     scroll: document.documentElement.scrollWidth
   }));
-  assert.ok(dimensions.scroll <= dimensions.client + 1,
-    `${label}: horizontal overflow (${dimensions.scroll}px > ${dimensions.client}px)`);
+  assert.ok(dimensions.scroll <= dimensions.layout + 1,
+    `${label}: horizontal overflow (${dimensions.scroll}px > ${dimensions.layout}px)`);
+}
+
+// The page is one column, and everything on it says so.
+//
+// Alignment is the part of this template a reader never notices working and always
+// notices failing, and it is what drifts first when someone adds a rule. Everything
+// this catches was real and none of it broke any other check, because the site was
+// still perfectly whole each time: a wide figure's caption sat 180px outside the
+// reading column (capping its width had been mistaken for placing it); the two links
+// on the page's own edges sat 2px off it, because the padding that buys their hit
+// area also moved their text; and in a right-to-left document the wide figure landed
+// 325px off and put 296px of horizontal scroll on the whole page.
+//
+// Two separate promises are checked here. ANCHORED names the handful of elements
+// that must sit exactly on an edge of the column — no tolerance, because there is no
+// reason for any of them to be a pixel off. The sweep is the general case: prose may
+// step off the column by a small declared indent (a list marker, a quote rule) and
+// there must be few such steps, or it stops reading as one column. Items inside a
+// horizontal row are skipped by the sweep and covered by ANCHORED instead — the
+// middle of a right-aligned cluster has no rail to be on.
+const ANCHORED = [
+  ['.wordmark', 'start', true],
+  ['.footer-links > a:first-child', 'start', true],
+  ['.site-footer > .footer-meta:last-of-type', 'start', true],
+  ['.post-nav-older', 'end', false],
+  ['.post-nav-newer', 'start', false]
+];
+
+async function assertTextRails(page, label) {
+  const measured = await page.evaluate((anchored) => {
+    const main = document.querySelector('main');
+    if (!main) return null;
+    const rtl = getComputedStyle(main).direction === 'rtl';
+    // The content edges: what a reader actually sees a line of text begin and end at,
+    // which is not the border box when something is padded.
+    const edges = (el) => {
+      const cs = getComputedStyle(el);
+      const r = el.getBoundingClientRect();
+      const left = r.left + parseFloat(cs.paddingLeft) + parseFloat(cs.borderLeftWidth);
+      const right = r.right - parseFloat(cs.paddingRight) - parseFloat(cs.borderRightWidth);
+      return rtl ? { start: right, end: left } : { start: left, end: right };
+    };
+    const column = edges(main);
+    const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+    const BLOCK = /^(block|flow-root|list-item|flex|grid|table|table-cell)/;
+    const name = (el) => el.tagName.toLowerCase() +
+      (typeof el.className === 'string' && el.className.trim()
+        ? '.' + el.className.trim().split(/\s+/)[0] : '');
+    const from = (el, side) => {
+      const own = edges(el);
+      const gap = side === 'start'
+        ? (rtl ? column.start - own.start : own.start - column.start)
+        : (rtl ? own.end - column.end : column.end - own.end);
+      return Math.round(gap * 100) / 100;
+    };
+
+    const missing = [];
+    const offEdge = [];
+    for (const [selector, side, required] of anchored) {
+      const el = document.querySelector(selector);
+      if (!el) { if (required) missing.push(selector); continue; }
+      const gap = from(el, side);
+      if (Math.abs(gap) > 0.5) offEdge.push(`${selector} is ${gap}px off the column ${side}`);
+    }
+
+    // The header row is the one place the rail depends on the width. While the links
+    // share a line with the wordmark they finish on the column's far edge; once a long
+    // enough title pushes them onto a line of their own they begin on its near edge
+    // instead. Both are rails — measured on a folded foldable at 280px, where the
+    // title alone fills the line — so the check has to ask which state it is in rather
+    // than assume one and be wrong on small screens.
+    const wordmark = document.querySelector('.wordmark');
+    const cluster = document.querySelector('.site-links');
+    if (wordmark && cluster) {
+      const wrapped = Math.abs(cluster.getBoundingClientRect().top -
+        wordmark.getBoundingClientRect().top) > 1;
+      const edge = cluster.querySelector(wrapped ? 'a' : 'a:last-child');
+      const side = wrapped ? 'start' : 'end';
+      if (!edge) missing.push('.site-links a');
+      else {
+        const gap = from(edge, side);
+        if (Math.abs(gap) > 0.5) {
+          offEdge.push(`.site-links (${wrapped ? 'wrapped onto its own line' : 'inline with the wordmark'}) is ${gap}px off the column ${side}`);
+        }
+      }
+    }
+
+    const indents = {};
+    const strays = [];
+    for (const el of document.querySelectorAll('header *, main *, footer *')) {
+      const cs = getComputedStyle(el);
+      if (cs.display === 'none' || cs.visibility === 'hidden') continue;
+      // Absolutely positioned chrome — the copy button — is placed against its own
+      // box, not against the text grid, and is inset from it on purpose.
+      if (cs.position === 'absolute' || cs.position === 'fixed') continue;
+      if (!BLOCK.test(cs.display)) continue;
+      if (el.closest('.visually-hidden, .skip-link')) continue;
+      // A table's later columns land where its content puts them. Only the first
+      // cell in a row is on the text grid, and it is flush with it on purpose.
+      if (/^(td|th)$/i.test(el.tagName) && el.previousElementSibling) continue;
+      // A horizontal row is a cluster, not a rail. ANCHORED covers its outer edges.
+      const parent = el.parentElement;
+      if (parent && getComputedStyle(parent).display.includes('flex')) continue;
+      if (![...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim())) continue;
+      if (el.getBoundingClientRect().width === 0) continue;
+
+      const indent = from(el, 'start');
+      if (indent >= -0.6 && indent <= 2 * rem) {
+        const key = Math.round(indent);
+        indents[key] = (indents[key] || 0) + 1;
+        continue;
+      }
+      // Off the near edge is allowed only for something aligned to the far one.
+      if (Math.abs(from(el, 'end')) < 0.6) continue;
+      strays.push(`${name(el)} starts ${Math.round(indent)}px from the column`);
+    }
+
+    // A caption is prose about the thing above it. A figure may leave the measure;
+    // the prose under it may not start somewhere else, in either direction.
+    const captions = [...document.querySelectorAll('figcaption')]
+      .filter((el) => getComputedStyle(el).display !== 'none' && el.getBoundingClientRect().width > 0)
+      .map((el) => ({
+        name: name(el.parentElement),
+        off: from(el, 'start'),
+        over: Math.round(Math.abs(edges(el).end - edges(el).start) -
+          Math.abs(column.end - column.start))
+      }));
+
+    return {
+      rem,
+      missing,
+      offEdge,
+      strays,
+      captions,
+      start: column.start,
+      indents: Object.keys(indents).map(Number).sort((a, b) => a - b)
+    };
+  }, ANCHORED);
+  if (measured === null) return null;
+
+  assert.deepEqual(measured.missing, [],
+    `${label}: an element the layout is anchored on is not on the page. Either it was ` +
+    'renamed and ANCHORED needs updating, or it stopped rendering.');
+
+  assert.deepEqual(measured.offEdge, [],
+    `${label}: the page has more than one left margin. These sit on the edge of the ` +
+    'reading column, and a fraction of a pixel off is still off.');
+
+  assert.deepEqual(measured.strays, [],
+    `${label}: text starting off the reading column. Every block belongs either on the ` +
+    'column, within a small declared indent of it, or flush to its far edge.');
+
+  assert.ok(measured.indents.length <= 4,
+    `${label}: ${measured.indents.length} different text indents (${measured.indents.join('px, ')}px). ` +
+    'Measured across every device and both directions, this page uses four: the column ' +
+    'itself, a callout rule, a quote rule, and a list marker. A fifth means something ' +
+    'stepped off the column without deciding to.');
+
+  for (const caption of measured.captions) {
+    assert.ok(Math.abs(caption.off) < 0.6,
+      `${label}: the caption under ${caption.name} starts ${caption.off}px off the reading ` +
+      'column. A figure may be wider than the measure; the prose under it may not begin ' +
+      'somewhere else.');
+    assert.ok(caption.over <= 1,
+      `${label}: the caption under ${caption.name} is ${caption.over}px wider than the column.`);
+  }
+  return measured;
 }
 
 async function controlRects(page, selector) {
@@ -185,9 +358,12 @@ async function runResponsive(engineName, browser, baseURL) {
 
     // Every route, every device. A layout that holds on the home page and breaks
     // on the archive is still a broken site.
+    const columnStarts = new Map();
     for (const route of ROUTES) {
       await goto(page, baseURL, route, route === '/404.html' ? 200 : 200);
       await assertNoOverflow(page, `${label} ${route}`);
+      const rails = await assertTextRails(page, `${label} ${route}`);
+      if (rails) columnStarts.set(route, rails.start);
       assertTargets(await controlRects(page, '.site-header a'), `${label} ${route} header`);
       assertTargets(await controlRects(page, '.footer-links a, .footer-links button'),
         `${label} ${route} footer`);
@@ -207,6 +383,18 @@ async function runResponsive(engineName, browser, baseURL) {
       }), true, `${label} ${route}: the contents list rendered with no entries`);
       checks += 1;
     }
+
+    // The column must not move sideways between routes. A short page does not scroll
+    // and a long one does, so without a reserved scrollbar gutter the whole layout —
+    // wordmark, text, footer — shifts by half the scrollbar on every navigation.
+    // Measured at 1280px before the fix: 298px on the home page against 290.5px on a
+    // post, with the cross-fade putting the jump directly under the reader's eye. A
+    // browser without scrollbar-gutter support fails here, which is the honest
+    // outcome — its readers really do see it.
+    const placements = [...new Set([...columnStarts.values()].map((x) => x.toFixed(1)))];
+    assert.equal(placements.length, 1,
+      `${label}: the reading column sits at ${placements.join('px / ')}px depending on the ` +
+      'route. A page that scrolls must not shift the layout against one that does not.');
 
     if (!STRESS.has(device.name)) continue;
 

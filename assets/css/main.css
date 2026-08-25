@@ -123,6 +123,10 @@
 html {
   font-size: clamp(1.0625rem, 1rem + 0.35vw, 1.1875rem); /* 17 → 19px */
   -webkit-text-size-adjust: 100%;
+  /* Reserved whether the page scrolls or not: otherwise a short page centres in the
+     full window and a long one in the window minus the scrollbar, jumping the whole
+     column 7.5px sideways on every navigation. Overlay scrollbars reserve nothing. */
+  scrollbar-gutter: stable;
 }
 
 body {
@@ -262,6 +266,14 @@ figure > img, figure > svg { display: block; }
   display: inline-flex; align-items: center; min-height: 44px;
 }
 .site-links a, .footer-links a { padding-inline: 0.125rem; }
+/* That padding also pushed the links on the page's own edges 2px off the column —
+   "rss" sits directly under the wordmark. The boxes now overhang by what they pad, so
+   the words land on the rail with the hit area unchanged. The header needs both edges
+   because the row wraps: the links end on the column beside the wordmark, and begin on
+   it once a long title pushes them onto their own line (measured at 280px). */
+.footer-links > a:first-child,
+.site-links > a:first-child { margin-inline-start: -0.125rem; }
+.site-links > a:last-child { margin-inline-end: -0.125rem; }
 
 .theme-toggle {
   font: inherit; font-size: var(--fs-meta); color: var(--fg-muted);
@@ -431,18 +443,20 @@ li + li { margin-top: var(--s1); }
 figure { margin: 0; }
 figcaption { font-size: var(--fs-meta); color: var(--fg-muted); margin-top: var(--s2); }
 
-/* The one way out of the measure, opt-in per figure. Capped at 52rem so an
-   ultrawide does not stretch it; the gutter subtraction keeps a classic
-   scrollbar from turning 100vw into overflow.
-   Why: docs/DESIGN-PRINCIPLES.md, "showing work, not just describing it". */
-.post-content > .wide {
-  width: min(52rem, 100vw - 2 * var(--gutter));
-  margin-inline: auto;
-  position: relative; left: 50%; transform: translateX(-50%);
+/* The one way out of the measure, opt-in per figure, capped at 52rem so an ultrawide
+   does not stretch it. Why: docs/DESIGN-PRINCIPLES.md.
+   Only the media leaves. The figure stays on the column, so its caption is an ordinary
+   block landing on the prose rail by construction — placing the caption instead left it
+   180px outside the column, then still 7px off at 280px where 100vw counts the reserved
+   scrollbar. Symmetric margins, not left: 50% + translateX(-50%): that assumed a
+   physical left edge and put RTL pages 325px off with 296px of horizontal scroll.
+   max-width: none is load-bearing — the global img cap would cancel the rule. */
+.post-content > .wide > :not(figcaption) {
+  --wide: min(52rem, 100vw - 2 * var(--gutter));
+  width: var(--wide);
+  max-width: none;
+  margin-inline: calc((100% - var(--wide)) / 2);
 }
-/* The figure gets the extra width; its caption does not. A caption is still
-   prose, and 52rem is past the measure the rest of the page is set to. */
-.post-content > .wide figcaption { max-width: var(--measure); }
 
 /* A demo is a figure whose content runs. The frame is inlined at build time and
    sandboxed without allow-same-origin, so it shares no origin with the page. */
