@@ -10,20 +10,21 @@
     "build:test": "node tests/build-test-site.cjs",
     "dev": "bundle exec jekyll serve --drafts --livereload",
     "docs:screenshots": "npm run build:cloudflare && node tests/capture-screenshots.cjs",
-    "test:compat": "npm run build:test && SITE_ROOT=_site-test node tests/compatibility.cjs",
+    "test:compat": "npm run build:test && cross-env SITE_ROOT=_site-test node tests/compatibility.cjs",
     "test:config": "node tests/config-lint.cjs",
     "test:hostile": "node tests/config-hostile.cjs",
-    "test:subpath": "npm run build:subpath && SITE_ROOT=_site-subpath SITE_URL=https://example.com SITE_BASEURL=/quiet EXPECT_DEMO=0 EXPECT_CLOUDFLARE=0 node tests/site-smoke.cjs && SITE_ROOT=_site-subpath QUIET_EXPECT_PLACEHOLDER=1 node tests/config-lint.cjs && SITE_ROOT=_site-subpath SITE_URL=https://example.com SITE_BASEURL=/quiet bundle exec ruby tests/feed-smoke.rb",
+    "test:subpath": "npm run build:subpath && cross-env SITE_ROOT=_site-subpath SITE_URL=https://example.com SITE_BASEURL=/quiet EXPECT_DEMO=0 EXPECT_CLOUDFLARE=0 node tests/site-smoke.cjs && cross-env SITE_ROOT=_site-subpath QUIET_EXPECT_PLACEHOLDER=1 node tests/config-lint.cjs && cross-env SITE_ROOT=_site-subpath SITE_URL=https://example.com SITE_BASEURL=/quiet bundle exec ruby tests/feed-smoke.rb",
     "test:edge": "node tests/edge-cases.cjs",
     "test:feed": "bundle exec ruby tests/feed-smoke.rb",
     "test:portable": "node tests/portability.cjs",
     "test:site": "node tests/site-smoke.cjs",
-    "verify": "ruby --version && bundle --version && npm run test:edge && npm run test:hostile && npm run build && QUIET_EXPECT_PLACEHOLDER=1 npm run test:config && SITE_URL=https://username.github.io EXPECT_DEMO=0 EXPECT_CLOUDFLARE=0 npm run test:site && npm run test:feed",
-    "verify:cloudflare": "ruby --version && bundle --version && npm run test:edge && npm run test:hostile && npm run build:cloudflare && QUIET_EXPECT_PLACEHOLDER=1 npm run test:config && SITE_URL=https://quiet.hjadmz.com EXPECT_DEMO=0 EXPECT_CLOUDFLARE=1 npm run test:site && npm run test:feed",
-    "verify:demo": "ruby --version && bundle --version && npm run test:edge && npm run test:hostile && npm run build:cloudflare && QUIET_EXPECT_PLACEHOLDER=1 npm run test:config && SITE_URL=https://quiet.hjadmz.com EXPECT_DEMO=1 EXPECT_CLOUDFLARE=1 npm run test:site && SITE_URL=https://quiet.hjadmz.com EXPECT_DEMO=1 npm run test:feed"
+    "verify": "ruby --version && bundle --version && npm run test:edge && npm run test:hostile && npm run build && cross-env QUIET_EXPECT_PLACEHOLDER=1 npm run test:config && cross-env SITE_URL=https://username.github.io EXPECT_DEMO=0 EXPECT_CLOUDFLARE=0 npm run test:site && npm run test:feed",
+    "verify:cloudflare": "ruby --version && bundle --version && npm run test:edge && npm run test:hostile && npm run build:cloudflare && cross-env QUIET_EXPECT_PLACEHOLDER=1 npm run test:config && cross-env SITE_URL=https://quiet.hjadmz.com EXPECT_DEMO=0 EXPECT_CLOUDFLARE=1 npm run test:site && npm run test:feed",
+    "verify:demo": "ruby --version && bundle --version && npm run test:edge && npm run test:hostile && npm run build:cloudflare && cross-env QUIET_EXPECT_PLACEHOLDER=1 npm run test:config && cross-env SITE_URL=https://quiet.hjadmz.com EXPECT_DEMO=1 EXPECT_CLOUDFLARE=1 npm run test:site && cross-env SITE_URL=https://quiet.hjadmz.com EXPECT_DEMO=1 npm run test:feed"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",
+    "cross-env": "10.1.0",
     "playwright": "1.62.1"
   }
 }
