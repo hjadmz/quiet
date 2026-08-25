@@ -518,6 +518,51 @@ async function runReaderMode(engineName, browser, baseURL) {
   await context.close();
 }
 
+// Browser text size, which is not page zoom. Zoom scales everything including
+// pixel values, so a layout can pass zoom and still break when someone raises
+// only their default font size — the setting people with low vision actually
+// use, and the one WCAG 1.4.4 is about. It reached 79px of document overflow at
+// 48px default text before the header was allowed to wrap.
+//
+// Chromium only: setting the browser's default font size is a CDP capability
+// and Playwright exposes no equivalent for the other two engines. Said plainly
+// rather than quietly skipped.
+async function runTextScaling(engineName, browser, baseURL) {
+  if (engineName !== 'chromium') return;
+  for (const standard of [16, 24, 32, 48]) {
+    const context = await browser.newContext({ viewport: { width: 320, height: 658 } });
+    const page = await context.newPage();
+    const cdp = await context.newCDPSession(page);
+    await cdp.send('Page.setFontSizes', { fontSizes: { standard, fixed: Math.round(standard * 0.85) } });
+
+    for (const route of ROUTES) {
+      await goto(page, baseURL, route);
+      await assertNoOverflow(page, `${engineName} ${route} at ${standard}px default text`);
+      assert.equal(await page.evaluate(() => {
+        const width = document.documentElement.clientWidth;
+        return [...document.querySelectorAll('.site-header a, .footer-links a, .footer-links button')]
+          .every((el) => el.getBoundingClientRect().right <= width + 1);
+      }), true, `${engineName} ${route}: navigation left the viewport at ${standard}px default text`);
+    }
+
+    // The copy button is positioned over the code block, and its clearance is
+    // expressed in rem so it tracks the text rather than a pixel constant.
+    await goto(page, baseURL, '/2026/everything-a-post-can-do/');
+    const clearance = await page.evaluate(() => {
+      const btn = document.querySelector('.copy-btn');
+      const pre = document.querySelector('pre.highlight');
+      if (!btn || !pre) return null;
+      const top = pre.getBoundingClientRect().top + parseFloat(getComputedStyle(pre).paddingTop);
+      return Math.round(top - btn.getBoundingClientRect().bottom);
+    });
+    if (clearance !== null) {
+      assert.ok(clearance >= 0,
+        `${engineName}: the copy button covers the first line of code at ${standard}px default text (${clearance}px)`);
+    }
+    await context.close();
+  }
+}
+
 async function runReducedMotion(engineName, browser, baseURL) {
   const context = await browser.newContext({
     reducedMotion: 'reduce',
@@ -550,6 +595,7 @@ async function runReducedMotion(engineName, browser, baseURL) {
           ['no-JavaScript', runNoJavaScript],
           ['accessibility', runAccessibility],
           ['reader-mode', runReaderMode],
+          ['text-scaling', runTextScaling],
           ['reduced-motion', runReducedMotion]
         ];
         for (const [phase, run] of PHASES) {

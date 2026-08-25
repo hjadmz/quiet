@@ -239,16 +239,21 @@ figure > img, figure > svg { display: block; }
   border: 1px solid var(--border); border-radius: var(--radius);
 }
 
+/* Wraps rather than overflows. At a browser default text size of 48px — a real
+   low-vision setting, not a hypothetical — the wordmark and the two links no
+   longer fit on one line, and without wrapping they pushed the whole document
+   79px wide. Stacking is the honest answer at that size; below it there is room
+   and nothing moves. */
 .site-header nav {
   display: flex; align-items: center; justify-content: space-between;
-  gap: var(--s3);
+  flex-wrap: wrap; gap: var(--s3);
   padding-top: var(--s3); padding-bottom: var(--s3);
 }
 .wordmark { font-size: 1rem; font-weight: 600; color: var(--fg); text-decoration: none; }
 .wordmark:hover { text-decoration: underline; text-decoration-thickness: 1px; }
 .site-links { display: flex; align-items: center; gap: var(--s3); font-size: var(--fs-meta); }
 .wordmark { min-width: 0; overflow-wrap: anywhere; }
-.site-links { flex: 0 0 auto; }
+.site-links { flex: 0 1 auto; flex-wrap: wrap; }
 /* the page you're on is a location, not a link: label weight, full ink */
 .site-links a[aria-current="page"] { color: var(--fg); font-weight: 600; text-decoration: none; }
 
@@ -320,9 +325,13 @@ html:not(.js) .theme-toggle { display: none; }
 .archive-year h2 { font-size: 1rem; margin: var(--s6) 0 var(--s3); }
 .archive-list { list-style: none; margin: 0; padding: 0; }
 .archive-list li { padding: var(--s2) 0; }
+/* Wraps for the same reason the header does: the date is nowrap so it stays one
+   unit, and at a large browser text size the title and the date stop fitting on
+   one line. Wrapping puts the date under the title; not wrapping pushed the
+   document 4px wide. */
 .archive-entry {
   display: flex; justify-content: space-between; align-items: baseline;
-  gap: var(--s4); margin: 0;
+  flex-wrap: wrap; gap: 0 var(--s4); margin: 0;
 }
 .archive-desc { margin: var(--s1) 0 0; font-size: var(--fs-meta); color: var(--fg-muted); }
 .archive-list time { color: var(--fg-muted); font-size: var(--fs-meta); white-space: nowrap; }
@@ -379,10 +388,16 @@ html:not(.js) .theme-toggle { display: none; }
    string sets the width of the whole page: measured 882px of content inside a
    323px column, which scrolls the entire document sideways on a phone.
    Code blocks are excluded on purpose — they scroll in their own box. */
-.post-content, .post-list-title, .post-list-meta, .archive-list a,
-.post-nav a, .toc a, .post-header h1, .page h1, .tagline,
-.footer-meta { overflow-wrap: anywhere; }
-.post-content pre { overflow-wrap: normal; }
+/* One rule, not a list of classes. Writers paste long URLs and identifiers, and
+   at a large browser text size even an ordinary word can be wider than the
+   column — measured, the archive's own "archive" heading was 273px inside a
+   218px column. The old version enumerated the elements allowed to break, and
+   an enumeration is a list that rots: it was missing the archive heading and
+   the archive descriptions, and each omission scrolled the whole document
+   sideways. Anything inside main may break; code is put back below, because it
+   scrolls in its own box instead. */
+main, .footer-meta { overflow-wrap: anywhere; }
+pre, pre code { overflow-wrap: normal; }
 
 h2[id], h3[id], h4[id], sup[id], .footnotes li[id] { scroll-margin-top: var(--s6); }
 

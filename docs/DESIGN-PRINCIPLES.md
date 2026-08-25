@@ -471,6 +471,28 @@ without scrolling. The single column is the design's central claim — one place
 to look, one reading order, identical on every device — and a margin list trades
 that for 255px on desktops only.
 
+## the setting that is not page zoom
+
+Zoom scales everything, pixel constants included, so a layout can pass a zoom
+test and still fall apart for the reader it was meant to serve. Raising only the
+browser's *default text size* is the setting people with low vision actually use,
+and it is the one WCAG 1.4.4 describes. It is now checked automatically at 16,
+24, 32 and 48px on a 320px viewport, on every route.
+
+It found three real defects immediately. The header could not wrap, so at 48px
+text the nav pushed the document 79px wide and "about" left the screen. Archive
+entries could not wrap, for the same reason in a different flex row. And the rule
+governing which elements may break a long word was an *enumerated list of class
+names* — which is a list that rots: it had fallen behind and no longer included
+the archive's own heading or its post descriptions, each of which scrolled the
+whole page sideways.
+
+That last one is the more useful lesson. The fix was not to add two more class
+names; it was to notice that enumerating the elements allowed to behave correctly
+is the wrong shape. It is now one rule scoped to `main`, with code put back to
+`normal` because code scrolls in its own container instead. A rule that describes
+the intent cannot fall behind the markup the way a list of names can.
+
 ## environments this is verified against
 
 Retained Playwright checks name **13 real devices** — a folded Galaxy Z Fold at
