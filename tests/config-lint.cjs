@@ -52,12 +52,20 @@ const problems = [...report.matchAll(/<ol class="config-problems">([\s\S]*?)<\/o
 // be reported, but still needs the output-safety half below.
 const ALLOW_PROBLEMS = process.env.QUIET_ALLOW_CONFIG_PROBLEMS === '1';
 
-// The template ships with placeholder identity, and /site-check/ now says so —
-// that is the point of it. A fork that has set its own url and author sees
-// nothing. So the shipped state is expected to report exactly that and nothing
-// else; anything beyond it is a real problem.
+// The shipped config still carries the template's own placeholder identity, and
+// /site-check/ reports it. `npm run doctor` MUST report it too: it is the one
+// warning that matters most before a first push, and a tool that stays quiet
+// about the exact state it was built to catch is worse than no tool.
+//
+// This repo's own suites build that shipped config on purpose, so they set
+// QUIET_EXPECT_PLACEHOLDER to say "yes, this fixture is the template itself".
+// The exemption belongs to the fixture, not to the check — silencing the check
+// was the earlier, wrong shape of this fix.
 const EXPECTED_PLACEHOLDER = /^Still set to the template's placeholder/;
-const unexpected = problems.filter((p) => !EXPECTED_PLACEHOLDER.test(p));
+const expectPlaceholder = process.env.QUIET_EXPECT_PLACEHOLDER === '1';
+const unexpected = expectPlaceholder
+  ? problems.filter((p) => !EXPECTED_PLACEHOLDER.test(p))
+  : problems;
 
 // ---- 2. posts that will never appear, which the site cannot report on itself ----
 //

@@ -62,7 +62,7 @@ try {
     'analytics added to the include must pass through its one explicit policy boundary');
   assert.match(home, /https:\/\/analytics\.example\/count\.js/,
     'configured analytics script is missing from the generated head');
-  node(path.join(source, 'tests/config-lint.cjs'), { SITE_ROOT: path.join(source, '_site') });
+  node(path.join(source, 'tests/config-lint.cjs'), { SITE_ROOT: path.join(source, '_site'), QUIET_EXPECT_PLACEHOLDER: '1' });
   node(path.join(source, 'tests/site-smoke.cjs'), { EXPECT_DEMO: '0', EXPECT_CLOUDFLARE: '0' });
   bundle(['exec', 'ruby', path.join(source, 'tests/feed-smoke.rb')], { cwd: ROOT });
   node(path.join(source, 'tests/edge-cases.cjs'), { QUIET_BUNDLE_CWD: ROOT });

@@ -221,7 +221,10 @@ const CASES = [
 ];
 
 function build(name, config) {
-  const configPath = path.join(source, `hostile-${name}.yml`);
+  // Beside the source, not inside it. A .yml left in the source tree is a file
+  // Jekyll publishes — which /site-check/ now correctly reports, and which this
+  // harness was quietly creating on every run.
+  const configPath = path.join(temporary, `hostile-${name}.yml`);
   fs.writeFileSync(configPath, config);
   const destination = path.join(temporary, `out-${name}`);
   jekyllBuild({
@@ -321,7 +324,8 @@ try {
       .replace(/&lt;/g, '<').replace(/&gt;/g, '>');
     // These fixtures inherit the shipped placeholder identity, which now reports
     // itself on purpose. It is expected everywhere and is not what is under test.
-    const reported = [...report.matchAll(/<li>([\s\S]*?)<\/li>/g)]
+    const reported = [...report.matchAll(/<ol class="config-problems">([\s\S]*?)<\/ol>/g)]
+      .flatMap((list) => [...list[1].matchAll(/<li>([\s\S]*?)<\/li>/g)])
       .map((match) => decode(match[1].replace(/<[^>]*>/g, '')).replace(/\s+/g, ' ').trim())
       .filter((line) => !line.startsWith("Still set to the template's placeholder"));
     for (const fragment of testCase.problems) {

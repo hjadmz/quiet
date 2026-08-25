@@ -1,0 +1,9 @@
+Drafts live here — files with no date in the filename are not built into the site.
+
+They are NOT private. In a public repository anyone can read this folder on
+GitHub, and search engines index repository files. "Not published" means "not on
+your site", not "not visible". Never put anything here you would mind being read.
+
+For a post that exists but should not be live yet, `published: false` in its
+front matter is the better tool — it keeps the post off the site, the feed and
+the sitemap while the file stays where the rest of your posts are.

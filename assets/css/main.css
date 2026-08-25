@@ -553,6 +553,7 @@ div.highlighter-rouge.has-copy pre.highlight { padding-top: calc(var(--s2) * 2 +
 }
 .config-verdict-warn { border-inline-start-color: var(--accent); }
 .config-problems { padding-inline-start: var(--s5); }
+.config-extras { padding-inline-start: var(--s5); font-size: var(--fs-meta); }
 .config-problems li + li { margin-top: var(--s3); }
 .config-unset { color: var(--fg-muted); }
 /* Local-preview only. Marked out with the accent rather than a warning colour:

@@ -249,6 +249,44 @@ needs script, needs a fallback at short viewports and near the footer, and puts
 a persistently updating element in peripheral vision while text is being read —
 and the static list already answers the question a reader is asking.
 
+## where friction belongs
+
+Removing friction is not automatically humane. Friction earns its place when it
+prevents something that cannot be undone, obtains consent worth obtaining, or
+teaches a model the reader needs. Everything else should get out of the way. Four
+places in this template pass that test, and they were found by asking the
+question directly rather than by optimising for effortlessness.
+
+**Publishing is the only irreversible act here.** The repository, the config and
+the posts are all revertible; a URL that was live and a feed entry a subscriber
+has already fetched are not. So the quickstart now turns Pages on *last*, after
+the config is yours and the demo posts are gone. Nothing else changed — the steps
+were always cheap and offline — but their order decided whether the first version
+of the site anyone saw was the author's or the template's.
+
+**"Is this ready" is decided in the file, not in the README.** `published: false`
+now ships commented out in every stub `blog:new` writes, at the moment and in the
+place the decision is actually made, days after anyone read the documentation. It
+is inert for whoever does not need it and one uncomment away for whoever does.
+
+**A claim about the reader has to stay true.** The about page tells readers the
+site makes no request to anyone else. That sentence stops being true the moment
+analytics is switched on, so it now checks the include itself and rewrites
+accordingly — and `/site-check/` carries an `analytics` row stating which it is.
+The door to third-party requests already had the right amount of friction; what
+was missing was the accounting afterwards.
+
+**Not published is not the same as not visible.** `_drafts/` is readable by
+anyone in a public repository, and the folder now says so in its own file rather
+than only in the README.
+
+And one thing that had drifted the other way: `npm run doctor` had been taught to
+stay quiet about the template's own placeholder identity, so it reported "no
+problems" on the exact state every author passes through immediately before
+publishing. The exemption belonged to the test fixtures, not to the check.
+Silencing a warning to make a suite pass is how the last gate before an
+irreversible act ends up lying.
+
 ## the reply channel
 
 There are no comments, no reactions and no counter, which leaves the question

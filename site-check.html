@@ -62,6 +62,16 @@ description: what quiet made of your settings and your posts, and anything it ha
         <tr><td><code>footer.github</code></td><td>{% if q_github == "" %}<span class="config-unset">no link</span>{% else %}{{ q_github | escape }}{% endif %}</td></tr>
         <tr><td><code>footer.email</code></td><td>{% if q_email == "" %}<span class="config-unset">no link</span>{% else %}{{ q_email | escape }}{% endif %}</td></tr>
         <tr><td><code>feed.posts_limit</code></td><td>{{ q_feed_limit }}</td></tr>
+        {%- comment -%} State, not a warning. Enabling analytics is the single
+        change with the largest effect on readers, and it was invisible to every
+        channel here — measured from the include itself rather than a setting, so
+        it cannot disagree with what the page actually loads. {%- endcomment -%}
+        {%- capture _analytics %}{% include analytics.html %}{% endcapture -%}
+        {%- assign _analytics_on = false -%}
+        {%- if _analytics contains "<script" or _analytics contains "<img" or _analytics contains "<iframe" -%}
+          {%- assign _analytics_on = true -%}
+        {%- endif -%}
+        <tr><td>analytics</td><td>{% if _analytics_on %}on — <code>_includes/analytics.html</code> is not empty, so this site now makes third-party requests{% else %}<span class="config-unset">off — no request leaves this domain</span>{% endif %}</td></tr>
       </tbody>
     </table>
   </div>
@@ -170,6 +180,47 @@ description: what quiet made of your settings and your posts, and anything it ha
     </li>
     {%- endif %}
   </ol>
+  {%- endif %}
+
+  {%- comment -%}
+    Everything else this repository publishes. Deliberately an inventory and not
+    a warning: an author who adds now.md meant to, and one false alarm here
+    would cost more than this section is worth. But a stray file becoming a
+    themed page in the sitemap is the highest-consequence thing the build does
+    that this page did not mention, so it says what exists and lets the reader
+    judge. Computed here, once per build, rather than in config.html, which runs
+    on every page.
+  {%- endcomment -%}
+  {%- assign _TEMPLATE_PAGES = "index.html|about.md|archive.html|404.html|site-check.html|feed.xml" | split: "|" -%}
+  {%- assign _extra = "" -%}
+  {%- for _p in site.pages -%}
+    {%- unless _TEMPLATE_PAGES contains _p.path or _p.url == "/sitemap.xml" or _p.url == "/robots.txt" -%}
+      {%- assign _extra = _extra | append: _p.url | append: "‖" -%}
+    {%- endunless -%}
+  {%- endfor -%}
+  {%- comment -%} jekyll-sitemap and jekyll-seo-tag generate these; they are the
+  build's own output, not something anyone left lying around. {%- endcomment -%}
+  {%- assign _GENERATED = "/sitemap.xml|/robots.txt|/feed.xml" | split: "|" -%}
+  {%- assign _loose = "" -%}
+  {%- for _f in site.static_files -%}
+    {%- assign _head = _f.path | slice: 0, 8 -%}
+    {%- unless _head == "/assets/" or _GENERATED contains _f.path -%}
+      {%- assign _loose = _loose | append: _f.path | append: "‖" -%}
+    {%- endunless -%}
+  {%- endfor -%}
+  {%- assign _extra_list = _extra | split: "‖" -%}
+  {%- assign _loose_list = _loose | split: "‖" -%}
+  {%- if _extra_list.size > 0 or _loose_list.size > 0 %}
+  <h2>also published</h2>
+  <p>
+    Beyond your posts and <code>/assets/</code>, these are on the live site and in
+    the sitemap. If one of them is a working file rather than a page, add it to
+    <code>exclude:</code> in <code>_config.yml</code>.
+  </p>
+  <ul class="config-extras">
+    {%- for _u in _extra_list %}<li><code>{{ _u | escape }}</code></li>{% endfor -%}
+    {%- for _f in _loose_list %}<li><code>{{ _f | escape }}</code></li>{% endfor -%}
+  </ul>
   {%- endif %}
 
   <h2>about this page</h2>

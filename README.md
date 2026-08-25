@@ -16,15 +16,19 @@ failed; if its details make reading feel effortless, it has succeeded.
 
 1. Click **Use this template** and name the new repo `username.github.io`,
    using your GitHub username. If you fork instead, rename the fork afterward.
-2. In the repo settings, under **Pages**, make sure the source is
-   "Deploy from a branch" with the `main` branch selected and `/ (root)`
-   as the publishing folder.
-3. Edit `_config.yml`. It opens with four settings under "Make it yours" —
+2. Edit `_config.yml`. It opens with four settings under "Make it yours" —
    `title`, `author.name`, `url`, `baseurl` — and everything below them already
    works. Change those four and stop.
-4. Delete the demo posts in `_posts/`, and rewrite `about.md`
-    in your own words.
-5. Write Markdown files in `_posts/` named `YYYY-MM-DD-your-title.md`.
+3. Delete the demo posts in `_posts/`, and rewrite `about.md` in your own words.
+4. Write Markdown files in `_posts/` named `YYYY-MM-DD-your-title.md`.
+5. **Last:** in the repo settings, under **Pages**, set the source to
+   "Deploy from a branch" with `main` and `/ (root)`.
+
+   This step is last on purpose. Everything above it is reversible; this one is
+   not. The moment it builds, the site is public — and a feed entry cannot be
+   recalled from a subscriber's reader once it has been fetched. The first
+   version anyone sees should be yours, not the template's demo posts under
+   your name.
 
 You can skip manual file naming with:
 
@@ -115,6 +119,10 @@ and does.
 If you write **about** templates, wrap the examples in a raw block. Liquid runs
 inside post bodies, so `{{ name }}` in prose is evaluated and vanishes, and a
 Liquid tag inside a code fence is executed instead of shown.
+
+Any Markdown file you leave in the repository becomes a page. `notes.md` at the
+root publishes as `/notes/` and goes into the sitemap — so keep working notes
+outside the repo, or add the filename to `exclude:` in `_config.yml`.
 
 Files in `_drafts/` (no date in the filename) are not rendered by a normal
 build. They are still visible if committed to a public repository, so never

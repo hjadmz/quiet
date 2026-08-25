@@ -104,9 +104,16 @@ if (clash) {
   process.exit(1);
 }
 
+// The commented line is the point of this stub. "Is this ready to be public" is
+// decided in the file, days after anyone read the README, and getting it wrong
+// is the one thing here that cannot be taken back — deleting a published post
+// does not recall it from a feed reader. Inert if you do not need it, one
+// uncomment away if you do.
 const source = `---
 title: ${JSON.stringify(title)}
 description: ""
+# published: false   # uncomment while this is not ready: the only thing that
+#                    # keeps a post off the site, the feed and the sitemap
 ---
 
 Start writing here.
