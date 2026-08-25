@@ -350,7 +350,7 @@ minimal Linux image, use `npx playwright install --with-deps`).
 | `npm run test:hostile` | a broken config still produces a working site, and says what broke |
 | `npm run test:portable` | a fork with the demo content deleted still passes |
 | `npm run test:subpath` | the site works served from `/repo-name` |
-| `npm run test:compat` | Chromium, Firefox, and WebKit, including no-JS, keyboard, print, responsive, and axe |
+| `npm run test:compat` | 13 named devices — folded foldable to 5120px ultrawide — × every route × Chromium, Firefox and WebKit, plus no-JS, keyboard, print, reader-mode and axe |
 
 CI runs all of these, plus the Cloudflare overlay build, plus the whole suite on
 macOS and Windows — because file-name case, `bundle` being a batch file, and the

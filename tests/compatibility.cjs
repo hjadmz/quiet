@@ -38,15 +38,30 @@ const SANDBOX_DENIALS = [
 // Generous, but finite: the whole suite runs in well under a minute per engine
 // on a laptop, so anything past this is stuck rather than slow.
 const PHASE_TIMEOUT_MS = Number(process.env.COMPAT_PHASE_TIMEOUT_MS || 120000);
-const VIEWPORTS = [
-  { width: 280, height: 653 },
-  { width: 320, height: 568 },
-  { width: 390, height: 844 },
-  { width: 768, height: 1024 },
-  { width: 1280, height: 800 },
-  { width: 2560, height: 1352 }
+// Real devices, named, so nobody has to remember to ask about foldables. The
+// list is the promise: a folded Galaxy Z Fold through a 5120px ultrawide, both
+// tablet orientations, a phone in landscape, and the laptop sizes people
+// actually own. Every route is checked on every one of them, in all three
+// engines, on every run — a sweep somebody performs by hand when prompted is not
+// a guarantee, it is a memory.
+const DEVICES = [
+  { name: 'Galaxy Z Fold folded', width: 280, height: 653 },
+  { name: 'small phone', width: 320, height: 568 },
+  { name: 'iPhone SE', width: 375, height: 667 },
+  { name: 'Pixel 8', width: 412, height: 915 },
+  { name: 'Galaxy Z Fold open', width: 717, height: 512 },
+  { name: 'iPhone 15 landscape', width: 852, height: 393 },
+  { name: 'iPad portrait', width: 768, height: 1024 },
+  { name: 'iPad landscape', width: 1024, height: 768 },
+  { name: 'MacBook Air 13', width: 1470, height: 956 },
+  { name: 'Framework 13', width: 1504, height: 1000 },
+  { name: '1080p monitor', width: 1920, height: 1080 },
+  { name: '1440p monitor', width: 2560, height: 1440 },
+  { name: 'ultrawide 5120', width: 5120, height: 1440 }
 ];
-
+// The stress pass — injecting unbreakable strings — only needs the extremes and
+// one middle, where wrapping actually decides the outcome.
+const STRESS = new Set(['Galaxy Z Fold folded', 'Pixel 8', 'iPad portrait', 'ultrawide 5120']);
 function contentType(file) {
   return ({
     '.css': 'text/css; charset=utf-8',
@@ -162,15 +177,40 @@ async function runResponsive(engineName, browser, baseURL) {
   const context = await browser.newContext({ colorScheme: 'dark', reducedMotion: 'reduce' });
   const page = await context.newPage();
   const failures = monitor(page, baseURL);
+  let checks = 0;
 
-  for (const viewport of VIEWPORTS) {
-    await page.setViewportSize(viewport);
+  for (const device of DEVICES) {
+    const label = `${engineName} ${device.name} ${device.width}px`;
+    await page.setViewportSize({ width: device.width, height: device.height });
+
+    // Every route, every device. A layout that holds on the home page and breaks
+    // on the archive is still a broken site.
+    for (const route of ROUTES) {
+      await goto(page, baseURL, route, route === '/404.html' ? 200 : 200);
+      await assertNoOverflow(page, `${label} ${route}`);
+      assertTargets(await controlRects(page, '.site-header a'), `${label} ${route} header`);
+      assertTargets(await controlRects(page, '.footer-links a, .footer-links button'),
+        `${label} ${route} footer`);
+
+      // Exactly one theme icon is visible, whatever the state — three would mean
+      // the state selectors stopped matching and the control started lying.
+      assert.equal(await page.evaluate(() =>
+        [...document.querySelectorAll('.theme-icon')]
+          .filter((icon) => getComputedStyle(icon).display !== 'none').length), 1,
+        `${label} ${route}: exactly one theme icon must show`);
+
+      // A contents list with no entries is worse than none: it takes the space
+      // and answers nothing.
+      assert.equal(await page.evaluate(() => {
+        const toc = document.querySelector('.toc');
+        return toc ? toc.querySelectorAll('a').length > 0 : true;
+      }), true, `${label} ${route}: the contents list rendered with no entries`);
+      checks += 1;
+    }
+
+    if (!STRESS.has(device.name)) continue;
+
     await goto(page, baseURL, '/');
-    await assertNoOverflow(page, `${engineName} home ${viewport.width}px`);
-    assertTargets(await controlRects(page, '.site-header a'), `${engineName} header ${viewport.width}px`);
-    assertTargets(await controlRects(page, '.footer-links a, .footer-links button'),
-      `${engineName} footer ${viewport.width}px`);
-
     await page.locator('.wordmark').evaluate((element) => {
       element.textContent = 'hjadmzdesignengineeringwithoutbreaks';
     });
@@ -180,14 +220,13 @@ async function runResponsive(engineName, browser, baseURL) {
     await page.locator('.footer-meta').last().evaluate((element) => {
       element.textContent = 'averylongunbrokenfooteridentitythatstillneedstowrap';
     });
-    await assertNoOverflow(page, `${engineName} customized home ${viewport.width}px`);
+    await assertNoOverflow(page, `${label} customized home`);
 
     await goto(page, baseURL, '/2026/everything-a-post-can-do/');
-    await assertNoOverflow(page, `${engineName} reference post ${viewport.width}px`);
     await page.locator('.post-header h1').evaluate((element) => {
       element.textContent = 'averylongunbrokenposttitlethatmustneverwidendocumentlayout';
     });
-    await assertNoOverflow(page, `${engineName} customized post ${viewport.width}px`);
+    await assertNoOverflow(page, `${label} customized post`);
 
     const prose = await page.locator('.post-content').evaluate((element) => {
       const style = getComputedStyle(element);
@@ -197,13 +236,18 @@ async function runResponsive(engineName, browser, baseURL) {
         lineHeight: Number.parseFloat(style.lineHeight)
       };
     });
-    assert.ok(prose.width <= 628, `${engineName} ${viewport.width}px: prose measure is ${prose.width}px`);
+    // The measure caps rather than stretching: identical on a 1470px laptop and
+    // a 5120px ultrawide, which is the whole point of a reading column.
+    assert.ok(prose.width <= 628, `${label}: prose measure is ${prose.width}px`);
     assert.ok(prose.fontSize >= 17 && prose.fontSize <= 19.1,
-      `${engineName} ${viewport.width}px: body font is ${prose.fontSize}px`);
+      `${label}: body font is ${prose.fontSize}px`);
     assert.ok(prose.lineHeight / prose.fontSize >= 1.59 && prose.lineHeight / prose.fontSize <= 1.61,
-      `${engineName} ${viewport.width}px: line-height ratio drifted`);
+      `${label}: line-height ratio drifted`);
   }
 
+  if (process.env.COMPAT_VERBOSE) {
+    process.stdout.write(`  ${engineName}: ${checks} device/route combinations clean\n`);
+  }
   assert.deepEqual(failures, [], `${engineName}: browser errors or third-party requests`);
   await context.close();
 }

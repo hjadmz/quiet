@@ -452,10 +452,32 @@ off-screen skip link positioned at `left: -999rem` put ~17,000px of sideways
 scroll into any RTL document — an offset that is harmless only in the direction
 the document cannot scroll.
 
+## why the contents list is at the top, not beside the text
+
+Some sites float a contents list in the margin on wide screens and move it above
+the text on narrow ones. It is a real pattern and it is the wrong one here.
+
+A margin list needs a second column, which needs a breakpoint, which needs a
+decision about where the list sits in reading order — before the article, where
+a screen reader meets it first, or after, where it is useless. On an iPad in
+portrait there is 48px of margin, so there is nowhere to put it; below that,
+nothing. So the pattern buys a cleaner first screen on wide displays only, and
+pays for it with two layouts, a breakpoint and a reading-order compromise that
+applies everywhere.
+
+Measured, the thing it would buy is already small: after the h2-only cut the
+list is 255px on a 1280×900 desktop, and the first paragraph is on screen
+without scrolling. The single column is the design's central claim — one place
+to look, one reading order, identical on every device — and a margin list trades
+that for 255px on desktops only.
+
 ## environments this is verified against
 
-Retained Playwright checks cover Chromium, Firefox, and WebKit at **280, 320,
-390, 768, 1280, and 2560px** with no document-level horizontal overflow — now
+Retained Playwright checks name **13 real devices** — a folded Galaxy Z Fold at
+280px, phones, both iPad orientations, a phone in landscape, laptops, and a
+5120px ultrawide — and visit every route on every one of them in all three
+engines, 195 device/route/engine combinations per run, with no document-level
+horizontal overflow — now
 including a post that embeds a 1400px SVG, a 1280×720 video, a wide figure and a
 running demo. Without containment rules for replaced content those measured
 1,417px of content inside a 280px viewport, scrolling the whole document
