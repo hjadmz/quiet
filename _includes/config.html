@@ -518,16 +518,21 @@
   browser, and the kind of thing found weeks later when the feed will not
   subscribe. Not a wrong value; an unfinished one, which needs saying just as much.
 {%- endcomment -%}
-{%- assign _placeholders = "" -%}
-{%- if _url contains "username.github.io" -%}
-  {%- assign _placeholders = _placeholders | append: ", url" -%}
-{%- endif -%}
-{%- if q_author == "Your Name" -%}
-  {%- assign _placeholders = _placeholders | append: ", author.name" -%}
-{%- endif -%}
-{%- if _placeholders != "" -%}
-  {%- assign _placeholders = _placeholders | remove_first: ", " -%}
-  {%- assign q_problems = q_problems | append: "Still set to the template's placeholder: " | append: _placeholders | append: ". Until url is your own address, every canonical link, the feed, the sitemap and every social preview point somewhere you do not control — which looks fine in a browser and is wrong everywhere it counts." | append: _SEP -%}
+{%- assign _ph_url = false -%}
+{%- assign _ph_author = false -%}
+{%- if _url contains "username.github.io" -%}{%- assign _ph_url = true -%}{%- endif -%}
+{%- if q_author == "Your Name" -%}{%- assign _ph_author = true -%}{%- endif -%}
+{%- comment -%} Each consequence stated only when the setting it belongs to is
+  actually still a placeholder. `jekyll serve` rewrites url to localhost, so
+  during local preview author.name is usually the only one left — and a sentence
+  explaining what a wrong url does to canonical links reads as a non-sequitur
+  when url is not the thing being reported. {%- endcomment -%}
+{%- if _ph_url and _ph_author -%}
+  {%- assign q_problems = q_problems | append: "url and author.name are still the template's placeholders. Until url is your own address every canonical link, the feed, the sitemap and every social preview point somewhere you do not control — which looks fine in a browser and is wrong everywhere it counts — and the feed and the copyright line credit “Your Name”." | append: _SEP -%}
+{%- elsif _ph_url -%}
+  {%- assign q_problems = q_problems | append: "url is still the template's placeholder. Until it is your own address, every canonical link, the feed, the sitemap and every social preview point somewhere you do not control — which looks fine in a browser and is wrong everywhere it counts." | append: _SEP -%}
+{%- elsif _ph_author -%}
+  {%- assign q_problems = q_problems | append: "author.name is still the template's placeholder, so the feed, the copyright line and this page's metadata all credit “Your Name”." | append: _SEP -%}
 {%- endif -%}
 
 {%- comment -%} ---------- result ---------- {%- endcomment -%}

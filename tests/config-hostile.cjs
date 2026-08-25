@@ -327,7 +327,7 @@ try {
     const reported = [...report.matchAll(/<ol class="config-problems">([\s\S]*?)<\/ol>/g)]
       .flatMap((list) => [...list[1].matchAll(/<li>([\s\S]*?)<\/li>/g)])
       .map((match) => decode(match[1].replace(/<[^>]*>/g, '')).replace(/\s+/g, ' ').trim())
-      .filter((line) => !line.startsWith("Still set to the template's placeholder"));
+      .filter((line) => !/still the template's placeholder/.test(line));
     for (const fragment of testCase.problems) {
       assert.ok(reported.some((line) => line.includes(fragment)),
         `"${testCase.name}": nothing reported about "${fragment}".\nReported:\n  ` +

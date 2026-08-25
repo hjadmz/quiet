@@ -61,7 +61,7 @@ const ALLOW_PROBLEMS = process.env.QUIET_ALLOW_CONFIG_PROBLEMS === '1';
 // QUIET_EXPECT_PLACEHOLDER to say "yes, this fixture is the template itself".
 // The exemption belongs to the fixture, not to the check — silencing the check
 // was the earlier, wrong shape of this fix.
-const EXPECTED_PLACEHOLDER = /^Still set to the template's placeholder/;
+const EXPECTED_PLACEHOLDER = /still the template's placeholder/;
 const expectPlaceholder = process.env.QUIET_EXPECT_PLACEHOLDER === '1';
 const unexpected = expectPlaceholder
   ? problems.filter((p) => !EXPECTED_PLACEHOLDER.test(p))
