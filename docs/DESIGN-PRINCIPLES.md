@@ -294,6 +294,23 @@ it is on. The measured archive keeps all 53 titles in that single search scope
 at 11KB. A substantially larger publication should remeasure that tradeoff
 rather than inherit this decision blindly.
 
+## the front page is an invitation, not an index
+
+`posts_on_home` caps at 20, and the number came from measurement rather than
+taste. On a 390×844 phone the home page runs 1.4 screens at five posts, 2.2 at
+ten, 3.7 at twenty, 8.4 at fifty and **16.1 at a hundred** — at which point the
+front page *is* the archive, and the "all posts →" link sitting under it points
+at a page the reader has just finished scrolling through. Two pages doing one
+job, which is the duplication the archive exists to prevent.
+
+Twenty is where it stops being an invitation. Below that a reader takes the list
+in and picks; above it they are browsing an index they did not ask for. The word
+`all` is still there for someone who genuinely wants every post on the front
+page — that is a decision, not an accident, and it should be spelled as one.
+
+The floor matters less and is simpler: a front page with no posts on it has
+nothing to read, so the minimum is one.
+
 ## the archive is the search box
 
 Refusing search only works if the substitute does. Find-in-page can only match

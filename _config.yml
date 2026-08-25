@@ -86,7 +86,11 @@ body_font: sans
 theme_default: system
 
 # How many posts the HOME PAGE lists before the "all posts →" link.
-# A whole number from 1 to 100, or the word `all`.
+# A whole number from 1 to 20, or the word `all`.
+#
+# 20 is the ceiling because that is where a front page stops being an invitation.
+# Measured on a phone: 5 posts is 1.4 screens, 10 is 2.2, 20 is 3.7 — and 100 is
+# 16 screens, which is the archive with an extra step.
 #
 # This is not a limit on how many posts you can have — there is none. The
 # archive always lists every post you have ever written, and nothing is ever

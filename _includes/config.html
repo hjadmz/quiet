@@ -180,7 +180,12 @@
 
 {%- comment -%} ---------- posts_on_home ----------
   The setting most likely to be typed wrong, so it gets the strictest reading:
-  a whole number from 1 to 100, or the word all. One rule, one fallback.
+  a whole number from 1 to 20, or the word all. One rule, one fallback.
+
+  The ceiling is 20 because that is where the front page stops being an
+  invitation. Measured on a 390x844 phone: 5 posts is 1.4 screens, 10 is 2.2,
+  20 is 3.7, 50 is 8.4, and 100 is 16.1 — by which point the home page is the
+  archive, and the link to the archive at the bottom of it is nonsense.
 
   `.first` is non-nil only for arrays — Liquid has no type filter, and without
   that check the list [5, 10] stringifies to "510" and is read as five hundred
@@ -188,7 +193,7 @@
   because their canonical integer form is not the text that was written.
 {%- endcomment -%}
 {%- assign _POSTS_DEFAULT = 5 -%}
-{%- assign _POSTS_MAX = 100 -%}
+{%- assign _POSTS_MAX = 20 -%}
 {%- assign _raw_n = site.posts_on_home -%}
 {%- assign q_posts_on_home = _POSTS_DEFAULT -%}
 {%- assign _in_n = _raw_n | append: "" | strip -%}
@@ -210,7 +215,7 @@
     {%- assign q_problems = q_problems | append: "posts_on_home is " | append: _n | append: ". A home page with no posts has nothing to read on it, so the lowest value is 1. Using 1." | append: _SEP -%}
   {%- elsif _n > _POSTS_MAX -%}
     {%- assign q_posts_on_home = _POSTS_MAX -%}
-    {%- assign q_problems = q_problems | append: "posts_on_home is " | append: _n | append: ", above the maximum of " | append: _POSTS_MAX | append: ". Using " | append: _POSTS_MAX | append: ". If you meant every post, write posts_on_home: all." | append: _SEP -%}
+    {%- assign q_problems = q_problems | append: "posts_on_home is " | append: _n | append: ", above the maximum of " | append: _POSTS_MAX | append: ". The front page is meant to be an invitation, not a second copy of the archive — measured on a phone, 20 posts is under four screens and 100 is sixteen, at which point the “all posts →” link underneath is pointing at a page you have already read. Using " | append: _POSTS_MAX | append: ". If you genuinely want every post on the front page, write posts_on_home: all and mean it." | append: _SEP -%}
   {%- else -%}
     {%- assign q_posts_on_home = _n -%}
   {%- endif -%}

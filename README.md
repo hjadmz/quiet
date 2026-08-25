@@ -241,7 +241,7 @@ the About page, and image files remain ordinary content. The short version:
 | `accent` | the one accent colour; both themes bound their own lightness | ignored; built-in accent stays |
 | `body_font` | `sans` or `serif` — both system stacks | falls back to `sans` |
 | `theme_default` | `system`, `light`, or `dark` | falls back to `system` |
-| `posts_on_home` | how many the **home page** lists; 1–100, or `all`. Not a cap on how many posts you can have — there is none | falls back to 5, or clamps |
+| `posts_on_home` | how many the **home page** lists; 1–20, or `all`. Not a cap on how many posts you can have — there is none | falls back to 5, or clamps |
 | `date_format` | `long`, `short`, `iso`, or a strftime string | falls back to `short` |
 | `footer.github`, `footer.email` | footer links; the email is also the reply line under every post | an unusable value is left out, not linked |
 | `show_reading_time`, `show_credit` | the "6 min read" meta and the footer credit | `"false"` in quotes is read as off, and reported |

@@ -31,7 +31,7 @@ const CASES = [
     name: 'a count far above the maximum',
     config: 'posts_on_home: 1000\n',
     homePosts: POSTS,
-    problems: ['posts_on_home is 1000, above the maximum of 100', 'posts_on_home: all']
+    problems: ['posts_on_home is 1000, above the maximum of 20', 'an invitation, not a second copy of the archive']
   },
   {
     name: 'a negative count',
