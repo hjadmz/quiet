@@ -9,7 +9,7 @@
     "build:subpath": "bundle exec jekyll build --strict_front_matter --destination _site-subpath --config _config.yml,tests/subpath.yml",
     "build:test": "node tests/build-test-site.cjs",
     "dev": "bundle exec jekyll serve --drafts --livereload",
-    "docs:screenshots": "npm run build:cloudflare && node tests/capture-screenshots.cjs",
+    "docs:screenshots": "cross-env JEKYLL_ENV=production npm run build:cloudflare && node tests/capture-screenshots.cjs",
     "test:compat": "npm run build:test && cross-env SITE_ROOT=_site-test node tests/compatibility.cjs",
     "test:config": "node tests/config-lint.cjs",
     "test:hostile": "node tests/config-hostile.cjs",

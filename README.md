@@ -1,7 +1,6 @@
 # quiet
 
 A reading-first Jekyll blog template for GitHub Pages and static hosts.
-[See the live demo](https://quiet.hjadmz.com).
 
 **The philosophy in three sentences.** Function first, then convenience,
 then aesthetics. The reader outranks the writer, and the writer outranks
