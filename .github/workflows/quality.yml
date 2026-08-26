@@ -32,10 +32,12 @@ jobs:
       - run: npm ci --ignore-scripts
 
       # The default GitHub Pages build, a customized fork with the demo content and
-      # the host overlay removed, and a project site served from /quiet.
+      # the host overlay removed, and every shape of address a fork can be served
+      # from: a github.io user site, a github.io project subfolder, a custom domain,
+      # and a custom domain subfolder.
       - run: npm run verify
       - run: npm run test:portable
-      - run: npm run test:subpath
+      - run: npm run test:origins
 
       # The only build that emits _headers, so the only thing exercising the
       # response-header contract. Nothing ran it once, and the whole contract could

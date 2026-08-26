@@ -325,9 +325,12 @@ generated HTML, CSS, JavaScript, XML, and assets are host-independent:
   host-native header configuration separately if you need one.
 - **Any static host, or your own server** — run `bundle exec jekyll build`
   and upload the `_site` folder.
-- **Served from a subfolder** (e.g. `example.com/blog`) — set
-  `baseurl: "/blog"` and check it with `npm run test:subpath`. Template URLs
-  use baseurl-aware filters, so no code changes are needed.
+- **Served from a subfolder** (e.g. `example.com/blog`, or
+  `you.github.io/blog` for a project site) — set `baseurl: "/blog"`. Template
+  URLs use baseurl-aware filters, so no code changes are needed.
+  `npm run test:origins` builds all four shapes — github.io root, github.io
+  subfolder, custom domain, custom domain subfolder — and checks each one's
+  links, canonical tags, feed and sitemap.
 
 `_config.cloudflare.yml` is an example host overlay and is not loaded by a
 normal build. It is kept because it is the only build that emits `_headers`,
@@ -364,7 +367,7 @@ minimal Linux image, use `npx playwright install --with-deps`).
 | `npm run verify` | the site builds and the generated output holds up |
 | `npm run test:hostile` | a broken config still produces a working site, and says what broke |
 | `npm run test:portable` | a fork with the demo content deleted still passes |
-| `npm run test:subpath` | the site works served from `/repo-name` |
+| `npm run test:origins` | the site works at a github.io root, a github.io subfolder, a custom domain and a custom domain subfolder — and no build points at an origin it was not given |
 | `npm run test:compat` | 13 named devices — folded foldable to 5120px ultrawide — × every route × Chromium, Firefox and WebKit, plus no-JS, keyboard, print, reader-mode and axe |
 
 CI runs all of these, plus the Cloudflare overlay build, plus the whole suite on
