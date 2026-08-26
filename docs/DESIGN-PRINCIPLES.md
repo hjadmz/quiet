@@ -13,7 +13,9 @@ The direction is influenced—not endorsed—by
 [Benji Taylor's simplicity, fluidity, and delight](https://benji.org/family-values),
 [Nielsen's usability heuristics](https://www.nngroup.com/articles/ten-usability-heuristics/),
 and [WCAG 2.2](https://www.w3.org/TR/WCAG22/). Rams and Benji explain the
-values; WCAG and retained tests decide whether the implementation works.
+values; WCAG and retained tests decide whether the implementation works. The
+full lineage, and the limitation recorded against each name, is in
+[the lineage, and where each one stops](#the-lineage-and-where-each-one-stops).
 
 ## the ordering principle
 
@@ -22,6 +24,61 @@ remove friction, then create a meaningful experience. Beauty is never
 applied on top; it is what remains when the first two are true. When
 these conflict, the reader outranks the writer, and the writer outranks
 the customizer.
+
+## the sentence this is built to satisfy
+
+> Minimize unnecessary effort while preserving comprehension, agency, safety
+> and human difference.
+
+That is the governing criterion, and it is deliberately stronger than "make the
+interface disappear." The weaker version is wrong in four specific ways, each of
+which has changed a decision recorded in this document:
+
+- **Zero friction is not always human-centered.** Good friction prevents
+  destructive errors, obtains meaningful consent, and encourages reflection. See
+  *where friction belongs*: publishing is the one irreversible act here, so the
+  post stub ships `# published: false` and the README puts the Pages switch last.
+- **"Intuitive" usually means compatible with prior experience, not objectively
+  natural.** Nothing here is discoverable by intuition alone. It is familiar
+  because it behaves like the documents people already read — which is why the
+  archive and Cmd+F replace a bespoke search palette rather than losing to one.
+- **Cognitive Load Theory originated in learning and instructional research.** It
+  is a useful lens, not a complete theory of interface design, and *cognitive
+  load* below uses it as a lens.
+- **Hick–Hyman does not mean every added element uniformly delays every
+  decision.** It is over-applied. Choice overload in particular shows a near-zero
+  mean effect in meta-analysis (Scheibehenne, Greifeneder & Todd, 2010), with
+  moderators rather than a universal law (Chernev, Böckenholt & Goodman, 2015).
+
+The last of these is why this document grades its own evidence instead of citing
+named effects as proof.
+
+## the lineage, and where each one stops
+
+Influence is not endorsement. A famous designer is not right about everything,
+and a design that cannot say where its influences fail has not understood them —
+so the limitation is recorded beside the contribution, and the right-hand column
+is the one that did the most work.
+
+| influence | what it contributes | where it stops |
+|---|---|---|
+| **Dieter Rams** | "Less, but better." Craftsmanship, longevity, rational aesthetics, systems over ornament. | Values and taste, not a method for cognition or code. |
+| **Naoto Fukasawa** | Quiet form; normality; products that disappear into use. Power hidden inside silence. | "Natural" behavior is not universal, and personal intuition still requires testing. |
+| **Jef Raskin** | Computers should adapt to human cognition rather than train humans to accommodate machines. | His own radical interfaces could impose unfamiliarity of a different kind. |
+| **Ben Shneiderman** | Predictability, feedback, reversibility, consistency, user control — the operational spec. | Rules are starting hypotheses, not replacements for research. |
+| **Bret Victor** | Code, visual design and cognition joined by immediate feedback and direct manipulation. | Visionary prototypes still need production discipline. |
+| **Susan Kare** | Function made recognizable through extremely economical visual language. | Good icons cannot rescue a bad workflow. |
+| **Alan Cooper** | Goal-Directed Design: organize around what the person is trying to do, not the machinery. | Personas become stereotypes when invented without research. |
+| **Don Norman** | The psychological vocabulary — affordances, signifiers, the three levels of emotional design. | Foundational rather than final; a textbook, not a destination. |
+| **Sara Hendren** | Forces the account to include disability, adaptation and different bodies instead of one "normal" user. | Deliberately less interested in seamlessness as the overriding goal. |
+| **Lucy Suchman** | Human action is situated, contextual and socially constructed, not derivable from abstract models. | Makes design less tidy — and more truthful. |
+| **Benji Taylor** | The posture of the thing: simplicity, fluidity, delight; a place to show work and write about it. | A single site's taste is a reference, not a specification. |
+
+Hendren and Suchman are the correctives rather than the mirrors, and they are the
+reason two of the strongest checks in this repository exist. *What a reading
+surface owes an RTL language* and *the setting that is not page zoom* both come
+from refusing to design for one supposedly normal reader — and both found real,
+shipping defects that no amount of taste had noticed.
 
 ## a setting cannot break the site
 
