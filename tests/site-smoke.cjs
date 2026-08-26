@@ -243,10 +243,11 @@ if (EXPECT_DEMO) {
   const referencePost = fs.readFileSync(referencePath, 'utf8');
   assert.match(referencePost, /<h3 id="deep-links" class="reference-heading">Headings get anchors<a class="anchor" href="#deep-links" aria-hidden="true" tabindex="-1">#<\/a><\/h3>/,
     'heading anchors must preserve custom ids and classes, and stay out of the accessibility tree');
-  assert.match(referencePost, /<a href="#deep-links">Headings get anchors<\/a>/,
-    'TOC must preserve custom heading ids');
-  assert.match(referencePost, /<div class="table-wrap" tabindex="0"><table class="wide">/,
-    'table wrapper must preserve table attributes');
+  const toc = referencePost.match(/<nav class="toc"[\s\S]*?<\/nav>/)?.[0] || '';
+  assert.doesNotMatch(toc, /href="#deep-links"/,
+    'h3 headings must keep anchors but stay out of the h2-only contents list');
+  assert.match(referencePost, /<div class="table-wrap" tabindex="0"><table(?:\s[^>]*)?>/,
+    'tables must receive a keyboard-scroll wrapper');
   assert.match(referencePost, /assets\/js\/copy\.js\?v=\d+/, 'copy script must be build-versioned');
 }
 

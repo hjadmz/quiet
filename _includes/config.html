@@ -1,10 +1,12 @@
 {%- comment -%}
   quiet — the one place raw _config.yml values become safe values.
 
-  Nothing else in this template reads a user-facing `site.<setting>` directly.
-  Templates read the `q_*` variables defined here, so every setting is
-  validated once, in one place, and a bad value can only ever produce the
-  documented fallback — never a broken page.
+  Theme-owned templates read the `q_*` variables defined here, so supported
+  settings are validated once, in one place, and an unusable parsed value gets
+  the documented fallback. Jekyll's metadata plugins still read a few raw
+  values before Liquid can replace them; those unavoidable boundaries are
+  reported here and listed in docs/ACCEPTANCE.md rather than hidden behind a
+  broader promise.
 
   Three rules, applied to every setting:
     1. Normalize — trim, lowercase, coerce to the expected type.
@@ -77,10 +79,8 @@
   that is present, clickable, and invisible. {%- endcomment -%}
 {%- assign q_title = site.title | append: "" | replace: "​", "" | replace: "‌", "" | replace: "‍", "" | replace: "﻿", "" | strip -%}
 {%- if _BOOL_KEYS contains "title" -%}{%- assign q_title = "" -%}{%- endif -%}
-{%- assign q_title_is_fallback = false -%}
 {%- if q_title == "" -%}
   {%- assign q_title = "home" -%}
-  {%- assign q_title_is_fallback = true -%}
   {%- assign q_problems = q_problems | append: "title is empty. The header link is how a reader gets back to the front page, and a link with no text cannot be seen or announced, so it reads “home” instead. Set title in _config.yml." | append: _SEP -%}
 {%- endif -%}
 
@@ -535,13 +535,14 @@
   {%- assign q_problems = q_problems | append: "author.name is still the template's placeholder, so the feed, the copyright line and this page's metadata all credit “Your Name”." | append: _SEP -%}
 {%- endif -%}
 
-{%- comment -%} The tagline is quiet's own line, and it is the most visible sentence
-  on the home page after the title. It is not a broken value — it works perfectly,
-  which is exactly why it reaches production unnoticed: the README says change four
-  settings and stop, and this is not one of them. An unfinished value, like the two
-  above, so it is said in the same place. {%- endcomment -%}
+{%- comment -%} The tagline and description are quiet's identity. Both are valid,
+  which is why they reach production unnoticed unless unfinished values are treated
+  like the URL and author placeholders above. {%- endcomment -%}
 {%- if q_tagline == "everything it needs, nothing it doesn't." -%}
   {%- assign q_problems = q_problems | append: "tagline is still the template's placeholder line, so your home page introduces itself in quiet's words rather than yours, directly under your name. Write one sentence of your own, or empty it to leave it out." | append: _SEP -%}
+{%- endif -%}
+{%- if q_description == "a quiet blog template for GitHub Pages." -%}
+  {%- assign q_problems = q_problems | append: "description is still the template's placeholder line, so search results, social previews and the feed describe quiet instead of your site. Write one sentence of your own, or empty it to leave it out." | append: _SEP -%}
 {%- endif -%}
 
 {%- comment -%} ---------- result ---------- {%- endcomment -%}

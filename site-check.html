@@ -45,6 +45,7 @@ description: what quiet made of your settings and your posts, and anything it ha
       <tbody>
         <tr><td><code>title</code></td><td>{{ q_title | escape }}</td></tr>
         <tr><td><code>tagline</code></td><td>{% if q_tagline == "" %}<span class="config-unset">not set</span>{% else %}{{ q_tagline | escape }}{% endif %}</td></tr>
+        <tr><td><code>description</code></td><td>{% if q_description == "" %}<span class="config-unset">not set</span>{% else %}{{ q_description | escape }}{% endif %}</td></tr>
         <tr><td><code>author.name</code></td><td>{% if q_author == "" %}<span class="config-unset">not set</span>{% else %}{{ q_author | escape }}{% endif %}</td></tr>
         <tr><td><code>url</code></td><td>{{ site.url | escape }}{{ site.baseurl | escape }}</td></tr>
         <tr><td><code>lang</code></td><td>{{ q_lang | escape }}</td></tr>

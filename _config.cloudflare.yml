@@ -6,11 +6,10 @@
 # present.
 #
 # It is also the starting point for a demo deployment. To publish one, fork this
-# repo, edit the values below to your own origin and identity, and run the suite
-# with EXPECT_DEMO=1 to additionally check the demo routes and that the notice is
-# visible. Nothing here points at a live site; the origin is a reserved example
-# name, so a fork that leaves it alone still gets the header check and advertises
-# nobody's domain.
+# repo, edit the values below and the base config to the demo's origin and
+# identity, write an honest demo_notice, and run `npm run verify:demo`. Nothing
+# here points at a live site; the origin is a reserved example name, so a fork
+# that leaves it alone still gets the header check and advertises nobody's domain.
 url: "https://reader.example"
 baseurl: ""
 include: ["_headers"]

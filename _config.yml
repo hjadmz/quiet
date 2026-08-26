@@ -1,12 +1,14 @@
 # ---------------------------------------------------------------
 # quiet — every setting lives in this one file.
 #
-# Change the four in the first block and you have a working site. Everything
-# below them already has a sensible value and can be left alone.
+# Review the six values in the first block and you have a site that is both
+# working and yours. Everything below them already has a sensible value.
 #
-# Nothing here can break the site. A value quiet cannot use is replaced by the
-# default noted beside it, and the substitution is written out in plain English
-# at /site-check/ on your own site.
+# Once this file is valid YAML, a supported value quiet cannot use is replaced
+# by the default noted beside it, and the substitution is written out in plain
+# English at /site-check/ on your own site. YAML syntax errors cannot be repaired
+# after the parser rejects the file; the quoting rule below prevents the common
+# ones.
 #
 # When in doubt, put quotes around a value. YAML does three surprising things,
 # and quotes fix all of them:
@@ -20,7 +22,7 @@
 
 
 # ===============================================================
-# 1. Make it yours. Change these four.
+# 1. Make it yours. Review these six.
 # ===============================================================
 
 # The site's name. Header, browser tab, feed.
@@ -44,11 +46,6 @@ url: https://username.github.io
 # For a project site served at username.github.io/repo-name, put "/repo-name".
 baseurl: ""
 
-
-# ===============================================================
-# 2. Make it read the way you want. All optional.
-# ===============================================================
-
 # One line under your name on the home page. "" hides it.
 # Use double quotes if you quote it — a single-quoted value cannot contain
 # an apostrophe, and the error it causes points at the wrong line.
@@ -57,6 +54,11 @@ tagline: "everything it needs, nothing it doesn't."
 # How search results and social cards describe the site as a whole.
 # Posts use their own `description` front matter. Often the same as the tagline.
 description: a quiet blog template for GitHub Pages.
+
+
+# ===============================================================
+# 2. Make it read the way you want. All optional.
+# ===============================================================
 
 # Your one accent color: links, focus, text selection. Not decoration.
 # Any CSS color, in quotes — "#386ca0", rebeccapurple, "oklch(52% 0.1 250)".

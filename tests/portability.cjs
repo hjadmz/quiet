@@ -34,8 +34,10 @@ try {
   let config = fs.readFileSync(configPath, 'utf8');
   const replacements = [
     [/^title: .*$/m, 'title: averylongunbrokentemplatetitle'],
-    [/^tagline: .*$/m, 'tagline: ""'],
+    [/^  name: .*$/m, '  name: Example Writer'],
     [/^url: .*$/m, 'url: https://reader.example'],
+    [/^tagline: .*$/m, 'tagline: "notes on making useful things"'],
+    [/^description: .*$/m, 'description: "Independent notes on design and software."'],
     [/^theme_default: .*$/m, 'theme_default: dark'],
     [/^show_reading_time: .*$/m, 'show_reading_time: false'],
   ];
@@ -44,6 +46,21 @@ try {
     config = config.replace(pattern, replacement);
   }
   fs.writeFileSync(configPath, config);
+
+  // A real generated site owns its About page too. Keeping the template's prose
+  // while calling the config personalized is the exact stale-identity failure this
+  // fixture exists to prevent.
+  fs.writeFileSync(path.join(source, 'about.md'), [
+    '---',
+    'layout: page',
+    'title: about',
+    'permalink: /about/',
+    'description: about this independent site.',
+    '---',
+    '',
+    'This is an independent site made from the quiet template.',
+    ''
+  ].join('\n'));
 
   // Analytics is a file edit now, not a config value, so exercise the path an
   // author actually takes: paste the snippet between the markers in the include.
@@ -62,10 +79,25 @@ try {
     'analytics added to the include must pass through its one explicit policy boundary');
   assert.match(home, /https:\/\/analytics\.example\/count\.js/,
     'configured analytics script is missing from the generated head');
-  node(path.join(source, 'tests/config-lint.cjs'), { SITE_ROOT: path.join(source, '_site'), QUIET_EXPECT_PLACEHOLDER: '1' });
+  node(path.join(source, 'tests/config-lint.cjs'), { SITE_ROOT: path.join(source, '_site') });
   node(path.join(source, 'tests/site-smoke.cjs'), { EXPECT_DEMO: '0', EXPECT_CLOUDFLARE: '0' });
   bundle(['exec', 'ruby', path.join(source, 'tests/feed-smoke.rb')], { cwd: ROOT });
   node(path.join(source, 'tests/edge-cases.cjs'), { QUIET_BUNDLE_CWD: ROOT });
+
+  const generatedIdentity = [
+    fs.readFileSync(path.join(source, '_site/index.html'), 'utf8'),
+    fs.readFileSync(path.join(source, '_site/about/index.html'), 'utf8'),
+    fs.readFileSync(path.join(source, '_site/feed.xml'), 'utf8')
+  ].join('\n');
+  for (const leftover of [
+    'Your Name',
+    'username.github.io',
+    "everything it needs, nothing it doesn't.",
+    'a quiet blog template for GitHub Pages.'
+  ]) {
+    assert.equal(generatedIdentity.includes(leftover), false,
+      `personalized fork still publishes template identity: ${leftover}`);
+  }
 
   // The command the README hands a fork must not pin an origin.
   //
@@ -89,8 +121,8 @@ try {
   }
 
   process.stdout.write(
-    'PASS portable fork: no demo posts or Cloudflare overlay, supported config edits, ' +
-    'and no shipped script pins an origin\n'
+    'PASS portable fork: no demo posts or Cloudflare overlay, personalized config and ' +
+    'About page, no template identity, and no shipped script pins an origin\n'
   );
 } finally {
   fs.rmSync(temporary, { recursive: true, force: true });

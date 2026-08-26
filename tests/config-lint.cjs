@@ -6,12 +6,14 @@
 // restate them — it reads the page they already generate, so a rule can never
 // drift between what the site does and what CI checks.
 //
-// It then adds the one guarantee Liquid cannot make. jekyll-seo-tag prints
-// site.lang and site.author.name into meta tags without escaping them, so a
-// quote in either escapes its attribute no matter what the templates do. The
-// template itself ships zero inline event handlers and exactly one inline
-// <style>, so anything else in the output is a value that broke out of its
-// context — including from a plugin this repo does not control.
+// It then adds the one safety guarantee Liquid cannot make. jekyll-seo-tag
+// prints site.lang and site.author.name into meta tags without escaping them,
+// so a quote in either escapes its attribute no matter what the templates do.
+// (It also reads site.description raw; that content mismatch is reported by the
+// page above, while the plugin escapes it safely.) The template itself ships
+// zero inline event handlers and exactly one inline <style>, so anything else
+// in the output is a value that broke out of its context — including from a
+// plugin this repo does not control.
 
 const assert = require('node:assert/strict');
 const fs = require('node:fs');

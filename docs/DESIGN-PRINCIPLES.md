@@ -5,8 +5,9 @@ and measured behavior come first; the reading task comes second; named
 heuristics and psychological effects are lenses, not mechanical proof.
 This document records the reasoning, measurements, and deliberate refusals.
 
-Current measurements are from the 2026-08-24 production candidate unless
-stated otherwise.
+Measurements that remain automated are listed in `docs/ACCEPTANCE.md` and
+printed by the suite. Historical measurements stay dated rather than being
+quietly presented as properties of a later build.
 
 The direction is influenced—not endorsed—by
 [Dieter Rams's principles](https://www.vitsoe.com/us/about/good-design),
@@ -80,18 +81,21 @@ surface owes an RTL language* and *the setting that is not page zoom* both come
 from refusing to design for one supposedly normal reader — and both found real,
 shipping defects that no amount of taste had noticed.
 
-## a setting cannot break the site
+## a parsed setting cannot break the theme
 
 The person most likely to mistype a setting is editing `_config.yml` in the
 GitHub web editor, with no terminal, no build log, and no npm. Any answer that
 reaches only a maintainer is not an answer for them. So the guarantee is split
-in two, and both halves are build-time and plugin-free:
+in two. It begins after YAML has parsed the file and applies to quiet's own
+templates; syntax errors and the few raw values read first by GitHub Pages'
+metadata plugins are recorded as explicit limits rather than folded into it.
 
-**The site keeps working.** `_includes/config.html` is the only place a raw
-`site.<setting>` is read. It normalizes, range-checks and type-checks every
-value, and hands the templates a `q_*` variable that is always usable. A value
-that cannot be used is replaced by the documented default. `posts_on_home` is
-the worked example: `1000` clamps to 100, `-10` and `0` clamp to 1, `abc`,
+**The theme keeps working.** `_includes/config.html` is the choke point for
+user-facing values rendered by quiet. It normalizes, range-checks and
+type-checks them, then hands the templates `q_*` variables that are always
+usable. A parsed value that cannot be used is replaced by the documented
+default. `posts_on_home` is the worked example: `1000` clamps to 20, `-10` and
+`0` clamp to 1, `abc`,
 `3.7`, `true` and `[5, 10]` all fall back to 5, and `all` is a real value
 because someone who typed 1000 meant "all" and deserved a word for it.
 
@@ -119,7 +123,7 @@ them — and `no` is the language code for Norwegian, so `lang: no` was producin
 tell anyone. `title: on` rendered the site name as "true". `author.name: yes`
 printed "© 2026 true" in the footer. All three were silent.
 
-Booleans are detectable in Liquid, so those four keys are now checked for type
+Booleans are detectable in Liquid, so the text keys are checked for type
 before they are checked for content, and a boolean falls back and says why. Two
 related traps cannot be detected, because YAML destroys the evidence before the
 template runs: a `#` in an unquoted value truncates it, and a colon-space stops
@@ -130,11 +134,12 @@ rule that fixes all three at once, which is to quote the value.
 different route: it parses, `site.footer.github` becomes unreadable, and both
 links disappear. That one is checked by shape.
 
-The residue is recorded rather than hidden: `jekyll-seo-tag` prints `site.lang`
-and `site.author.name` into meta tags without escaping them, which no template
-can prevent. `tests/config-lint.cjs` fails the build on any inline event handler
-in the output — the template writes none, so one can only have arrived from a
-value that escaped its attribute.
+The residue is recorded rather than hidden: `jekyll-seo-tag` reads `site.lang`,
+`site.author.name` and `site.description` directly. The first two are printed
+into meta tags without escaping them; the last can expose a YAML boolean even
+when quiet and its feed use the validated fallback. `tests/config-lint.cjs`
+fails the build on any inline event handler in the output — the template writes
+none, so one can only have arrived from a value that escaped its attribute.
 
 ## cognitive load
 

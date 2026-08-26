@@ -35,8 +35,8 @@ collection: posts
     <title type="html">{{ title | smartify | xml_escape }}</title>
   {% endif %}
 
-  {% if site.description %}
-    <subtitle>{{ site.description | xml_escape }}</subtitle>
+  {% if q_description != "" %}
+    <subtitle>{{ q_description | xml_escape }}</subtitle>
   {% endif %}
 
   {% if q_author != "" %}

@@ -1,5 +1,9 @@
 name: Quality
 
+# This workflow tests source and generated output. It never uploads a Pages
+# artifact and never deploys the site; GitHub Pages must use the branch source
+# documented in README.md.
+
 on:
   push:
   pull_request:
@@ -12,6 +16,10 @@ env:
   JEKYLL_ENV: production
   LANG: C.UTF-8
   LC_ALL: C.UTF-8
+  # Only the mother template is supposed to contain its shipped placeholders.
+  # A generated repository inherits this workflow under a different name and
+  # is held to the same clean-config rule as `npm run verify` locally.
+  QUIET_EXPECT_PLACEHOLDER: ${{ github.repository == 'hjadmz/quiet' && '1' || '0' }}
 
 jobs:
   build:

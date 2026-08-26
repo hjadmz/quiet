@@ -15,13 +15,21 @@ failed; if its details make reading feel effortless, it has succeeded.
 
 1. Click **Use this template** and name the new repo `username.github.io`,
    using your GitHub username. If you fork instead, rename the fork afterward.
-2. Edit `_config.yml`. It opens with four settings under "Make it yours" —
-   `title`, `author.name`, `url`, `baseurl` — and everything below them already
-   works. Change those four and stop.
-3. Delete the demo posts in `_posts/`, and rewrite `about.md` in your own words.
+2. Edit the six values under "Make it yours" in `_config.yml`: `title`,
+   `author.name`, `url`, `baseurl`, `tagline`, and `description`. Leave
+   `baseurl` empty for `username.github.io` or a custom domain; write the
+   repository path only for a project site such as `username.github.io/blog`.
+   Write your own tagline and description, or empty either one to omit it.
+3. Delete the demo posts in `_posts/`, rewrite `about.md`, and replace the four
+   identity images in `assets/img/`: `favicon.svg`, `favicon.ico`,
+   `apple-touch-icon.png`, and `og-default.png`. The shipped files say “quiet”
+   and are examples, not a neutral identity for a generated site.
 4. Write Markdown files in `_posts/` named `YYYY-MM-DD-your-title.md`.
 5. **Last:** in the repo settings, under **Pages**, set the source to
    "Deploy from a branch" with `main` and `/ (root)`.
+
+   Do **not** select "GitHub Actions." The inherited Quality workflow only tests
+   the source and generated site; it contains no deployment step.
 
    This step is last on purpose. Everything above it is reversible; this one is
    not. The moment it builds, the site is public — and a feed entry cannot be
@@ -61,11 +69,14 @@ as true and false — which is why Norwegian has to be `lang: "no"` — a `#` st
 a comment mid-line, and a colon-space stops the build. Quotes fix all three, and
 never hurt a value that did not need them.
 
-The rule behind the page: **a mistake in `_config.yml` changes what that page
-says, never whether your site works.** Every setting is validated at build time, and
-an unusable value is replaced by a documented default rather than being passed
-through to break a page. If you have the toolchain, `npm run doctor` prints the
-same report in a terminal and exits non-zero, so CI can fail on it.
+The rule behind the page: **once `_config.yml` is valid YAML, an unusable
+supported value changes what that page says, not whether the site renders.**
+The documented fallback is used instead. Syntax errors cannot be corrected
+after YAML rejects the file, and GitHub Pages' metadata plugins read a few raw
+values before Liquid can replace them; the exact boundaries are recorded in
+[the acceptance report](docs/ACCEPTANCE.md#deliberate-limits). If you have the
+toolchain, `npm run doctor` prints the same report in a terminal and exits
+non-zero.
 
 ## writing posts
 
@@ -301,9 +312,11 @@ in sync, once per theme).
 This template intentionally ships without a `CNAME` file so forks do not
 inherit someone else's domain accidentally.
 
-For GitHub Pages, add a `CNAME` file containing your domain (for example,
-`blog.example.com`), point DNS at GitHub Pages per
-[GitHub's guide](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site),
+For GitHub Pages, first enter the domain under **Settings → Pages → Custom
+domain** and save it. With branch publishing, GitHub creates the `CNAME` file
+in the source branch; adding a file by hand does not configure the account-side
+domain setting. Then point DNS at GitHub Pages per
+[GitHub's guide](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site)
 and update `url` in `_config.yml`.
 
 For Cloudflare Pages, connect the custom domain in the Pages dashboard;
@@ -317,9 +330,11 @@ generated HTML, CSS, JavaScript, XML, and assets are host-independent:
 
 - **Cloudflare Pages** — edit `_config.cloudflare.yml` to your own URL and
   identity, keeping `include: ["_headers"]`. Connect the repo, set the
-  production branch to `main`, build command to `npm run verify:cloudflare`,
+  production branch to `main`, build command to `npm run build:cloudflare`,
   and output directory to `_site`. Set `RUBY_VERSION=3.3.12`,
   `JEKYLL_ENV=production`, and `BUNDLE_FROZEN=true` in production and previews.
+  Git integration rebuilds automatically on pushes; no Worker or Wrangler
+  configuration is needed for this static site.
 - **Netlify or another static host** — run `npm run build` and publish
   `_site`. That generic build emits no host-specific response policy; add a
   host-native header configuration separately if you need one.
@@ -342,8 +357,20 @@ is also fine, and the check drops out with it.
 
 To publish a demo of the template rather than a blog, fork this repo, point that
 overlay at the fork's own domain, and set `demo_notice` to a line saying what the
-site is. Running the suite with `EXPECT_DEMO=1` then additionally checks that the
-demo posts are present and that the notice is visible.
+site is, including that the sample content used substantial AI assistance. Run
+`npm run verify:demo`; it additionally checks that the demo posts, canonical
+origin, notice, feed, and deployment headers agree.
+
+## updates
+
+**Use this template creates an independent site, not a synchronized child.**
+That protects `_config.yml`, `_posts/`, `about.md`, and identity images from
+being overwritten, but later quiet fixes do not arrive automatically. Release
+tags are stable comparison points: review the files changed between releases
+and carry over the relevant template fixes deliberately. If you want GitHub's
+upstream relationship instead, use **Fork**; updates can then be merged, but
+conflicts in personalized files still require a decision. There is no honest
+one-click update that can distinguish your writing from template code.
 
 ## local preview
 
@@ -364,7 +391,10 @@ minimal Linux image, use `npx playwright install --with-deps`).
 | command | what it proves |
 |---------|----------------|
 | `npm run doctor` | your `_config.yml` and posts are clean; exits non-zero if not |
-| `npm run verify` | the site builds and the generated output holds up |
+| `npm run verify` | a generated site has no unfinished template identity, builds, and its output holds up |
+| `npm run verify:template` | the mother template itself builds while explicitly allowing its shipped placeholders |
+| `npm run verify:cloudflare:template` | the mother template and its Cloudflare response-header overlay both hold up |
+| `npm run verify:demo` | an explicitly labeled public template demo is internally consistent |
 | `npm run test:hostile` | a broken config still produces a working site, and says what broke |
 | `npm run test:portable` | a fork with the demo content deleted still passes |
 | `npm run test:origins` | the site works at a github.io root, a github.io subfolder, a custom domain and a custom domain subfolder — and no build points at an origin it was not given |

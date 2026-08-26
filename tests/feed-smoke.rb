@@ -133,6 +133,11 @@ DEVIATIONS = [
    %q(<link href="{{ '/' | absolute_url }}" rel="alternate" type="text/html" {% if site.lang %}hreflang="{{ site.lang }}" {% endif %}/>),
    %q(<link href="{{ '/' | absolute_url }}" rel="alternate" type="text/html" hreflang="{{ q_lang | xml_escape }}" />)],
 
+  ["validated feed subtitle — a YAML boolean or unusable value must not become the " \
+   "site description in every subscriber's reader",
+   %Q(  {% if site.description %}\n    <subtitle>{{ site.description | xml_escape }}</subtitle>\n  {% endif %}),
+   %Q(  {% if q_description != "" %}\n    <subtitle>{{ q_description | xml_escape }}</subtitle>\n  {% endif %})],
+
   ["feed-level author present only when there is a name — upstream's guard is true for " \
    "author: {name: \"\"}",
    "{% if site.author %}",

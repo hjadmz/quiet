@@ -138,13 +138,14 @@ const CASES = [
     // <html lang="false"> with nothing reported; `title: on` rendered the site
     // name as "true"; `author.name: yes` printed "© 2026 true".
     name: 'bare words YAML reads as true or false',
-    config: 'lang: no\ntitle: on\ntagline: off\nauthor:\n  name: yes\n',
+    config: 'lang: no\ntitle: on\ntagline: off\ndescription: yes\nauthor:\n  name: yes\n',
     homePosts: POSTS,
     problems: [
       'lang was read as a true/false value',
       'the language code for Norwegian has to be written lang: "no"',
       'title was read as a true/false value',
       'tagline was read as a true/false value',
+      'description was read as a true/false value',
       'author.name was read as a true/false value'
     ],
     expect: (home) => {

@@ -17,8 +17,11 @@
     "test:portable": "node tests/portability.cjs",
     "test:site": "node tests/site-smoke.cjs",
     "test:origins": "node tests/origins.cjs",
-    "verify": "ruby --version && bundle --version && npm run test:edge && npm run test:hostile && npm run build && cross-env QUIET_EXPECT_PLACEHOLDER=1 npm run test:config && cross-env EXPECT_DEMO=0 EXPECT_CLOUDFLARE=0 npm run test:site && npm run test:feed",
-    "verify:cloudflare": "ruby --version && bundle --version && npm run test:edge && npm run test:hostile && npm run build:cloudflare && cross-env QUIET_EXPECT_PLACEHOLDER=1 npm run test:config && cross-env SITE_URL=https://reader.example EXPECT_DEMO=0 EXPECT_CLOUDFLARE=1 npm run test:site && npm run test:feed"
+    "verify": "ruby --version && bundle --version && npm run test:edge && npm run test:hostile && npm run build && npm run test:config && cross-env EXPECT_DEMO=0 EXPECT_CLOUDFLARE=0 npm run test:site && npm run test:feed",
+    "verify:template": "cross-env QUIET_EXPECT_PLACEHOLDER=1 npm run verify",
+    "verify:cloudflare": "ruby --version && bundle --version && npm run test:edge && npm run test:hostile && npm run build:cloudflare && npm run test:config && cross-env SITE_URL=https://reader.example EXPECT_DEMO=0 EXPECT_CLOUDFLARE=1 npm run test:site && npm run test:feed",
+    "verify:cloudflare:template": "cross-env QUIET_EXPECT_PLACEHOLDER=1 npm run verify:cloudflare",
+    "verify:demo": "ruby --version && bundle --version && npm run test:edge && npm run test:hostile && npm run build:cloudflare && npm run test:config && cross-env EXPECT_DEMO=1 EXPECT_CLOUDFLARE=1 npm run test:site && cross-env EXPECT_DEMO=1 npm run test:feed"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",
