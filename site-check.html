@@ -219,13 +219,14 @@ description: what quiet made of your settings and your posts, and anything it ha
       {%- assign _extra = _extra | append: _p.url | append: "‖" -%}
     {%- endunless -%}
   {%- endfor -%}
-  {%- comment -%} jekyll-sitemap and jekyll-seo-tag generate these; they are the
-  build's own output, not something anyone left lying around. {%- endcomment -%}
-  {%- assign _GENERATED = "/sitemap.xml|/robots.txt|/feed.xml" | split: "|" -%}
+  {%- comment -%} The plugins generate the first three. GitHub adds CNAME when a
+  fork saves a custom domain. They are expected infrastructure, not stray author
+  files, so reporting them would turn a correct deployment into a false alarm. {%- endcomment -%}
+  {%- assign _EXPECTED_OUTPUT = "/sitemap.xml|/robots.txt|/feed.xml|/CNAME" | split: "|" -%}
   {%- assign _loose = "" -%}
   {%- for _f in site.static_files -%}
     {%- assign _head = _f.path | slice: 0, 8 -%}
-    {%- unless _head == "/assets/" or _GENERATED contains _f.path -%}
+    {%- unless _head == "/assets/" or _EXPECTED_OUTPUT contains _f.path -%}
       {%- assign _loose = _loose | append: _f.path | append: "‖" -%}
     {%- endunless -%}
   {%- endfor -%}
@@ -234,9 +235,10 @@ description: what quiet made of your settings and your posts, and anything it ha
   {%- if _extra_list.size > 0 or _loose_list.size > 0 %}
   <h2>also published</h2>
   <p>
-    Beyond your posts and <code>/assets/</code>, these are on the live site and in
-    the sitemap. If one of them is a working file rather than a page, add it to
-    <code>exclude:</code> in <code>_config.yml</code>.
+    Beyond your posts and <code>/assets/</code>, these files or pages are also on
+    the live site. Pages appear in the sitemap; static files do not. If one is a
+    working file rather than something readers need, add it to <code>exclude:</code>
+    in <code>_config.yml</code>.
   </p>
   <ul class="config-extras">
     {%- for _u in _extra_list %}<li><code>{{ _u | escape }}</code></li>{% endfor -%}

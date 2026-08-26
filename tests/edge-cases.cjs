@@ -79,6 +79,7 @@ The home list should show only this post's date.
   const forkOutput = path.join(temporary, 'fork-site');
   fs.cpSync(source, forkSource, { recursive: true });
   fs.rmSync(path.join(forkSource, 'about.md'), { force: true });
+  fs.writeFileSync(path.join(forkSource, 'CNAME'), 'reader.example\n');
   for (const name of fs.readdirSync(path.join(forkSource, '_posts'))) {
     fs.rmSync(path.join(forkSource, '_posts', name), { force: true });
   }
@@ -116,6 +117,10 @@ The home list should show only this post's date.
   const forkCheck = fs.readFileSync(path.join(forkOutput, 'site-check/index.html'), 'utf8');
   assert.match(forkCheck, /about\.md/,
     'site-check must name the page the header expected, so removing one is not silent');
+  assert.doesNotMatch(forkCheck, /<code>\/CNAME<\/code>/,
+    'a GitHub Pages custom-domain file is expected infrastructure, not stray output');
+  assert.equal(fs.readFileSync(path.join(forkOutput, 'CNAME'), 'utf8'), 'reader.example\n',
+    'ignoring CNAME in the report must not keep GitHub Pages from publishing it');
 
   const forkFeed = fs.readFileSync(path.join(forkOutput, 'feed.xml'), 'utf8');
   assert.match(forkFeed, /<feed[\s>]/, 'the feed must still be valid Atom with no posts');
@@ -123,7 +128,7 @@ The home list should show only this post's date.
 
   process.stdout.write(
     'PASS edge-case build: minimum reading time, empty descriptions, ' +
-    'and a day-one fork with no posts and no about page\n'
+    'and a day-one fork with a custom domain, no posts, and no about page\n'
   );
 } finally {
   fs.rmSync(temporary, { recursive: true, force: true });
