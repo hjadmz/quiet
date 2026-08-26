@@ -37,6 +37,13 @@
         circle in a 24px box, 2px stroke — so they read as a set, and differ in
         outline so they are told apart at a glance rather than by inspection.
 
+        The crescent sits 1.7 units above centre on purpose. Centring the box is
+        not centring the mark: a crescent's ink is bottom-heavy, so a box centred
+        against the word left the ink 1.15px low beside it — measured by rendering
+        each icon and taking the centroid of its coverage, against 0.09px for the
+        sun and 0.08px for the half-circle. Geometry was right and the eye was
+        right too; they were measuring different things.
+
         The set this replaced drew light and dark as two near-identical suns,
         which at 16px is the mystery-meat failure an icon exists to prevent: a
         wrong icon is worse than none. The half-circle for "follow the system"
@@ -50,7 +57,7 @@
         and it is worth it.
       {%- endcomment -%}
       <svg class="theme-icon theme-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4.25"/><path d="M12 2.5v2.25M12 19.25v2.25M4.22 4.22l1.6 1.6M18.18 18.18l1.6 1.6M2.5 12h2.25M19.25 12h2.25M4.22 19.78l1.6-1.6M18.18 5.82l1.6-1.6"/></svg>
-      <svg class="theme-icon theme-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20.5 14.5A8.9 8.9 0 0 1 9.5 3.5a8.9 8.9 0 1 0 11 11Z"/></svg>
+      <svg class="theme-icon theme-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20.5 12.8A8.9 8.9 0 0 1 9.5 1.8a8.9 8.9 0 1 0 11 11Z"/></svg>
       <svg class="theme-icon theme-system" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5a8.5 8.5 0 0 0 0 17Z" fill="currentColor" stroke="none"/></svg>
       <span class="theme-text"><span class="visually-hidden">theme: </span><span id="theme-label">{{ q_theme_default }}</span></span>
     </button>
