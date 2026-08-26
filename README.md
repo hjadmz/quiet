@@ -212,9 +212,11 @@ at once. A client-side index would need JavaScript and reimplement a control the
 reader already owns; a hosted one would be a third-party request on every page.
 
 **There is no limit on how many posts you can have**, and nothing is ever hidden
-or deleted to make room. Measured on a 500-post site: it builds in 6.4 seconds,
-the archive lists all 500, and it loads in 48 ms on a phone with no horizontal
-overflow. `posts_on_home` only decides how many the *front page* shows.
+or deleted to make room. `npm run test:scale` rebuilds a 500-post site and fails
+if any title or description leaves the single find-in-page scope, if the home
+page escapes its configured cap, if the feed grows without bound, or if the
+sitemap loses posts. `posts_on_home` only decides how many the *front page*
+shows.
 
 What does change with scale is how comfortable that one long page is. At 53
 posts the archive is about 5.7 desktop screens; at 500 it is 62 phone screens
@@ -398,6 +400,7 @@ minimal Linux image, use `npx playwright install --with-deps`).
 | `npm run test:hostile` | a broken config still produces a working site, and says what broke |
 | `npm run test:portable` | a fork with the demo content deleted still passes |
 | `npm run test:origins` | the site works at a github.io root, a github.io subfolder, a custom domain and a custom domain subfolder — and no build points at an origin it was not given |
+| `npm run test:scale` | a 500-post site keeps every title and description in one bounded find-in-page archive |
 | `npm run test:compat` | 13 named devices — folded foldable to 5120px ultrawide — × every route × Chromium, Firefox and WebKit, plus no-JS, keyboard, print, reader-mode and axe |
 
 CI runs all of these, plus the Cloudflare overlay build, plus the whole suite on

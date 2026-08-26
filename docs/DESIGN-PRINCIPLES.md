@@ -428,13 +428,13 @@ It is also what sets the threshold for revisiting the decision: not a post
 count, but the point where the archive stops being scannable in one pass —
 around ten phone screens, or 100 KB of HTML.
 
-Measured at the far end so the ceiling is a number rather than a worry: a
-500-post site builds in 6.4 seconds, generates all 504 pages, lists every post
-on the archive, and loads that archive in 48 ms on a phone with no horizontal
-overflow — 158 KB raw, 13 KB gzipped, 54,527 characters in one find-in-page
-scope. Nothing breaks; it is simply 62 phone screens long. The design holds
-comfortably to roughly 75–100 posts and keeps working well past that, which
-makes the archive a choice rather than a ceiling.
+The far end is now a retained contract rather than a dated anecdote:
+`npm run test:scale` generates 500 posts and requires every title and
+description to remain in one archive, the home page and feed to remain bounded,
+and the sitemap to retain the complete site. Nothing breaks; the archive is
+simply long. The design is comfortable to scan to roughly 75–100 posts and
+keeps working well past that, which makes the archive a choice rather than a
+ceiling.
 
 The 404 page routes there too. Someone reading it followed a dead link to a
 specific post; the home page shows five, and the archive shows everything.
