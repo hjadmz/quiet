@@ -1,6 +1,7 @@
-# quiet
+# hjadmz.com
 
-A reading-first Jekyll blog template for GitHub Pages and static hosts.
+The canonical source for [hjadmz.com](https://hjadmz.com), built with the
+reading-first `quiet` Jekyll template and published by GitHub Pages.
 
 **The philosophy in three sentences.** Function first, then convenience,
 then aesthetics. The reader outranks the writer, and the writer outranks
@@ -11,29 +12,20 @@ failed; if its details make reading feel effortless, it has succeeded.
 |-------|------|
 | ![The home page in light mode: a small wordmark, a one-line bio, and a clean list of posts on a warm off-white background.](docs/screenshot-light.png) | ![The same home page in dark mode: soft off-white text on an elevated near-black background.](docs/screenshot-dark.png) |
 
-## quickstart
+## publish a post
 
-1. Click **Use this template** and name the new repo `username.github.io`,
-   using your GitHub username. If you fork instead, rename the fork afterward.
-2. Edit `_config.yml`. It opens with four settings under "Make it yours" —
-   `title`, `author.name`, `url`, `baseurl` — and everything below them already
-   works. Change those four and stop.
-3. Delete the demo posts in `_posts/`, and rewrite `about.md` in your own words.
-4. Write Markdown files in `_posts/` named `YYYY-MM-DD-your-title.md`.
-5. **Last:** in the repo settings, under **Pages**, set the source to
-   "Deploy from a branch" with `main` and `/ (root)`.
+1. Create a Markdown file in `_posts/` named `YYYY-MM-DD-your-title.md`, or run:
 
-   This step is last on purpose. Everything above it is reversible; this one is
-   not. The moment it builds, the site is public — and a feed entry cannot be
-   recalled from a subscriber's reader once it has been fetched. The first
-   version anyone sees should be yours, not the template's demo posts under
-   your name.
+   ```bash
+   npm run blog:new -- "My post title"
+   ```
 
-You can skip manual file naming with:
+2. Write the post and set `published: true` if the scaffold included
+   `published: false`.
+3. Commit and push to `main`. GitHub Pages rebuilds the site automatically.
 
-```bash
-npm run blog:new -- "My post title"
-```
+For a browser-only edit, use **Add file → Create new file** on GitHub, create the
+same `_posts/YYYY-MM-DD-title.md` path, preview it, and commit to `main`.
 
 GitHub Pages rebuilds after each push to `main`; the exact wait varies.
 The hosted path requires no local build tools. Local preview and the

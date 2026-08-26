@@ -2,35 +2,13 @@
 layout: page
 title: about
 permalink: /about/
-description: what the quiet Jekyll template is designed to do.
+description: About Henry Adams and the work documented on this site.
 ---
 
-quiet is a minimal Jekyll blog template designed around the act of
-reading: one measured column, familiar links, no tracking, and no
-interface competing with the text.
+I’m Henry Adams, a design engineer in training focused on the space between design and software.
 
-{%- comment -%}
-  Conditional because it is a claim about the reader, and a claim that stops
-  being true the moment analytics is switched on is worse than no claim. It
-  checks the actual include rather than a setting, so it cannot drift from what
-  the page really loads.
-{%- endcomment -%}
-{%- capture _analytics %}{% include analytics.html %}{% endcapture -%}
-{%- if _analytics contains "<script" or _analytics contains "<img" or _analytics contains "<iframe" -%}
-this site uses an analytics service, so some requests go to a third party. the
-only thing quiet itself keeps on your device is which theme you picked, and
-clearing your browser data removes it.
-{%- else -%}
-this site has no analytics, no cookies, and makes no request to anyone else —
-every byte comes from this domain. the only thing kept on your device is which
-theme you picked, and clearing your browser data removes it.
-{%- endif -%}
+I build web products and study how interfaces, systems, and technology can be made clearer, more useful, and more intentional. My work centers on front-end development, interaction design, and human-centered computing, with a particular interest in products where design and engineering are treated as one discipline rather than separate steps.
 
-there is no comment box and nothing to click to show approval. if something here
-is wrong, or useful, the reply channel is email — set `footer.email` in
-`_config.yml` and it appears in the footer, and under every post.
+This site is where I document what I’m building, learning, and figuring out along the way.
 
-this hosted copy is a demo. delete the sample posts in `_posts/` and
-rewrite this page with your own words. the
-[source](https://github.com/hjadmz/quiet) includes the design rationale,
-acceptance checks, and instructions for replacing this page with your own.
+My approach is simple: **Function → Convenience → Aesthetics.**

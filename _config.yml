@@ -26,19 +26,19 @@
 # The site's name. Header, browser tab, feed.
 # Empty falls back to the word "home", so the link back to the front page
 # always has something to click.
-title: quiet
+title: hjadmz
 
 # Who wrote it. Feed, copyright line, page metadata.
 # `author: Your Name` also works. Avoid quotes and angle brackets: jekyll-seo-tag
 # prints this straight into a meta tag without escaping it.
 author:
-  name: Your Name
+  name: Henry Adams
 
 # Where the site lives, without a trailing slash.
 # https://username.github.io, or your own domain.
 # Worth getting right the first time: it is invisible in the browser and wrong
 # everywhere it matters — canonical links, the feed, the sitemap, social previews.
-url: https://username.github.io
+url: https://hjadmz.com
 
 # Leave empty unless the repo is NOT named username.github.io.
 # For a project site served at username.github.io/repo-name, put "/repo-name".
@@ -52,11 +52,11 @@ baseurl: ""
 # One line under your name on the home page. "" hides it.
 # Use double quotes if you quote it — a single-quoted value cannot contain
 # an apostrophe, and the error it causes points at the wrong line.
-tagline: "everything it needs, nothing it doesn't."
+tagline: "Function → Convenience → Aesthetics."
 
 # How search results and social cards describe the site as a whole.
 # Posts use their own `description` front matter. Often the same as the tagline.
-description: a quiet blog template for GitHub Pages.
+description: "Notes on design engineering, front-end development, systems, and the things I’m building and learning."
 
 # Your one accent color: links, focus, text selection. Not decoration.
 # Any CSS color, in quotes — "#386ca0", rebeccapurple, "oklch(52% 0.1 250)".
@@ -110,7 +110,7 @@ date_format: short
 # The email is more than a footer link: with no comments and no reactions, it is
 # the only way a reader can answer you, and it appears under every post.
 footer:
-  github: ""            # your username alone, e.g. octocat
+  github: "hjadmz"      # your username alone, e.g. octocat
   email: ""             # e.g. you@example.com
 
 # "· 6 min read" on posts.
@@ -119,7 +119,7 @@ footer:
 show_reading_time: true
 
 # "built with quiet" in the footer. false removes it — guilt-free, it's MIT.
-show_credit: true
+show_credit: false
 
 
 # ===============================================================
@@ -133,7 +133,7 @@ lang: en
 # IANA timezone for post dates and feed timestamps.
 # America/New_York, Europe/Berlin, Asia/Tokyo. `npm run blog:new` reads it too,
 # so new files get the right day.
-timezone: Etc/UTC
+timezone: America/Chicago
 
 # Icons and the social-preview image are files, not settings. Replace them in
 # place: assets/img/favicon.svg, favicon.ico, apple-touch-icon.png, and
