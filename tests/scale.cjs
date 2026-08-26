@@ -80,7 +80,11 @@ try {
   }
 
   const started = Date.now();
-  jekyllBuild({ cwd: source, source, destination });
+  // bundle runs from ROOT, not from the copy. The copy deliberately excludes
+  // .bundle and vendor, so `bundle exec` inside it cannot find jekyll — which
+  // passes on a machine with jekyll on its PATH and fails on all three CI
+  // runners. --source points the build at the copy instead.
+  jekyllBuild({ cwd: ROOT, source, destination });
   const buildMs = Date.now() - started;
 
   const read = (...parts) => fs.readFileSync(path.join(destination, ...parts), 'utf8');
