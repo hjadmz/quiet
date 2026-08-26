@@ -67,7 +67,30 @@ try {
   bundle(['exec', 'ruby', path.join(source, 'tests/feed-smoke.rb')], { cwd: ROOT });
   node(path.join(source, 'tests/edge-cases.cjs'), { QUIET_BUNDLE_CWD: ROOT });
 
-  process.stdout.write('PASS portable fork: no demo posts or Cloudflare overlay, supported config edits\n');
+  // The command the README hands a fork must not pin an origin.
+  //
+  // It did. `verify` passed SITE_URL=https://username.github.io, so the moment an
+  // author set their own `url` in _config.yml — step 2 of the quickstart — their own
+  // CI failed with "generated home canonical uses https://theirsite, expected
+  // https://username.github.io". The template shipped a workflow that punished people
+  // for using the template. site-smoke already falls back to the site's own canonical
+  // when SITE_URL is unset, so the check was always right; only the caller was wrong.
+  //
+  // The build above proves the behaviour end to end with url: https://reader.example.
+  // This proves the scripts a fork actually runs cannot reintroduce the pin, which the
+  // build cannot: it invokes the harnesses directly rather than through npm.
+  const scripts = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8')).scripts;
+  for (const name of ['verify', 'doctor', 'test:compat', 'test:edge', 'test:portable', 'test:config']) {
+    assert.doesNotMatch(scripts[name] || '', /SITE_URL=https?:\/\//,
+      `${name} pins a site origin. A fork runs this against its own site, so any ` +
+      'literal origin here fails for everyone except this repository. Demo-only ' +
+      'scripts (verify:cloudflare, verify:demo) and self-contained fixtures may pin one.');
+  }
+
+  process.stdout.write(
+    'PASS portable fork: no demo posts or Cloudflare overlay, supported config edits, ' +
+    'and no shipped script pins an origin\n'
+  );
 } finally {
   fs.rmSync(temporary, { recursive: true, force: true });
 }
