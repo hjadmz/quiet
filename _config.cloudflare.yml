@@ -1,10 +1,18 @@
-url: "https://quiet.hjadmz.com"
+# Example host overlay, not loaded by a normal build.
+#
+# It exists for one reason the template needs: this is the only build that emits
+# _headers, so it is the only thing that exercises the response-header contract.
+# `npm run verify:cloudflare` builds with it, and CI runs that whenever the file is
+# present.
+#
+# It is also the starting point for a demo deployment. To publish one, fork this
+# repo, edit the values below to your own origin and identity, and run the suite
+# with EXPECT_DEMO=1 to additionally check the demo routes and that the notice is
+# visible. Nothing here points at a live site; the origin is a reserved example
+# name, so a fork that leaves it alone still gets the header check and advertises
+# nobody's domain.
+url: "https://reader.example"
 baseurl: ""
 include: ["_headers"]
-description: "a live demo of quiet, a minimal Jekyll blog template."
-author:
-  name: "hjadmz"
-demo_notice: "template demo · sample content · built with substantial AI assistance"
-footer:
-  github: "hjadmz"
-  email: ""
+description: "an example deployment of quiet, a minimal Jekyll blog template."
+demo_notice: ""

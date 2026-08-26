@@ -83,8 +83,9 @@ try {
   for (const name of ['verify', 'doctor', 'test:compat', 'test:edge', 'test:portable', 'test:config']) {
     assert.doesNotMatch(scripts[name] || '', /SITE_URL=https?:\/\//,
       `${name} pins a site origin. A fork runs this against its own site, so any ` +
-      'literal origin here fails for everyone except this repository. Demo-only ' +
-      'scripts (verify:cloudflare, verify:demo) and self-contained fixtures may pin one.');
+      'literal origin here fails for everyone except this repository. The host-overlay ' +
+      'script (verify:cloudflare) and self-contained fixtures may pin one, because the ' +
+      'origin they pin is the reserved example name the overlay itself carries.');
   }
 
   process.stdout.write(

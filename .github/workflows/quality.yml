@@ -32,21 +32,23 @@ jobs:
       - run: npm ci --ignore-scripts
 
       # The default GitHub Pages build, a customized fork with the demo content and
-      # the hjadmz overlay removed, and a project site served from /quiet.
+      # the host overlay removed, and a project site served from /quiet.
       - run: npm run verify
       - run: npm run test:portable
       - run: npm run test:subpath
 
-      # The Cloudflare overlay is the documented production path for the public demo,
-      # and it is the only build that emits _headers. Nothing exercised it, so the
-      # entire response-header contract could break and CI would stay green.
+      # The only build that emits _headers, so the only thing exercising the
+      # response-header contract. Nothing ran it once, and the whole contract could
+      # have broken with CI still green.
       #
-      # Template-only: _config.cloudflare.yml carries the demo's own origin, and the
-      # README tells a fork to delete it. Running this in a fork either tests someone
-      # else's domain or fails on a file the fork was told to remove. Every other job
-      # here is about the site in the repository, so a fork's CI is about the fork.
+      # Gated on the file, not on the repository name. It used to be gated on the
+      # name because the overlay carried a personal origin, which meant a fork either
+      # tested someone else's domain or failed on a file it had been told to delete.
+      # The overlay now names a reserved example and nobody, so a fork that keeps it
+      # gets the same header check, and a fork that deletes it drops the job with it
+      # instead of failing on it.
       - run: npm run verify:cloudflare
-        if: github.repository == 'hjadmz/quiet'
+        if: hashFiles('_config.cloudflare.yml') != ''
 
   # This suite passes or fails depending on the machine, not only on the code: file
   # name case matters on Linux and not on macOS, `bundle` is a batch file on Windows,

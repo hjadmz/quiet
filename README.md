@@ -315,9 +315,8 @@ hostname and set `url` to it.
 The repository uses GitHub Pages' pinned Jekyll dependency set, but the
 generated HTML, CSS, JavaScript, XML, and assets are host-independent:
 
-- **Cloudflare Pages** — replace `_config.cloudflare.yml` with your own URL
-  and identity; clear or rewrite its `description`, `demo_notice`, and footer,
-  while keeping `include: ["_headers"]`. Connect the repo, set the
+- **Cloudflare Pages** — edit `_config.cloudflare.yml` to your own URL and
+  identity, keeping `include: ["_headers"]`. Connect the repo, set the
   production branch to `main`, build command to `npm run verify:cloudflare`,
   and output directory to `_site`. Set `RUBY_VERSION=3.3.12`,
   `JEKYLL_ENV=production`, and `BUNDLE_FROZEN=true` in production and previews.
@@ -330,9 +329,18 @@ generated HTML, CSS, JavaScript, XML, and assets are host-independent:
   `baseurl: "/blog"` and check it with `npm run test:subpath`. Template URLs
   use baseurl-aware filters, so no code changes are needed.
 
-`_config.cloudflare.yml` contains only the settings for the public
-`quiet.hjadmz.com` demo. A fork should delete it or replace it with its own
-overlay; it is not loaded by a normal build.
+`_config.cloudflare.yml` is an example host overlay and is not loaded by a
+normal build. It is kept because it is the only build that emits `_headers`,
+so it is the only thing that exercises the response-header contract — CI runs
+`npm run verify:cloudflare` whenever the file is present, in a fork as well as
+here. Its origin is a reserved example name and it names nobody, so leaving it
+alone is safe. Editing it to your own URL is how you would deploy; deleting it
+is also fine, and the check drops out with it.
+
+To publish a demo of the template rather than a blog, fork this repo, point that
+overlay at the fork's own domain, and set `demo_notice` to a line saying what the
+site is. Running the suite with `EXPECT_DEMO=1` then additionally checks that the
+demo posts are present and that the notice is visible.
 
 ## local preview
 

@@ -110,18 +110,23 @@ presented as current acceptance evidence. The retained suite now supplies the
 repeatable route, accessibility, browser, interaction, responsive, source,
 and budget checks that were previously only described in prose.
 
-The source build makes no third-party runtime request. Hosting can change that.
-Before promoting 1.1, the Cloudflare preview must also prove:
+The source build makes no third-party runtime request. Hosting can change that,
+and this repository is a template rather than a deployment: nothing here is
+served anywhere, so there is no hosted build to hold to that claim. The
+`quiet.hjadmz.com` demo the earlier revisions of this report referred to is
+retired, and `_config.cloudflare.yml` now carries a reserved example origin and
+no identity. Anyone deploying from this template — including a demo fork of it —
+should prove on their own preview:
 
 1. deployment trigger is `github:push` for the exact reviewed commit;
-2. Ruby is 3.3.12, Bundler is frozen, and the build command is
-   `npm run verify:demo`;
+2. Ruby is 3.3.12, Bundler is frozen, and the build runs `npm run
+   verify:cloudflare` (a demo fork adds `EXPECT_DEMO=1`);
 3. `_headers` is active, HTML includes `no-transform`, and CSS/JS return one
    unambiguous immutable cache policy;
 4. no Bot Fight Mode/Javascript Detection bootstrap, `/cdn-cgi/` request,
    hidden challenge iframe, or `cf_clearance` cookie is injected;
-5. canonical metadata remains `https://quiet.hjadmz.com`, routes return the
-   intended statuses, and the custom domain/TLS/DNS stay active.
+5. canonical metadata matches the deployed origin, routes return the intended
+   statuses, and the custom domain/TLS/DNS stay active.
 
 ## deliberate deviations
 
