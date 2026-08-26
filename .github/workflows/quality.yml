@@ -47,6 +47,11 @@ jobs:
       - run: npm run test:portable
       - run: npm run test:origins
 
+      # Size only breaks at size. Five hundred posts is where a quadratic archive,
+      # an uncapped home page or an unbounded feed would show up, and where the
+      # claim that find-in-page replaces a search box is either true or isn't.
+      - run: npm run test:scale
+
       # The only build that emits _headers, so the only thing exercising the
       # response-header contract. Nothing ran it once, and the whole contract could
       # have broken with CI still green.
