@@ -267,7 +267,7 @@ figure > img, figure > svg { display: block; }
 }
 .site-links a, .footer-links a { padding-inline: 0.125rem; }
 /* That padding also pushed the links on the page's own edges 2px off the column —
-   "rss" sits directly under the wordmark. The boxes now overhang by what they pad, so
+   "feed" sits directly under the wordmark. The boxes now overhang by what they pad, so
    the words land on the rail with the hit area unchanged. The header needs both edges
    because the row wraps: the links end on the column beside the wordmark, and begin on
    it once a long title pushes them onto their own line (measured at 280px). */

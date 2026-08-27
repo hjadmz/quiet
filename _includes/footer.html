@@ -9,7 +9,7 @@
     {%- if q_email != "" %}
     <a href="mailto:{{ q_email | escape }}">email</a>
     {%- endif %}
-    <a href="{{ '/feed.xml' | relative_url }}">rss</a>
+    <a href="{{ '/feed.xml' | relative_url }}">feed</a>
     {%- comment -%}
       Reads as “[icon] system”. The word “theme” is still there, carried in the
       accessible name rather than on screen, and it is load-bearing twice over:

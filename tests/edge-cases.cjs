@@ -4,7 +4,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
-const { jekyllBuild } = require('./run.cjs');
+const { jekyllBuild, run } = require('./run.cjs');
 
 const ROOT = path.resolve(__dirname, '..');
 const BUNDLE_CWD = process.env.QUIET_BUNDLE_CWD
@@ -34,6 +34,8 @@ try {
   fs.writeFileSync(path.join(source, '_posts/2026-08-01-image-only.md'), `---
 title: image only
 description: verifies the minimum reading time.
+redirect_from:
+  - /2025/old-image-only/
 ---
 
 <img src="/assets/img/reference-image.svg" alt="" width="1200" height="675">
@@ -64,6 +66,20 @@ The home list should show only this post's date.
 
   const postCount = (home.match(/<li>\s*<a/g) || []).length;
   assert.ok(postCount >= 1, 'home must show at least one post');
+
+  // A generated site may preserve an old address with jekyll-redirect-from,
+  // which ships inside GitHub Pages. A redirect is intentionally not a full
+  // article layout, but it still needs a canonical target, noindex, a fallback
+  // link, exact-case resolution and exclusion from the archive's post count.
+  run(process.execPath, [path.join(source, 'tests/site-smoke.cjs')], {
+    cwd: source,
+    env: {
+      SITE_ROOT: output,
+      SITE_URL: 'https://example.com',
+      EXPECT_DEMO: '0',
+      EXPECT_CLOUDFLARE: '0'
+    }
+  });
 
   // ---- day one in a fork ----
   //
@@ -127,7 +143,7 @@ The home list should show only this post's date.
   assert.doesNotMatch(forkFeed, /<entry>/, 'no posts means no entries, not a broken feed');
 
   process.stdout.write(
-    'PASS edge-case build: minimum reading time, empty descriptions, ' +
+    'PASS edge-case build: minimum reading time, empty descriptions, redirect preservation, ' +
     'and a day-one fork with a custom domain, no posts, and no about page\n'
   );
 } finally {

@@ -125,32 +125,49 @@ for (const relative of FORBIDDEN) {
 
 const files = walk(ROOT);
 const htmlFiles = files.filter((file) => file.endsWith('.html'));
+const redirectPages = new Set();
 let references = 0;
 
 for (const file of htmlFiles) {
   const relative = path.relative(ROOT, file);
   const html = fs.readFileSync(file, 'utf8');
   const ids = [...html.matchAll(/\sid=["']([^"']+)["']/g)].map((match) => match[1]);
+  const pageCanonical = html.match(/<link rel="canonical" href="([^"]+)"\s*\/?>/);
+  const redirectTarget = html.match(
+    /<meta\s+http-equiv="refresh"\s+content="0;\s*url=([^"]+)">/i
+  )?.[1] || '';
+  if (redirectTarget) redirectPages.add(file);
   assert.equal(new Set(ids).size, ids.length, `${relative}: duplicate id`);
   assert.equal(count(html, /<h1\b/g), 1, `${relative}: needs exactly one h1`);
-  assert.equal(count(html, /<main\b[^>]*\bid=["']main["'][^>]*\btabindex=["']-1["']/g), 1,
-    `${relative}: main must be a working skip-link target`);
   assert.match(html, /<html\s+lang=["'][^"']+["']/i, `${relative}: missing document language`);
-  assert.match(html, /<meta\s+name="viewport"/i, `${relative}: missing viewport metadata`);
-  assert.match(html, /<link rel="stylesheet" href="[^"]*\/assets\/css\/main\.css\?v=\d+">/,
-    `${relative}: stylesheet must be build-versioned`);
-  assert.match(html, /<link rel="canonical" href="[^"]+"\s*\/?>/, `${relative}: missing canonical URL`);
+  assert.ok(pageCanonical, `${relative}: missing canonical URL`);
+  if (redirectTarget) {
+    assert.equal(pageCanonical[1], redirectTarget,
+      `${relative}: redirect and canonical targets disagree`);
+    assert.match(html, /<meta name="robots" content="noindex">/,
+      `${relative}: redirect must stay out of search results`);
+    assert.ok(html.includes(`href="${redirectTarget}"`),
+      `${relative}: redirect needs a working fallback link`);
+    assert.ok(html.includes(`location="${redirectTarget}"`),
+      `${relative}: redirect script and refresh target disagree`);
+  } else {
+    assert.equal(count(html, /<main\b[^>]*\bid=["']main["'][^>]*\btabindex=["']-1["']/g), 1,
+      `${relative}: main must be a working skip-link target`);
+    assert.match(html, /<meta\s+name="viewport"/i, `${relative}: missing viewport metadata`);
+    assert.match(html, /<link rel="stylesheet" href="[^"]*\/assets\/css\/main\.css\?v=\d+">/,
+      `${relative}: stylesheet must be build-versioned`);
+    assert.equal(count(html, /id="theme-toggle"/g), 1, `${relative}: needs one theme control`);
+    assert.doesNotMatch(html.match(/<header[\s\S]*?<\/header>/)?.[0] || '', /id="theme-toggle"/,
+      `${relative}: theme preference belongs outside the reading path`);
+    assert.match(html.match(/<footer[\s\S]*?<\/footer>/)?.[0] || '', /id="theme-toggle"/,
+      `${relative}: footer must contain the theme preference`);
+  }
   // Pages that carry a canonical link but should never be a search result have to
   // say so themselves. A 404 in a result list wastes the one click it gets.
   if (relative === '404.html' || relative.startsWith('site-check')) {
     assert.match(html, /<meta name="robots" content="noindex/,
       `${relative}: has a canonical link and no noindex, so it can be indexed`);
   }
-  assert.equal(count(html, /id="theme-toggle"/g), 1, `${relative}: needs one theme control`);
-  assert.doesNotMatch(html.match(/<header[\s\S]*?<\/header>/)?.[0] || '', /id="theme-toggle"/,
-    `${relative}: theme preference belongs outside the reading path`);
-  assert.match(html.match(/<footer[\s\S]*?<\/footer>/)?.[0] || '', /id="theme-toggle"/,
-    `${relative}: footer must contain the theme preference`);
 
   // A configured analytics recipe is a deliberate exception. Markers emitted
   // by the dedicated include keep that exception narrow instead of allowing
@@ -230,7 +247,8 @@ const archiveLinks = new Set(
     .map((match) => decodeURIComponent(match[1]))
 );
 const postPages = files
-  .filter((file) => /\d{4}[\\/][^\\/]+[\\/]index\.html$/.test(path.relative(ROOT, file)))
+  .filter((file) => /\d{4}[\\/][^\\/]+[\\/]index\.html$/.test(path.relative(ROOT, file)) &&
+    !redirectPages.has(file))
   .map((file) => `${BASEURL}/${path.relative(ROOT, path.dirname(file)).split(path.sep).join('/')}/`);
 for (const url of postPages) {
   assert.ok(archiveLinks.has(url),

@@ -19,4 +19,9 @@ footer:
   github: ""
   email: ""
 permalink: /:year/:title/
+plugins:
+  - jekyll-feed
+  - jekyll-redirect-from
+  - jekyll-seo-tag
+  - jekyll-sitemap
 demo_notice: ""

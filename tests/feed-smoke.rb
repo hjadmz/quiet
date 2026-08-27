@@ -99,10 +99,10 @@ assert(sitemap_locations.none? { |location| URI.parse(location).path.end_with?("
 
 home = read_utf8(home_path)
 assert(home.include?(%(href="#{self_url}")), "feed discovery metadata disagrees with feed self URL")
-footer_href = home.match(/<a href="([^"]*\/feed\.xml)">rss<\/a>/)&.[](1)
-assert(footer_href, "footer RSS link is missing")
+footer_href = home.match(/<a href="([^"]*\/feed\.xml)">feed<\/a>/)&.[](1)
+assert(footer_href, "footer feed link is missing")
 footer_url = URI.join(alternate_url, footer_href).to_s
-assert(footer_url == self_url, "footer RSS link disagrees with feed self URL")
+assert(footer_url == self_url, "footer feed link disagrees with feed self URL")
 
 # The feed template is vendored from jekyll-feed so it can be edited; this keeps that
 # copy honest. Explanatory Liquid comments are stripped before comparing, so documenting
