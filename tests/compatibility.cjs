@@ -369,6 +369,31 @@ async function assertKeyboardPermalink(page, label, engineName = label) {
   assert.equal(new URL(page.url()).hash, '#deep-links', `${label}: Enter must activate the section URL`);
 }
 
+async function assertThemeControl(page, state, label) {
+  const button = page.locator('#theme-toggle');
+  const expected = `theme: ${state}`;
+  assert.equal(await button.isVisible(), true, `${label}: theme control must be visible`);
+  assert.equal((await button.innerText()).replace(/\s+/g, ' ').trim(), expected,
+    `${label}: the visible theme label must describe the current preference`);
+  assert.equal(await page.getByRole('button', { name: expected, exact: true }).count(), 1,
+    `${label}: the theme button's accessible name must match its visible label`);
+  assert.equal(await button.evaluate((element) => {
+    const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
+    while (walker.nextNode()) {
+      if (!/theme\s*:/.test(walker.currentNode.textContent)) continue;
+      for (let parent = walker.currentNode.parentElement; parent; parent = parent.parentElement) {
+        const style = getComputedStyle(parent);
+        if (style.display === 'none' || style.visibility !== 'visible' || Number(style.opacity) === 0 ||
+            style.clip !== 'auto' || style.clipPath !== 'none') return false;
+        if (parent === element) return true;
+      }
+    }
+    return false;
+  }), true, `${label}: the word theme must appear on screen, not only in hidden accessible text`);
+  assert.equal(await page.locator('html').getAttribute('data-theme'), state === 'system' ? null : state,
+    `${label}: the rendered theme and the preference label must agree`);
+}
+
 async function runResponsive(engineName, browser, baseURL) {
   const context = await browser.newContext({ colorScheme: 'dark', reducedMotion: 'reduce' });
   const page = await context.newPage();
@@ -391,12 +416,7 @@ async function runResponsive(engineName, browser, baseURL) {
       assertTargets(await controlRects(page, '.footer-links a, .footer-links button'),
         `${label} ${route} footer`);
 
-      // Exactly one theme icon is visible, whatever the state — three would mean
-      // the state selectors stopped matching and the control started lying.
-      assert.equal(await page.evaluate(() =>
-        [...document.querySelectorAll('.theme-icon')]
-          .filter((icon) => getComputedStyle(icon).display !== 'none').length), 1,
-        `${label} ${route}: exactly one theme icon must show`);
+      await assertThemeControl(page, 'system', `${label} ${route}`);
 
       // A contents list with no entries is worse than none: it takes the space
       // and answers nothing.
@@ -497,37 +517,20 @@ async function runInteraction(engineName, browser, baseURL) {
   assert.equal(await page.locator('.site-header #theme-toggle').count(), 0,
     `${engineName}: theme control must not compete with reading navigation`);
 
-  // The theme control reads as "[icon] system" — the state, not a label plus the
-  // state. The word that makes it unambiguous is still in the page, hidden, and
-  // it has two jobs: it is the button's accessible name, and find-in-page still
-  // matches it. Clip-hidden text is findable in all three engines; display:none
-  // text is not, which is why the visually-hidden technique is the one used.
+  // The same plain label names the control visually and for assistive technology.
+  // Check the preference, including system mode, rather than the OS's current color.
   const themeBtn = page.locator('#theme-toggle');
-  assert.equal(await themeBtn.locator('#theme-label').textContent(), 'system',
-    `${engineName}: the theme control should show its state, not a label`);
-  assert.match((await themeBtn.textContent()).replace(/\s+/g, ' ').trim(), /^theme: /,
-    `${engineName}: the accessible name must still say what the control is`);
+  await assertThemeControl(page, 'system', engineName);
   assert.equal(await page.evaluate(() => window.find && window.find('theme')), true,
     `${engineName}: find-in-page must still reach the theme control`);
-  assert.equal(await page.evaluate(() =>
-    [...document.querySelectorAll('.theme-icon')].filter((s) => getComputedStyle(s).display !== 'none').length), 1,
-    `${engineName}: exactly one theme icon shows at a time`);
-
-  const shownIcon = () => page.evaluate(() =>
-    [...document.querySelectorAll('.theme-icon')]
-      .filter((s) => getComputedStyle(s).display !== 'none')
-      .map((s) => s.className.baseVal.replace('theme-icon theme-', '')));
-  await page.locator('#theme-toggle').click();
-  assert.equal(await page.locator('html').getAttribute('data-theme'), 'light');
-  assert.deepEqual(await shownIcon(), ['light'], `${engineName}: the icon must follow the state`);
-  assert.equal(await page.locator('#theme-label').textContent(), 'light');
-  await page.locator('#theme-toggle').click();
-  assert.equal(await page.locator('html').getAttribute('data-theme'), 'dark');
-  assert.deepEqual(await shownIcon(), ['dark'], `${engineName}: the icon must follow the state`);
-  assert.equal(await page.locator('#theme-label').textContent(), 'dark');
+  await themeBtn.click();
+  await assertThemeControl(page, 'light', engineName);
+  await themeBtn.click();
+  await assertThemeControl(page, 'dark', engineName);
   await page.reload({ waitUntil: 'networkidle' });
   assert.equal(await page.locator('html').getAttribute('data-theme'), 'dark',
     `${engineName}: theme choice must persist`);
+  await assertThemeControl(page, 'dark', `${engineName} after reload`);
 
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.locator('body').press('Home');
@@ -629,6 +632,17 @@ async function runInteraction(engineName, browser, baseURL) {
       `${engineName}: ${token.selector} print contrast is ${token.contrast ?? 'unmeasured'}:1`);
   }
   await page.emulateMedia({ media: 'screen' });
+
+  // Native keyboard activation must complete the cycle and store system mode too.
+  await themeBtn.focus();
+  await page.keyboard.press('Enter');
+  await assertThemeControl(page, 'system', `${engineName} keyboard`);
+  assert.equal(await page.evaluate(() => localStorage.getItem('quiet-theme')), 'system',
+    `${engineName}: returning to system must replace the stored dark preference`);
+  await page.keyboard.press('Space');
+  await assertThemeControl(page, 'light', `${engineName} keyboard`);
+  await page.keyboard.press('Enter');
+  await assertThemeControl(page, 'dark', `${engineName} keyboard`);
 
   assert.deepEqual(failures, [], `${engineName}: browser errors or third-party requests`);
   await context.close();

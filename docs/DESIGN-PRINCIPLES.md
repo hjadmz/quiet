@@ -217,18 +217,15 @@ sit next to titles, the archive is reverse-chronological, and the feed lives at
 `/feed.xml` by default (under `baseurl` for project sites). Nothing here needs
 to be learned.
 
-**The theme control shows its state, and says it too.** The icon changes with
-the mode — sun, crescent, half-filled circle — and the word beside it spells the
-mode out. That redundancy is deliberate on both sides: the glyph is what the eye
-lands on while scanning a row of text links, and the word is what makes the
-glyph unambiguous, since "follow the system" has no universal symbol. It is also
-what makes the control findable, because typing "theme" into find-in-page lands
-on it.
+**The theme control names its current preference.** The full label is visible
+text: `theme: system`, `theme: light`, or `theme: dark`. The words identify both
+the setting and its value, without requiring an icon to align with the chosen
+body font. The same wording is available to screen readers and find-in-page.
 
-The two icons not currently shown cost about 272 B gzipped per page. That was
-measured and judged worth paying: a control that announces its state at a glance
-is the point of having an icon at all, and an icon that never changes is
-decoration.
+It remains a native button that cycles system → light → dark → system. The
+label describes the current preference; it is not the name of the next action.
+System follows the device's appearance setting, and the choice persists when
+browser storage is available.
 
 **Affordance** — no mystery-meat navigation. Controls use labels rather than
 unexplained icons; most text links are underlined, while the wordmark,

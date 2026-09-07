@@ -272,6 +272,11 @@ the About page, and image files remain ordinary content. The short version:
 | `timezone` | IANA zone; `blog:new` reads it too | dates fall back to UTC |
 | `feed.posts_limit` | how many posts the feed carries (default 10) | falls back to 10 |
 
+The footer button shows the current preference as `theme: system`, `theme: light`,
+or `theme: dark`. Each activation cycles **system → light → dark → system**.
+System follows the device's appearance setting; the choice is remembered in
+that browser when storage is available.
+
 Not settings, on purpose: the favicon, the apple-touch icon and the social image
 are **files** — replace them in place at `assets/img/`. Analytics is **a file
 too**: `_includes/analytics.html`, which explains what it costs before you add

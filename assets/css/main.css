@@ -281,23 +281,14 @@ figure > img, figure > svg { display: block; }
   position: relative;
   text-decoration: underline; text-decoration-thickness: 1px;
   text-underline-offset: 0.15em;
-  white-space: nowrap; /* never break "theme: system" mid-label */
+  /* Let the label wrap at enlarged default text sizes on narrow screens. */
+  white-space: normal; text-align: start; max-width: 100%;
 }
 .theme-toggle:hover { color: var(--fg); text-decoration-thickness: 2px; }
 @supports (text-decoration-color: color-mix(in srgb, red 50%, blue)) {
   .theme-toggle { text-decoration-color: color-mix(in srgb, var(--fg-muted) 55%, transparent); }
   .theme-toggle:hover, .theme-toggle:focus-visible { text-decoration-color: var(--fg); }
 }
-.theme-toggle { display: inline-flex; align-items: center; gap: 0.25em; }
-/* One icon visible at a time, chosen by the state the document is actually in.
-   html:not([data-theme]) is the system case — theme.js removes the attribute
-   rather than setting it to "system", so there is no [data-theme="system"] rule
-   to write; it could never match. */
-.theme-icon { display: none; width: 1em; height: 1em; vertical-align: middle; }
-html:not([data-theme]) .theme-system,
-html[data-theme="light"] .theme-light,
-html[data-theme="dark"] .theme-dark { display: inline; }
-.theme-text { font-size: var(--fs-meta); }
 /* The isolated copy control can use an invisible extension safely. */
 .copy-btn::after {
   content: ""; position: absolute; inset: -12px;
