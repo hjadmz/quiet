@@ -5,14 +5,12 @@
   Safe around code blocks: Rouge HTML-escapes code, so literal "</h2>"
   text inside a snippet can never match here.
 
-  The anchor is hidden from assistive technology, and that is the point of it.
-  An accessible name on a descendant is folded into its ancestor's name, so a
-  labelled anchor made every heading announce itself twice — "A table permalink
-  to A table" — which doubles the length of the one thing screen reader users
-  navigate an article by. It is a pointer affordance for grabbing a section's
-  URL; the heading's id already gives that URL to everyone else, and the
-  browser's own address bar carries it after a click. tabindex="-1" travels
-  with aria-hidden so the hidden element is never also a tab stop.
+  The permalink is beside the heading, so its accessible name cannot become
+  part of the heading's name. It remains a native keyboard link, named by the
+  heading it targets. Only the decorative hash is hidden from assistive
+  technology and reader-mode extraction; the link itself stays accessible.
+  A header keeps this introductory group intact in reader mode, which can
+  discard short div wrappers along with the headings they contain.
 {% endcomment %}
 {%- assign _out = include.html -%}
 {%- assign _levels = "2|3|4" | split: "|" -%}
@@ -29,10 +27,10 @@
         {%- if _id_parts.size > 1 -%}
           {%- assign _id = _id_parts[1] | split: '"' | first -%}
           {%- assign _segs = _p | split: _close -%}
-          {{- _open -}}{{- _tag -}}>
+          <header class="heading-anchor heading-h{{ _lv }}">{{- _open -}}{{- _tag -}}>
           {%- for _s in _segs -%}
             {%- if forloop.first -%}
-              {{- _s | remove_first: _tag | remove_first: '>' -}}<a class="anchor" href="#{{ _id }}" aria-hidden="true" tabindex="-1">#</a>{{- _close -}}
+              {{- _s | remove_first: _tag | remove_first: '>' -}}{{- _close -}}<a class="anchor" href="#{{ _id }}" aria-labelledby="{{ _id }}" title="permalink"><span aria-hidden="true">#</span></a></header>
             {%- else -%}
               {{- _s -}}{%- unless forloop.last -%}{{- _close -}}{%- endunless -%}
             {%- endif -%}

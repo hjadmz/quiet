@@ -346,6 +346,29 @@ async function focusSkipLink(page, engineName) {
     `${engineName}: skip link must be keyboard-focusable`);
 }
 
+async function assertKeyboardPermalink(page, label, engineName = label) {
+  assert.equal(await page.getByRole('heading', { name: 'Headings get anchors', exact: true }).count(), 1,
+    `${label}: the heading's accessible name must contain only its content`);
+  const permalink = page.getByRole('link', { name: 'Headings get anchors', exact: true });
+  assert.equal(await permalink.count(), 1, `${label}: the permalink must be a named accessible link`);
+  assert.equal(await page.locator('h3#deep-links.reference-heading + a.anchor[href="#deep-links"]').count(), 1,
+    `${label}: attributed headings and their adjacent permalinks must survive`);
+  await page.locator('.post-content p a[href="#text"]').focus();
+  await page.keyboard.press(engineName === 'webkit' ? 'Alt+Tab' : 'Tab');
+  assert.equal(await permalink.evaluate((el) => el === document.activeElement), true,
+    `${label}: sequential keyboard navigation must reach the permalink`);
+  // Poll from the driver: requestAnimationFrame polling does not run when the
+  // context has JavaScript disabled, even though CSS focus transitions still do.
+  const visibleBy = Date.now() + 2000;
+  while (await permalink.evaluate((el) => getComputedStyle(el).opacity) !== '1' && Date.now() < visibleBy) {
+    await new Promise((resolve) => setTimeout(resolve, 25));
+  }
+  assert.equal(await permalink.evaluate((el) => getComputedStyle(el).opacity), '1',
+    `${label}: the focused permalink must be visible`);
+  await page.keyboard.press('Enter');
+  assert.equal(new URL(page.url()).hash, '#deep-links', `${label}: Enter must activate the section URL`);
+}
+
 async function runResponsive(engineName, browser, baseURL) {
   const context = await browser.newContext({ colorScheme: 'dark', reducedMotion: 'reduce' });
   const page = await context.newPage();
@@ -444,7 +467,7 @@ async function runInteraction(engineName, browser, baseURL) {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
   await context.addInitScript(() => {
     if (!sessionStorage.getItem('quiet-test-seeded')) {
-      localStorage.setItem('theme', 'invalid-value');
+      localStorage.setItem('quiet-theme', 'invalid-value');
       sessionStorage.setItem('quiet-test-seeded', 'true');
     }
   });
@@ -466,6 +489,8 @@ async function runInteraction(engineName, browser, baseURL) {
   const failures = monitor(page, baseURL);
   await goto(page, baseURL, '/2026/everything-a-post-can-do/');
 
+  assert.equal(await page.evaluate(() => localStorage.getItem('quiet-theme')), 'invalid-value',
+    `${engineName}: the invalid preference test must seed the application's storage key`);
   assert.equal(await page.locator('#theme-label').textContent(), 'system',
     `${engineName}: invalid stored theme must fall back to system`);
   assert.equal(await page.locator('html').getAttribute('data-theme'), null);
@@ -563,13 +588,7 @@ async function runInteraction(engineName, browser, baseURL) {
     assert.equal(await page.frameLocator('.demo-frame').locator('#swatch').count(), 1,
       `${engineName}: the demo must render its initial state`);
   }
-  // An accessible name on a descendant is folded into the heading's own name.
-  assert.equal(await page.locator('h2#a-table').evaluate((h) => h.textContent.trim()), 'A table#',
-    `${engineName}: heading text must not be doubled by the permalink`);
-  assert.equal(await page.locator('.anchor[aria-hidden="true"][tabindex="-1"]').count() > 0, true,
-    `${engineName}: heading permalinks must stay out of the accessibility tree`);
-  assert.equal(await page.locator('h3#deep-links.reference-heading > a.anchor[href="#deep-links"]').count(), 1,
-    `${engineName}: attributed headings need a working permalink`);
+  await assertKeyboardPermalink(page, engineName);
   assert.equal(await page.locator('.toc a[href="#sentinel-heading"]').textContent(),
     'Lists ||| stay @@@ readable',
     `${engineName}: TOC text must not depend on delimiter sentinels`);
@@ -585,6 +604,30 @@ async function runInteraction(engineName, browser, baseURL) {
   await page.emulateMedia({ media: 'print' });
   assert.equal(await page.locator('.site-header').isVisible(), false, `${engineName}: print must hide header`);
   assert.equal(await page.locator('.site-footer').isVisible(), false, `${engineName}: print must hide footer`);
+  // This page is still in forced dark mode. Printing must reset syntax colors
+  // too: the dark palette had only about 2:1 contrast on the white print canvas.
+  assert.equal(await page.locator('html').getAttribute('data-theme'), 'dark');
+  const printContrast = await page.evaluate(() => {
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = 1;
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    return ['.highlight .kd', '.highlight .sr', '.highlight .mi'].map((selector) => {
+      const token = document.querySelector(selector);
+      if (!token) return { selector, missing: true };
+      ctx.fillStyle = getComputedStyle(token).color;
+      ctx.fillRect(0, 0, 1, 1);
+      const linear = [...ctx.getImageData(0, 0, 1, 1).data].slice(0, 3).map((v) => {
+        v /= 255;
+        return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+      });
+      const luminance = linear[0] * 0.2126 + linear[1] * 0.7152 + linear[2] * 0.0722;
+      return { selector, contrast: 1.05 / (luminance + 0.05) };
+    });
+  });
+  for (const token of printContrast) {
+    assert.ok(!token.missing && token.contrast >= 4.5,
+      `${engineName}: ${token.selector} print contrast is ${token.contrast ?? 'unmeasured'}:1`);
+  }
   await page.emulateMedia({ media: 'screen' });
 
   assert.deepEqual(failures, [], `${engineName}: browser errors or third-party requests`);
@@ -619,6 +662,7 @@ async function runNoJavaScript(engineName, browser, baseURL) {
   await page.keyboard.press('Enter');
   assert.equal(await page.evaluate(() => document.activeElement?.id), 'main',
     `${engineName}: native skip link must work without JavaScript`);
+  await assertKeyboardPermalink(page, `${engineName} no-JS`, engineName);
   assert.deepEqual(failures, [], `${engineName} no-JS: browser errors or third-party requests`);
   await context.close();
 }
@@ -668,6 +712,7 @@ async function runReaderMode(engineName, browser, baseURL) {
     return {
       title: document.querySelector('.reader-title')?.textContent?.trim() || '',
       headings: [...root.querySelectorAll('h2')].map((h) => h.textContent.trim()),
+      hashLinks: [...root.querySelectorAll('a')].filter((a) => a.textContent.trim() === '#').length,
       text: root.innerText,
       navCount: root.querySelectorAll('nav').length,
       codeBlocks: root.querySelectorAll('pre').length,
@@ -684,12 +729,13 @@ async function runReaderMode(engineName, browser, baseURL) {
   assert.ok(extracted.headings.length >= 5,
     `${engineName}: reader view kept ${extracted.headings.length} headings, so section navigation is lost`);
 
-  // The permalink is a pointer affordance. Spoken, "Text number sign" is noise on
-  // every heading, so it must not survive into the extracted text.
+  // The permalink's decorative hash must not enter the extracted reading text.
   for (const heading of extracted.headings) {
     assert.doesNotMatch(heading, /#\s*$/,
       `${engineName}: heading "${heading}" carries its permalink into reader view, where it is read aloud`);
   }
+  assert.equal(extracted.hashLinks, 0,
+    `${engineName}: reader view must not move the permalink hash outside its heading and read it there`);
 
   // The table of contents repeats every heading. Read twice is worse than not at all.
   assert.equal(extracted.navCount, 0,

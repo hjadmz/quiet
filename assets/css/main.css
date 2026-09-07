@@ -392,8 +392,10 @@ html:not(.js) .theme-toggle { display: none; }
    measured as a 1.0rem gap under one heading where every other was 0.6rem. */
 .post-content blockquote > *, .post-content li > * { margin-block: 0; }
 .post-content blockquote > * + *, .post-content li > * + * { margin-block-start: 1.35em; }
-.post-content > h2, .post-content > h3, .post-content > h4 { margin-block-start: 2.2em; }
-.post-content > h2 + *, .post-content > h3 + *, .post-content > h4 + * { margin-block-start: 0.6em; }
+.post-content > h2, .post-content > h3, .post-content > h4,
+.post-content > .heading-anchor { margin-block-start: 2.2em; }
+.post-content > h2 + *, .post-content > h3 + *, .post-content > h4 + *,
+.post-content > .heading-anchor + * { margin-block-start: 0.6em; }
 .post-content > hr, .post-content > hr + * { margin-block-start: var(--s7); }
 
 /* Writers paste long URLs and identifiers. Without this, one unbreakable
@@ -413,8 +415,13 @@ pre, pre code { overflow-wrap: normal; }
 
 h2[id], h3[id], h4[id], sup[id], .footnotes li[id] { scroll-margin-top: var(--s6); }
 
+.heading-anchor { display: flex; align-items: baseline; line-height: 1.2; }
+.heading-h2 { font-size: var(--fs-h2); }
+.heading-h3 { font-size: var(--fs-h3); }
+.heading-h4 { font-size: 1rem; }
+.heading-anchor > :is(h2, h3, h4) { margin: 0; min-width: 0; }
 .anchor { margin-inline-start: var(--s2); font-weight: 400; text-decoration: none; opacity: 0; }
-h2:hover .anchor, h3:hover .anchor, h4:hover .anchor,
+.heading-anchor:hover .anchor,
 .anchor:hover, .anchor:focus { opacity: 1; }
 @media (hover: none) { .anchor { opacity: 1; } }
 
@@ -626,6 +633,7 @@ div.highlighter-rouge.has-copy pre.highlight { padding-top: calc(var(--s2) * 2 +
     color-scheme: light;
     --bg: #fff; --fg: #000; --fg-muted: #333;
     --surface: #fff; --border: #999; --accent: #000;
+    --code-kw: #000; --code-str: #000; --code-num: #000;
   }
   html { background: #fff; }
 

@@ -151,11 +151,14 @@ put secrets or genuinely private writing there. Preview them with
   visible. Use it when a post has five or more sections and readers will jump
   between them; leave it off for a linear essay.
 - h2–h4 headings receive a small `#` permalink; it lets readers link to a
-  specific section. It is hidden from screen readers on purpose — an accessible
-  name inside a heading gets folded into the heading's own name, which made
-  every heading announce itself twice.
+  specific section with a pointer or the keyboard. Each link has a descriptive
+  accessible name, while the heading keeps its own concise name.
 - No JavaScript is used for these links; they are part of the generated HTML.
 - If you want a cleaner look, remove heading hashes by changing `.anchor` in `assets/css/main.css` (for example, `display: none;` or a neutral color).
+
+For custom CSS, headings with permalinks sit inside `.heading-anchor` wrappers,
+with the link beside the heading. A selector such as `.post-content > h2` needs
+to account for that wrapper.
 
 Deep h4 headings stay out of the TOC to avoid an overly busy map.
 
@@ -238,9 +241,9 @@ voice and a speed in Safari's Listen to Page, Edge Read Aloud, Android
 Select-to-Speak or a screen reader, and a play button on one blog cannot beat a
 tool they have configured everywhere. Deferring is only respectful if those tools
 work here, so `npm run test:compat` runs a post through Firefox's reader view —
-the same Readability extractor behind Safari Reader — and fails if the article,
-its headings, its code or a demo's caption do not survive, or if the heading
-permalinks and the table of contents *do* (both get read aloud as noise).
+the same Readability extractor behind Safari Reader — and checks retained article text,
+section headings, code and a demo's caption, while ensuring decorative heading
+permalink hashes and the table of contents stay out of the extracted text.
 
 [docs/DESIGN-PRINCIPLES.md](docs/DESIGN-PRINCIPLES.md) records each refusal with
 what it would have cost.
@@ -401,7 +404,7 @@ minimal Linux image, use `npx playwright install --with-deps`).
 | `npm run test:portable` | a fork with the demo content deleted still passes |
 | `npm run test:origins` | the site works at a github.io root, a github.io subfolder, a custom domain and a custom domain subfolder — and no build points at an origin it was not given |
 | `npm run test:scale` | a 500-post site keeps every title and description in one bounded find-in-page archive |
-| `npm run test:compat` | 13 named devices — folded foldable to 5120px ultrawide — × every route × Chromium, Firefox and WebKit, plus no-JS, keyboard, print, reader-mode and axe |
+| `npm run test:compat` | 13 viewport sizes — folded foldable to 5120px ultrawide — × every route × Chromium, Firefox and WebKit, plus no-JS, keyboard, print, reader-mode and axe; simulated coverage, not physical-device testing |
 
 CI runs all of these, plus the Cloudflare overlay build, plus the whole suite on
 macOS and Windows — because file-name case, `bundle` being a batch file, and the

@@ -80,6 +80,23 @@ try {
     };
 
     node(path.join(ROOT, 'tests', 'site-smoke.cjs'), env);
+    // `npm run verify` supplies neither URL setting. Exercise that same inference
+    // path; explicit fixture settings previously hid failures on project sites.
+    node(path.join(ROOT, 'tests', 'site-smoke.cjs'), {
+      ...env, SITE_URL: undefined, SITE_BASEURL: undefined
+    });
+    if (shape.slug === 'gh-project') {
+      assert.throws(
+        () => node(path.join(ROOT, 'tests', 'site-smoke.cjs'), { ...env, SITE_BASEURL: '' }),
+        /generated home canonical path is \/blog\/, expected \//,
+        'an explicitly expected root must not be replaced with the inferred subfolder'
+      );
+      assert.throws(
+        () => node(path.join(ROOT, 'tests', 'site-smoke.cjs'), { ...env, SITE_URL: 'https://wrong.example' }),
+        /expected https:\/\/wrong\.example/,
+        'an explicit expected origin must still be checked'
+      );
+    }
     node(path.join(ROOT, 'tests', 'config-lint.cjs'), env);
     run('bundle', ['exec', 'ruby', path.join(ROOT, 'tests', 'feed-smoke.rb')], { cwd: ROOT, env });
 

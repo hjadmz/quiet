@@ -62,7 +62,7 @@ without joining the landmark list. {% endcomment %}
   and asks a question rather than issuing a call to action.
 {%- endcomment -%}
 {%- if q_email != "" %}
-<p class="post-reply">thoughts on this? <a href="mailto:{{ q_email | escape }}?subject={{ page.title | escape | cgi_escape }}">reply by email</a></p>
+<p class="post-reply">thoughts on this? <a href="mailto:{{ q_email | escape }}?subject={{ page.title | cgi_escape | escape }}">reply by email</a></p>
 {%- endif %}
 {%- if page.previous or page.next %}
 <nav class="post-nav" aria-label="more posts">

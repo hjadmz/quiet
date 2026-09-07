@@ -25,7 +25,7 @@ this — and footnotes land at the bottom of the page with a way back.[^1]
 ### Headings get anchors
 {: #deep-links .reference-heading}
 
-Hover an h2–h4 heading (or focus it with the keyboard) and a quiet `#`
+Hover an h2–h4 heading (or Tab to its permalink) and a quiet `#`
 appears — a shareable deep link to that section, generated at build
 time with no JavaScript.
 

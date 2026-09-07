@@ -454,8 +454,8 @@ features. A retained check runs the reference post through it and asserts:
 - the article survives extraction — measured **more than 60% of the rendered
   text**, compared as a fraction rather than a character count so the assertion
   does not rot as the fixture grows;
-- the title and every section heading come through, so listening can be navigated;
-- **heading permalinks do not** — otherwise every heading is spoken as "Text,
+- the title and at least five h2 headings come through, preserving section structure;
+- **decorative permalink hashes do not** — otherwise every heading is spoken as "Text,
   number sign";
 - the table of contents does not either, since it would be read out in full
   before the article it describes;

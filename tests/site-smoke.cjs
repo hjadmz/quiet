@@ -10,12 +10,16 @@ const ROOT = path.resolve(process.env.SITE_ROOT || path.join(__dirname, '..', '_
 const generatedHome = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
 const canonical = generatedHome.match(/<link rel="canonical" href="([^"]+)"\s*\/?>/);
 assert.ok(canonical, 'generated home is missing a canonical URL');
+const canonicalUrl = new URL(canonical[1]);
 const SITE_URL = new URL(process.env.SITE_URL || canonical[1]);
-const BASEURL = (process.env.SITE_BASEURL || '').replace(/\/$/, '');
+// Ordinary verification reads the deployed shape from the generated home. An
+// explicit empty SITE_BASEURL still means root, so fixture assertions stay strict.
+const BASEURL = (process.env.SITE_BASEURL ?? canonicalUrl.pathname).replace(/\/$/, '');
 if (process.env.SITE_URL) {
-  const canonicalUrl = new URL(canonical[1]);
   assert.equal(canonicalUrl.origin, SITE_URL.origin,
     `generated home canonical uses ${canonicalUrl.origin}, expected ${SITE_URL.origin}`);
+}
+if (process.env.SITE_URL || process.env.SITE_BASEURL !== undefined) {
   assert.equal(canonicalUrl.pathname, `${BASEURL}/`,
     `generated home canonical path is ${canonicalUrl.pathname}, expected ${BASEURL}/`);
 }
@@ -259,8 +263,8 @@ assert.equal(archiveLinks.size, postPages.length,
 const referencePath = path.join(ROOT, '2026/everything-a-post-can-do/index.html');
 if (EXPECT_DEMO) {
   const referencePost = fs.readFileSync(referencePath, 'utf8');
-  assert.match(referencePost, /<h3 id="deep-links" class="reference-heading">Headings get anchors<a class="anchor" href="#deep-links" aria-hidden="true" tabindex="-1">#<\/a><\/h3>/,
-    'heading anchors must preserve custom ids and classes, and stay out of the accessibility tree');
+  assert.match(referencePost, /<header class="heading-anchor heading-h3"><h3 id="deep-links" class="reference-heading">Headings get anchors<\/h3><a class="anchor" href="#deep-links" aria-labelledby="deep-links" title="permalink"><span aria-hidden="true">#<\/span><\/a><\/header>/,
+    'heading anchors must preserve custom ids and classes, with a named keyboard-accessible link outside the heading');
   const toc = referencePost.match(/<nav class="toc"[\s\S]*?<\/nav>/)?.[0] || '';
   assert.doesNotMatch(toc, /href="#deep-links"/,
     'h3 headings must keep anchors but stay out of the h2-only contents list');

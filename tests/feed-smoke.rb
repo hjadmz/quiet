@@ -44,7 +44,10 @@ assert(self_links.length == 1, "feed needs exactly one self link")
 self_url = self_links.first.attributes["href"]
 assert(URI.parse(self_url).absolute?, "feed self link must be absolute")
 assert(text_at(root, "a:id") == self_url, "feed id and self link must match")
-text_at(root, "a:title")
+feed_title = text_at(root, "a:title")
+if ENV["EXPECT_FEED_TITLE"]
+  assert(feed_title == ENV.fetch("EXPECT_FEED_TITLE"), "feed title must match its configured fallback")
+end
 Time.xmlschema(text_at(root, "a:updated"))
 text_at(root, "a:author/a:name")
 
@@ -81,6 +84,22 @@ entries.each do |entry|
     assert(html.include?('role="doc-backlink"'), "footnote return link lost doc-backlink")
     assert(html.match?(/id="fn:[^"]+"/), "footnote target is missing")
     assert(html.match?(/href="#fnref:[^"]+"/), "footnote backlink target is missing")
+  end
+end
+
+if ENV["EXPECT_FEED_EDGE_FIXTURE"] == "1"
+  entry = entries.find { |item| text_at(item, "a:id").end_with?("/2026/reply-and-svg") }
+  assert(entry, "missing inline SVG feed fixture")
+  html = text_at(entry, "a:content")
+  assert(html.include?('<style type="text/css"><![CDATA[rect { fill: blue; }]]></style>'),
+    "feed must preserve embedded SVG CDATA as HTML content")
+  assert(html.include?('<p>Content after the SVG survives.</p>'),
+    "feed content must survive after an embedded CDATA terminator")
+  assert(text_at(entry, "a:summary") == "The marker ]]> closes CDATA.",
+    "feed must preserve CDATA terminators in descriptions")
+  if ENV["EXPECT_FEED_EDGE_LANG"]
+    assert(entry.attributes["xml:lang"] == ENV.fetch("EXPECT_FEED_EDGE_LANG"),
+      "post language must remain one XML attribute even when it contains quotes or ampersands")
   end
 end
 
@@ -133,6 +152,14 @@ DEVIATIONS = [
    %q(<link href="{{ '/' | absolute_url }}" rel="alternate" type="text/html" {% if site.lang %}hreflang="{{ site.lang }}" {% endif %}/>),
    %q(<link href="{{ '/' | absolute_url }}" rel="alternate" type="text/html" hreflang="{{ q_lang | xml_escape }}" />)],
 
+  ["escaped entry language — a typo in post front matter must not break the XML attribute",
+   %q(xml:lang="{{ post.lang }}"),
+   %q(xml:lang="{{ post.lang | xml_escape }}")],
+
+  ["validated feed title — the documented blank-title fallback also names the feed",
+   "{% assign title = site.title | default: site.name %}",
+   "{% assign title = q_title %}"],
+
   ["validated feed subtitle — a YAML boolean or unusable value must not become the " \
    "site description in every subscriber's reader",
    %Q(  {% if site.description %}\n    <subtitle>{{ site.description | xml_escape }}</subtitle>\n  {% endif %}),
@@ -159,7 +186,15 @@ DEVIATIONS = [
   ["misplaced Digital Publishing roles removed from entry content (axe flags them on " \
    "kramdown's footnote wrappers; the links keep their semantics)",
    "{{ post.content | strip }}",
-   %q({{ post.content | strip | replace: ' role="doc-noteref"', '' | replace: ' role="doc-endnote"', '' }})]
+   %q({{ post.content | strip | replace: ' role="doc-noteref"', '' | replace: ' role="doc-endnote"', '' }})],
+
+  ["XML-escaped entry content — inline SVG and other HTML may contain CDATA terminators",
+   %q(<![CDATA[{{ post.content | strip | replace: ' role="doc-noteref"', '' | replace: ' role="doc-endnote"', '' }}]]>),
+   %q({{ post.content | strip | replace: ' role="doc-noteref"', '' | replace: ' role="doc-endnote"', '' | xml_escape }})],
+
+  ["XML-escaped summaries — a description containing ]]> must not terminate feed markup",
+   %q(<![CDATA[{{ post_summary | strip_html | normalize_whitespace }}]]>),
+   %q({{ post_summary | strip_html | normalize_whitespace | xml_escape }})]
 ].freeze
 
 expected = upstream.dup

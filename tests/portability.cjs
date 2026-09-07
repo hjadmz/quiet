@@ -112,17 +112,37 @@ try {
   // This proves the scripts a fork actually runs cannot reintroduce the pin, which the
   // build cannot: it invokes the harnesses directly rather than through npm.
   const scripts = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8')).scripts;
-  for (const name of ['verify', 'doctor', 'test:compat', 'test:edge', 'test:portable', 'test:config']) {
+  for (const name of ['verify', 'verify:cloudflare', 'verify:demo', 'doctor', 'test:compat', 'test:edge', 'test:portable', 'test:config']) {
     assert.doesNotMatch(scripts[name] || '', /SITE_URL=https?:\/\//,
       `${name} pins a site origin. A fork runs this against its own site, so any ` +
-      'literal origin here fails for everyone except this repository. The host-overlay ' +
-      'script (verify:cloudflare) and self-contained fixtures may pin one, because the ' +
-      'origin they pin is the reserved example name the overlay itself carries.');
+      'literal origin here fails for everyone except this repository. Only ' +
+      'self-contained fixtures may pin an origin.');
   }
 
+  // Authors customize the Cloudflare overlay before deploying. Keep its hostname
+  // different from both the shipped overlay and this fixture's base config.
+  fs.writeFileSync(path.join(source, '_config.cloudflare.yml'), [
+    'url: https://cloudflare-writer.example',
+    'baseurl: ""',
+    'include: ["_headers"]',
+    ''
+  ].join('\n'));
+  jekyllBuild({
+    source,
+    destination: path.join(source, '_site'),
+    config: [path.join(source, '_config.yml'), path.join(source, '_config.cloudflare.yml')],
+    cwd: ROOT
+  });
+  const cloudflareHome = fs.readFileSync(path.join(source, '_site/index.html'), 'utf8');
+  assert.match(cloudflareHome, /<link rel="canonical" href="https:\/\/cloudflare-writer\.example\/"/,
+    'the customized Cloudflare overlay must control the generated origin');
+  node(path.join(source, 'tests/site-smoke.cjs'), {
+    SITE_URL: undefined, SITE_BASEURL: undefined, EXPECT_DEMO: '0', EXPECT_CLOUDFLARE: '1'
+  });
+
   process.stdout.write(
-    'PASS portable fork: no demo posts or Cloudflare overlay, personalized config and ' +
-    'About page, no template identity, and no shipped script pins an origin\n'
+    'PASS portable fork: no demo posts, personalized config and About page, ' +
+    'customized Cloudflare overlay, no template identity, and no shipped script pins an origin\n'
   );
 } finally {
   fs.rmSync(temporary, { recursive: true, force: true });

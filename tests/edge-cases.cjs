@@ -4,7 +4,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
-const { jekyllBuild, run } = require('./run.cjs');
+const { bundle, jekyllBuild, run } = require('./run.cjs');
 
 const ROOT = path.resolve(__dirname, '..');
 const BUNDLE_CWD = process.env.QUIET_BUNDLE_CWD
@@ -47,11 +47,26 @@ description: ""
 
 The home list should show only this post's date.
 `);
+  const replyTitle = 'Cats & Dogs: "quoted" words + café';
+  fs.writeFileSync(path.join(source, '_posts/2026-08-03-reply-and-svg.md'), `---
+title: ${JSON.stringify(replyTitle)}
+description: "The marker ]]> closes CDATA."
+---
+
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="Blue square">
+<style type="text/css"><![CDATA[rect { fill: blue; }]]></style>
+<rect width="100" height="100" />
+</svg>
+
+Content after the SVG survives.
+`);
+  const edgeConfig = path.join(source, 'tests/edge.yml');
+  fs.writeFileSync(edgeConfig, 'footer:\n  email: writer@example.com\n');
 
   jekyllBuild({
     source,
     destination: output,
-    config: [path.join(source, '_config.yml'), path.join(source, 'tests/fixture.yml')],
+    config: [path.join(source, '_config.yml'), path.join(source, 'tests/fixture.yml'), edgeConfig],
     cwd: BUNDLE_CWD
   });
 
@@ -66,6 +81,20 @@ The home list should show only this post's date.
 
   const postCount = (home.match(/<li>\s*<a/g) || []).length;
   assert.ok(postCount >= 1, 'home must show at least one post');
+
+  const replyPost = fs.readFileSync(path.join(output, '2026/reply-and-svg/index.html'), 'utf8');
+  const replyHref = replyPost.match(/href="(mailto:[^"]*\?subject=[^"]*)"/);
+  assert.ok(replyHref, 'configured email must produce a post reply link');
+  assert.equal(new URL(replyHref[1]).searchParams.get('subject'), replyTitle,
+    'reply subjects must preserve punctuation and Unicode without HTML entities');
+
+  // Parse the actual generated XML, then check that embedded CDATA and the HTML
+  // after it round-trip. A green Jekyll build alone did not catch this failure.
+  bundle(['exec', 'ruby', path.join(source, 'tests/feed-smoke.rb')], {
+    cwd: BUNDLE_CWD,
+    env: { SITE_ROOT: output, SITE_URL: 'https://example.com', EXPECT_DEMO: '0',
+      EXPECT_FEED_EDGE_FIXTURE: '1', EXPECT_FEED_TITLE: 'quiet test fixture' }
+  });
 
   // A generated site may preserve an old address with jekyll-redirect-from,
   // which ships inside GitHub Pages. A redirect is intentionally not a full
@@ -142,8 +171,28 @@ The home list should show only this post's date.
   assert.match(forkFeed, /<feed[\s>]/, 'the feed must still be valid Atom with no posts');
   assert.doesNotMatch(forkFeed, /<entry>/, 'no posts means no entries, not a broken feed');
 
+  // The supported blank-title fallback must also provide Atom's required title.
+  const blankTitleOutput = path.join(temporary, 'blank-title-site');
+  fs.writeFileSync(edgeConfig, 'title: ""\nfooter:\n  email: writer@example.com\n');
+  const edgeLanguage = 'en"&extra';
+  const svgPostPath = path.join(source, '_posts/2026-08-03-reply-and-svg.md');
+  fs.writeFileSync(svgPostPath, fs.readFileSync(svgPostPath, 'utf8')
+    .replace('\n---\n', `\nlang: ${JSON.stringify(edgeLanguage)}\n---\n`));
+  jekyllBuild({
+    source,
+    destination: blankTitleOutput,
+    config: [path.join(source, '_config.yml'), path.join(source, 'tests/fixture.yml'), edgeConfig],
+    cwd: BUNDLE_CWD
+  });
+  bundle(['exec', 'ruby', path.join(source, 'tests/feed-smoke.rb')], {
+    cwd: BUNDLE_CWD,
+    env: { SITE_ROOT: blankTitleOutput, SITE_URL: 'https://example.com', EXPECT_DEMO: '0',
+      EXPECT_FEED_EDGE_FIXTURE: '1', EXPECT_FEED_TITLE: 'home', EXPECT_FEED_EDGE_LANG: edgeLanguage }
+  });
+
   process.stdout.write(
     'PASS edge-case build: minimum reading time, empty descriptions, redirect preservation, ' +
+    'reply subjects, SVG and summary feed XML, blank feed-title fallback, ' +
     'and a day-one fork with a custom domain, no posts, and no about page\n'
   );
 } finally {
