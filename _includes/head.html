@@ -38,7 +38,7 @@
 {%- if q_accent != "" %}
 {%- capture _accent_light %}oklch(from {{ q_accent }} clamp(0.3, l, 0.5) c h){% endcapture -%}
 {%- capture _accent_dark %}oklch(from {{ q_accent }} 0.72 calc(c * 0.8) h){% endcapture -%}
-<style>@supports (color:{{ q_accent }}){:root{--accent:{{ q_accent }}}@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--accent:{{ q_accent }}}}:root[data-theme=dark]{--accent:{{ q_accent }}}}@supports (color:{{ _accent_dark }}){:root{--accent:{{ _accent_light }}}@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--accent:{{ _accent_dark }}}}:root[data-theme=dark]{--accent:{{ _accent_dark }}}}</style>
+<style media="screen">@supports (color:{{ q_accent }}){:root{--accent:{{ q_accent }}}@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--accent:{{ q_accent }}}}:root[data-theme=dark]{--accent:{{ q_accent }}}}@supports (color:{{ _accent_dark }}){:root{--accent:{{ _accent_light }}}@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--accent:{{ _accent_dark }}}}:root[data-theme=dark]{--accent:{{ _accent_dark }}}}</style>
 {%- endif %}
 {%- comment -%}
   A config problem costs the reader nothing and must not be shown to them, but

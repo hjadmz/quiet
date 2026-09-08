@@ -450,7 +450,7 @@ figcaption { font-size: var(--fs-meta); color: var(--fg-muted); margin-top: var(
    physical left edge and put RTL pages 325px off with 296px of horizontal scroll.
    max-width: none is load-bearing — the global img cap would cancel the rule. */
 .post-content > .wide > :not(figcaption) {
-  --wide: min(52rem, 100vw - 2 * var(--gutter));
+  --wide: min(52rem, 100vw - 2 * var(--gutter) - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px));
   width: var(--wide);
   max-width: none;
   margin-inline: calc((100% - var(--wide)) / 2);

@@ -44,6 +44,12 @@ function readingTime(text, wpm = 220) {
 }
 ```
 
+The second block checks that separate copy controls can report results independently.
+
+```css
+.reading-column { max-width: 42rem; }
+```
+
 ## An image, with a caption
 
 <figure>

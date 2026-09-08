@@ -6,6 +6,7 @@ const http = require('node:http');
 const path = require('node:path');
 const { AxeBuilder } = require('@axe-core/playwright');
 const { chromium, firefox, webkit } = require('playwright');
+const { expect } = require('playwright/test');
 
 const ROOT = path.resolve(process.env.SITE_ROOT || path.join(__dirname, '..', '_site-test'));
 const HOST = '127.0.0.1';
@@ -506,6 +507,7 @@ async function runInteraction(engineName, browser, baseURL) {
     });
   }
   const page = await context.newPage();
+  await page.clock.install();
   const failures = monitor(page, baseURL);
   await goto(page, baseURL, '/2026/everything-a-post-can-do/');
 
@@ -547,12 +549,47 @@ async function runInteraction(engineName, browser, baseURL) {
       `${engineName}: next Tab after skip must enter the content`);
   }
 
+  // Control time in the real page so the first button resets just after a second
+  // copy, without relying on machine speed or a synthetic implementation of the DOM.
+  await page.clock.pauseAt(await page.evaluate(() => Date.now()) + 1000);
   const copy = page.locator('.copy-btn').first();
+  const secondCopy = page.locator('.copy-btn').nth(1);
+  const live = page.locator('body > [aria-live="polite"]');
+  assert.equal(await live.count(), 1, `${engineName}: copy confirmations need one shared live region`);
+  const firstLanguage = (await copy.getAttribute('aria-label')).replace(/^copy /, '');
+  const secondLanguage = (await secondCopy.getAttribute('aria-label')).replace(/^copy /, '');
   await copy.click();
-  await page.waitForFunction((button) => button.textContent !== 'copy', await copy.elementHandle());
-  assert.equal(await copy.textContent(), 'copied', `${engineName}: copy control must confirm success`);
+  await expect(copy).toHaveText('copied');
+  await expect(copy).toHaveAccessibleName(`copied ${firstLanguage}`);
   assert.match(await page.evaluate(() => navigator.clipboard.readText()), /function readingTime/,
     `${engineName}: copy control must write the code`);
+  await page.clock.runFor(1900);
+  await secondCopy.click();
+  await expect(secondCopy).toHaveText('copied');
+  await expect(secondCopy).toHaveAccessibleName(`copied ${secondLanguage}`);
+  await page.clock.runFor(100);
+  await expect(copy).toHaveText('copy');
+  await expect(copy).toHaveAccessibleName(`copy ${firstLanguage}`);
+  await expect(secondCopy).toHaveText('copied');
+  await expect(live).toHaveText('copied');
+  await page.clock.runFor(1900);
+  await expect(secondCopy).toHaveText('copy');
+  await expect(secondCopy).toHaveAccessibleName(`copy ${secondLanguage}`);
+  await expect(live).toBeEmpty();
+
+  await page.evaluate(() => Object.defineProperty(navigator, 'clipboard', {
+    configurable: true,
+    value: { writeText: () => Promise.reject(new Error('Clipboard denied by test')) }
+  }));
+  await copy.click();
+  await expect(copy).toHaveText('copy failed');
+  await expect(copy).toHaveAccessibleName(`copy failed ${firstLanguage}`);
+  await expect(live).toHaveText('copy failed');
+  await page.clock.runFor(2000);
+  await expect(copy).toHaveText('copy');
+  await expect(copy).toHaveAccessibleName(`copy ${firstLanguage}`);
+  await expect(live).toBeEmpty();
+  await page.clock.resume();
 
   // Focusable so an overflowing table can be panned from the keyboard, and
   // deliberately not a landmark: the wrapper label was a constant, so two tables
@@ -827,6 +864,64 @@ async function runReducedMotion(engineName, browser, baseURL) {
   await context.close();
 }
 
+// Exercise CSS environments that ordinary viewport resizing cannot reproduce.
+async function runLayoutEnvironments(engineName, browser, baseURL) {
+  const context = await browser.newContext({
+    colorScheme: 'dark', viewport: { width: 844, height: 390 }
+  });
+  try {
+    const page = await context.newPage();
+    await goto(page, baseURL, '/2026/everything-a-post-can-do/');
+    assert.equal(await page.locator('head style').count(), 1,
+      `${engineName}: the fixture must exercise a real configured accent`);
+    await page.evaluate(() => document.documentElement.setAttribute('data-theme', 'dark'));
+    await page.emulateMedia({ media: 'print' });
+    const accent = await page.evaluate(() => {
+      const probe = document.createElement('span');
+      probe.style.color = 'var(--accent)';
+      document.body.appendChild(probe);
+      const color = getComputedStyle(probe).color;
+      probe.remove();
+      return color;
+    });
+    assert.equal(accent, 'rgb(0, 0, 0)',
+      `${engineName}: a configured dark accent must return to black in print`);
+    await page.emulateMedia({ media: 'screen' });
+
+    // CDP supplies actual env() values; these are simulated cutouts, not
+    // physical-device results. Firefox and WebKit still run the print check.
+    if (engineName !== 'chromium') return;
+    const cdp = await context.newCDPSession(page);
+    for (const [left, right] of [[47, 47], [59, 0], [0, 59]]) {
+      await cdp.send('Emulation.setSafeAreaInsetsOverride', {
+        insets: { left, right, top: 0, bottom: 0 }
+      });
+      for (const direction of ['ltr', 'rtl']) {
+        await page.evaluate((dir) => document.documentElement.setAttribute('dir', dir), direction);
+        const layout = await page.evaluate(() => ({
+          left: parseFloat(getComputedStyle(document.body).paddingLeft),
+          right: parseFloat(getComputedStyle(document.body).paddingRight),
+          viewport: innerWidth,
+          media: [...document.querySelectorAll('.post-content > .wide > :not(figcaption)')]
+            .map((element) => {
+              const box = element.getBoundingClientRect();
+              return { left: box.left, right: box.right };
+            })
+        }));
+        assert.equal(layout.left, left, 'the safe-area override must reach body padding');
+        assert.equal(layout.right, right, 'the safe-area override must reach body padding');
+        assert.ok(layout.media.length > 0, 'the fixture must contain wide media');
+        for (const box of layout.media) {
+          assert.ok(box.left >= left - 1 && box.right <= layout.viewport - right + 1,
+            `${direction}: wide media crosses the ${left}/${right}px display safe area`);
+        }
+      }
+    }
+  } finally {
+    await context.close();
+  }
+}
+
 (async () => {
   for (const name of REQUESTED) assert.ok(ENGINES[name], `unknown browser engine: ${name}`);
   const { server, baseURL } = await startServer();
@@ -844,7 +939,8 @@ async function runReducedMotion(engineName, browser, baseURL) {
           ['accessibility', runAccessibility],
           ['reader-mode', runReaderMode],
           ['text-scaling', runTextScaling],
-          ['reduced-motion', runReducedMotion]
+          ['reduced-motion', runReducedMotion],
+          ['layout-environments', runLayoutEnvironments]
         ];
         for (const [phase, run] of PHASES) {
           const started = Date.now();

@@ -76,10 +76,12 @@
 {%- comment -%} ---------- title ---------- {%- endcomment -%}
 {%- comment -%} Zero-width characters survive `strip`, so a title made only of
   them is not empty and the "home" fallback never fires — leaving a header link
-  that is present, clickable, and invisible. {%- endcomment -%}
-{%- assign q_title = site.title | append: "" | replace: "​", "" | replace: "‌", "" | replace: "‍", "" | replace: "﻿", "" | strip -%}
+  that is present, clickable, and invisible. Remove them only in the emptiness
+  probe: joiners carry meaning in scripts such as Persian and in emoji sequences. {%- endcomment -%}
+{%- assign q_title = site.title | append: "" | strip -%}
 {%- if _BOOL_KEYS contains "title" -%}{%- assign q_title = "" -%}{%- endif -%}
-{%- if q_title == "" -%}
+{%- assign _title_visible = q_title | replace: "​", "" | replace: "‌", "" | replace: "‍", "" | replace: "﻿", "" | strip -%}
+{%- if _title_visible == "" -%}
   {%- assign q_title = "home" -%}
   {%- assign q_problems = q_problems | append: "title is empty. The header link is how a reader gets back to the front page, and a link with no text cannot be seen or announced, so it reads “home” instead. Set title in _config.yml." | append: _SEP -%}
 {%- endif -%}

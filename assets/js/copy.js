@@ -2,6 +2,7 @@
 (function () {
   if (!navigator.clipboard) return;
   var live = document.createElement("div");
+  var liveTimer;
   live.setAttribute("aria-live", "polite");
   live.className = "visually-hidden";
   document.body.appendChild(live);
@@ -20,15 +21,20 @@
     // One place the label and the announcement change together.
     // Clearing the live region first matters: repeating a message verbatim is
     // not a mutation, so a second identical result would announce nothing.
-    // Clearing the pending timer matters too, or the first copy's reset lands
-    // on the second copy's confirmation and it reads as having done nothing.
+    // The announcement has one shared timer; an earlier button must not erase
+    // another button's more recent result when its own label resets.
     function say(text) {
       btn.textContent = text;
+      btn.setAttribute("aria-label", text + " " + lang);
       live.textContent = "";
       live.textContent = text;
       clearTimeout(btn._reset);
       btn._reset = setTimeout(function () {
         btn.textContent = "copy";
+        btn.setAttribute("aria-label", "copy " + lang);
+      }, 2000);
+      clearTimeout(liveTimer);
+      liveTimer = setTimeout(function () {
         live.textContent = "";
       }, 2000);
     }

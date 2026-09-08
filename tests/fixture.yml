@@ -9,6 +9,7 @@ url: https://example.com
 baseurl: ""
 lang: en
 body_font: sans
+accent: "#386ca0"
 theme_default: system
 posts_on_home: 5
 date_format: "%b %-d, %Y"

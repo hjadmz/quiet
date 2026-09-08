@@ -47,6 +47,11 @@ jobs:
       - run: npm run test:portable
       - run: npm run test:origins
 
+      # The public demo contract uses the mother's sample posts. A generated
+      # site may delete those posts and still pass its ordinary verification.
+      - run: npm run test:configured-demo
+        if: github.repository == 'hjadmz/quiet'
+
       # Size only breaks at size. Five hundred posts is where a quadratic archive,
       # an uncapped home page or an unbounded feed would show up, and where the
       # claim that find-in-page replaces a search box is either true or isn't.

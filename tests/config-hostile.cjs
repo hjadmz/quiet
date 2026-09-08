@@ -28,6 +28,27 @@ const POSTS = 3;
 
 const CASES = [
   {
+    name: 'a Persian title preserves its non-joiner',
+    config: `title: ${JSON.stringify('یادداشت‌های من')}\nlang: fa\n`,
+    homePosts: POSTS,
+    problems: [],
+    expectedTitle: 'یادداشت‌های من'
+  },
+  {
+    name: 'an emoji title preserves its joiner',
+    config: `title: ${JSON.stringify('👩‍💻 field notes')}\n`,
+    homePosts: POSTS,
+    problems: [],
+    expectedTitle: '👩‍💻 field notes'
+  },
+  {
+    name: 'an invisible-only title still falls back',
+    config: `title: ${JSON.stringify(' \u200b\u200c\u200d\ufeff ')}\n`,
+    homePosts: POSTS,
+    problems: ['title is empty'],
+    expectedTitle: 'home'
+  },
+  {
     name: 'a count far above the maximum',
     config: 'posts_on_home: 1000\n',
     homePosts: POSTS,
@@ -111,7 +132,7 @@ const CASES = [
     homePosts: POSTS,
     problems: ['which is a CSS keyword rather than a color'],
     expect: (home) => {
-      assert.doesNotMatch(home, /<style>/, 'a non-colour must not reach the stylesheet at all');
+      assert.doesNotMatch(home, /<style(?:\s|>)/, 'a non-colour must not reach the stylesheet at all');
     }
   },
   {
@@ -340,6 +361,15 @@ try {
     }
 
     if (testCase.expect) testCase.expect(home);
+    if (testCase.expectedTitle) {
+      assert.equal(decode(home.match(/class="wordmark"[^>]*>([^<]+)</)[1]), testCase.expectedTitle,
+        `"${testCase.name}": the visible site title must preserve its meaningful characters`);
+      assert.ok(decode(title[1]).startsWith(`${testCase.expectedTitle} |`),
+        `"${testCase.name}": the browser title must use the same site name`);
+      const feed = fs.readFileSync(path.join(destination, 'feed.xml'), 'utf8');
+      assert.equal(decode(feed.match(/<title type="html">([^<]+)<\/title>/)[1]), testCase.expectedTitle,
+        `"${testCase.name}": the feed title must use the same site name`);
+    }
 
     // And nothing escaped its attribute anywhere in the output.
     let outputRejected = false;

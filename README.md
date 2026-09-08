@@ -415,6 +415,8 @@ minimal Linux image, use `npx playwright install --with-deps`).
 |---------|----------------|
 | `npm run doctor` | your `_config.yml` and posts are clean; exits non-zero if not |
 | `npm run test:build-env` | publishing commands omit development warnings even without a host-provided environment; development warnings still work |
+| `npm run test:new-post` | the post helper rejects conflicting `.md`, `.markdown`, and `.html` addresses without overwriting existing posts |
+| `npm run test:configured-demo` | the mother template’s sample posts pass strict demo checks with a configured identity; missing disclosure and placeholders fail |
 | `npm run verify` | recognized config placeholders are replaced, the site builds, and its output holds up; review personal content and artwork separately |
 | `npm run verify:template` | the mother template itself builds while explicitly allowing its shipped placeholders |
 | `npm run verify:cloudflare:template` | the mother template and its Cloudflare response-header overlay both hold up |

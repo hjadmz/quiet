@@ -93,8 +93,10 @@ if (fs.existsSync(file)) {
 // differ. Jekyll builds both without complaint and serves only the last, which is the
 // kind of loss you find months later. Catch it while the second post is still a title.
 const clash = fs.readdirSync(POSTS)
-  .filter((name) => name.endsWith('.md'))
-  .find((name) => name.startsWith(`${year}-`) && name.slice(11, -3) === slug);
+  .find((name) => {
+    const post = name.match(/^(\d{4})-\d{2}-\d{2}-(.+)\.(?:md|markdown|html)$/i);
+    return post && post[1] === year && post[2] === slug;
+  });
 if (clash) {
   console.error(
     `${path.relative(ROOT, path.join(POSTS, clash))} already claims /${year}/${slug}/.\n` +
