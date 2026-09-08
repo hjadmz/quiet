@@ -125,10 +125,10 @@ printed "© 2026 true" in the footer. All three were silent.
 
 Booleans are detectable in Liquid, so the text keys are checked for type
 before they are checked for content, and a boolean falls back and says why. Two
-related traps cannot be detected, because YAML destroys the evidence before the
-template runs: a `#` in an unquoted value truncates it, and a colon-space stops
-the build. Both are answered the only way left — the config file leads with the
-rule that fixes all three at once, which is to quote the value.
+related traps occur before the template runs: a `#` preceded by whitespace in an
+unquoted value starts a comment, and a colon-space inside an unquoted value can
+stop parsing. The config file explains correct quoting, including how to retain
+an apostrophe inside a quoted value. Invalid YAML still stops the build.
 
 `footer:` written flat or as a list is the same class of silent failure by a
 different route: it parses, `site.footer.github` becomes unreadable, and both
@@ -138,8 +138,9 @@ The residue is recorded rather than hidden: `jekyll-seo-tag` reads `site.lang`,
 `site.author.name` and `site.description` directly. The first two are printed
 into meta tags without escaping them; the last can expose a YAML boolean even
 when quiet and its feed use the validated fallback. `tests/config-lint.cjs`
-fails the build on any inline event handler in the output — the template writes
-none, so one can only have arrived from a value that escaped its attribute.
+fails the build on inline event handlers in the output, including the tested
+attribute-escape case. That check is not an exhaustive sanitizer for raw plugin
+inputs; a reported value still needs correction.
 
 ## cognitive load
 
@@ -163,23 +164,20 @@ reader's attention, so when something *is* emphasized, it registers.
 
 ## one accent, and why not two
 
-The accent existed as a pair: `accent` and `accent_dark`, with the second
-defaulting to the first. That default is wrong for almost every colour a person
-would choose. Measured across 36 hue-and-chroma combinations, reusing the light
-accent on the dark background fell below 4.5:1 **every time**, from 1.32:1 to
-3.56:1 — so the shipped behaviour for anyone who set one colour and stopped was
-a dark mode with unreadable links.
+The accent began as a pair: `accent` and `accent_dark`, with the second
+defaulting to the first. In an earlier measurement of 36 hue-and-chroma
+combinations, reusing the light accent on the dark background fell below 4.5:1
+in every case. Deriving the dark color cleared that threshold in all 36.
 
-Deriving it instead — same hue, fixed lightness, slightly less chroma, which is
-the exact relationship the built-in pair already had — cleared 4.5:1 on all 36,
-between 6.90:1 and 8.24:1. Verified rendered in Chromium, Firefox and WebKit: a
-terracotta set once measures 5.56:1 in light and 7.12:1 in dark.
+The current setting derives both themes. Light mode bounds OKLCH lightness
+between 0.3 and 0.5; dark mode uses 0.72 lightness and reduces chroma. Both keep
+the author's hue. The retained browser checks exercise the resulting contrast.
 
-So the second setting is gone. This is the shape the whole config is meant to
+The second setting is gone. This is the shape the whole config is meant to
 have: not "expose a knob for every value", but "compute what can be computed,
 and ask only for what genuinely differs between one person's site and another's".
-A browser without relative colour syntax skips the derivation and gets the old
-behaviour; nobody gets worse than before.
+A browser without relative colour syntax uses the raw accent in both themes;
+authors supporting that fallback must check its contrast separately.
 
 ## perception and structure
 
@@ -444,9 +442,9 @@ that; it can only add a second, worse control with a voice they did not pick. Th
 honest position is to defer — but deferring is only respectful if the page is
 actually legible to those tools, so that is checked rather than assumed.
 
-Firefox is the one engine that exposes its reader view to automation, and it uses
-Readability, the same extractor behind Safari Reader and most read-aloud
-features. A retained check runs the reference post through it and asserts:
+The retained check opens Firefox's Readability-based reader view and runs the
+reference post through it. This covers that extractor, not Safari Reader, Edge
+Read Aloud, or screen-reader output. It asserts:
 
 - the article survives extraction — measured **more than 60% of the rendered
   text**, compared as a fraction rather than a character count so the assertion
@@ -571,10 +569,10 @@ that for 255px on desktops only.
 ## the setting that is not page zoom
 
 Zoom scales everything, pixel constants included, so a layout can pass a zoom
-test and still fall apart for the reader it was meant to serve. Raising only the
-browser's *default text size* is the setting people with low vision actually use,
-and it is the one WCAG 1.4.4 describes. It is now checked automatically at 16,
-24, 32 and 48px on a 320px viewport, on every route.
+test and still break when a reader raises only the browser's *default text size*.
+That separate scaling mode is checked automatically in Chromium at 16, 24, 32
+and 48px on a 320px viewport, on every route. It is useful accessibility evidence,
+not a complete WCAG conformance test.
 
 It found three real defects immediately. The header could not wrap, so at 48px
 text the nav pushed the document 79px wide and "about" left the screen. Archive
@@ -592,15 +590,16 @@ the intent cannot fall behind the markup the way a list of names can.
 
 ## environments this is verified against
 
-Retained Playwright checks name **13 real devices** — a folded Galaxy Z Fold at
-280px, phones, both iPad orientations, a phone in landscape, laptops, and a
-5120px ultrawide — and visit every route on every one of them in all three
-engines, 195 device/route/engine combinations per run, with no document-level
-horizontal overflow — now
+Retained Playwright checks use **13 simulated viewport sizes**, named after
+representative devices — a folded Galaxy Z Fold at 280px, phones, both iPad
+orientations, a phone in landscape, laptops, and a 5120px ultrawide. They visit
+every route at every size in all three engines: 195 viewport/route/engine
+combinations per run, with no document-level horizontal overflow — now
 including a post that embeds a 1400px SVG, a 1280×720 video, a wide figure and a
 running demo. Without containment rules for replaced content those measured
 1,417px of content inside a 280px viewport, scrolling the whole document
-sideways at every width; the fixture carries them so that cannot return.
+sideways at every width; the fixture carries them to catch a recurrence.
+These checks do not establish physical-device, hinge, or posture-change coverage.
 They also cover long unbroken titles, light/dark/system preference, keyboard
 skip navigation, print, reduced motion, and a no-JavaScript pass. Hex colors
 remain alongside OKLCH values as older-browser fallbacks. With JavaScript

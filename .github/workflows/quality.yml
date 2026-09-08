@@ -117,6 +117,8 @@ jobs:
 
       - run: npm ci --ignore-scripts
       - run: npx playwright install --with-deps ${{ matrix.browser }}
+      - run: npm run brand:export
+        if: github.repository == 'hjadmz/quiet' && matrix.browser == 'chromium'
       - run: npm run test:compat
         env:
           COMPAT_BROWSER: ${{ matrix.browser }}

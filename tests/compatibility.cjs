@@ -39,12 +39,10 @@ const SANDBOX_DENIALS = [
 // Generous, but finite: the whole suite runs in well under a minute per engine
 // on a laptop, so anything past this is stuck rather than slow.
 const PHASE_TIMEOUT_MS = Number(process.env.COMPAT_PHASE_TIMEOUT_MS || 120000);
-// Real devices, named, so nobody has to remember to ask about foldables. The
-// list is the promise: a folded Galaxy Z Fold through a 5120px ultrawide, both
-// tablet orientations, a phone in landscape, and the laptop sizes people
-// actually own. Every route is checked on every one of them, in all three
-// engines, on every run — a sweep somebody performs by hand when prompted is not
-// a guarantee, it is a memory.
+// Simulated viewport sizes, named after representative devices, from a folded
+// foldable through a 5120px ultrawide. Every route is checked at every size in
+// all three engines. This does not exercise physical devices, hinges, posture
+// changes, or the named devices' browser implementations.
 const DEVICES = [
   { name: 'Galaxy Z Fold folded', width: 280, height: 653 },
   { name: 'small phone', width: 320, height: 568 },
@@ -734,14 +732,9 @@ async function runAccessibility(engineName, browser, baseURL) {
   await context.close();
 }
 
-// The template refuses to ship its own read-aloud, on the grounds that the reader
-// already has a better one. That refusal is only honest if the platform tools
-// actually work here, so this checks the claim rather than asserting it.
-//
-// Firefox is the one engine that exposes its reader view to automation
-// (about:reader), and it uses Readability — the same extractor behind Safari
-// Reader and most read-aloud tools. What it makes of a post is a good proxy for
-// what "Listen to Page" or Edge Read Aloud will speak.
+// Test article extraction in Firefox's Readability-based reader view
+// (about:reader). This is evidence for that extractor only; Safari Reader,
+// Edge Read Aloud, and screen-reader output need separate platform checks.
 async function runReaderMode(engineName, browser, baseURL) {
   if (engineName !== 'firefox') return;
   const context = await browser.newContext();

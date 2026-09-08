@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "blog:new": "node scripts/new-post.mjs",
+    "brand:export": "node scripts/export-brand.mjs",
     "build": "cross-env JEKYLL_ENV=production bundle exec jekyll build --strict_front_matter",
     "doctor": "npm run build && npm run test:config",
     "build:cloudflare": "cross-env JEKYLL_ENV=production bundle exec jekyll build --strict_front_matter --config _config.yml,_config.cloudflare.yml",

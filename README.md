@@ -24,6 +24,8 @@ failed; if its details make reading feel effortless, it has succeeded.
    identity images in `assets/img/`: `favicon.svg`, `favicon.ico`,
    `apple-touch-icon.png`, and `og-default.png`. The shipped files say “quiet”
    and are examples, not a neutral identity for a generated site.
+   The [branding export](#identity-images) can produce the three raster files
+   from your edited SVG artwork.
 4. Write Markdown files in `_posts/` named `YYYY-MM-DD-your-title.md`.
 5. **Last:** in the repo settings, under **Pages**, set the source to
    "Deploy from a branch" with `main` and `/ (root)`.
@@ -71,10 +73,11 @@ settings do not make it private. Keep `site-check.html`: `npm run doctor` and
 the maintained verification tests require its generated report.
 
 One rule prevents most config mistakes before they happen: **when in doubt, put
-quotes around the value.** YAML reads the bare words `no`, `yes`, `on` and `off`
-as true and false — which is why Norwegian has to be `lang: "no"` — a `#` starts
-a comment mid-line, and a colon-space stops the build. Quotes fix all three, and
-never hurt a value that did not need them.
+quotes around text values.** YAML reads the bare words `no`, `yes`, `on` and `off`
+as true and false — which is why Norwegian has to be `lang: "no"`. In an unquoted
+value, a `#` preceded by whitespace starts a comment, and a colon-space can stop
+the build. Correct quoting avoids these traps; double an apostrophe inside
+single quotes (`'it''s fine'`) or use double quotes (`"it's fine"`).
 
 The rule behind the page: **once `_config.yml` is valid YAML, an unusable
 supported value changes what that page says, not whether the site renders.**
@@ -295,25 +298,46 @@ Reading time counts every word, including the words inside code blocks, at
 220 wpm. On a code-heavy post the estimate runs long; there is no clean way to
 exclude code in Liquid, so it is a known approximation rather than a measurement.
 
+### identity images
+
+You can replace all four files with your own exports. Alternatively, edit
+`assets/img/favicon.svg` and `docs/brand/social-card.svg`, then run:
+
+```sh
+npm ci
+npx playwright install chromium
+npm run brand:export
+```
+
+The optional command produces a 16/32px `.ico`, a 180px Apple touch icon, and a
+1200×630 sharing PNG at the existing paths. It uses the existing development
+dependencies and adds nothing to the reader's page or the publishing build.
+Keep source SVGs self-contained; system-font text is rendered with the fonts
+on the export machine. The favicon remains an SVG and may adapt to the system
+theme; raster icons use its light appearance.
+
+Review the results at small sizes and when cropped before publishing. The
+default sharing card also appears on posts without their own `image:`. If you
+use a different design tool, retain its editable source and replace the exports
+directly; you do not need to use this command. Sites that use the command should
+keep `docs/brand/social-card.svg` as their current source.
+
 ### changing the accent
 
-Set `accent` in `_config.yml` to any valid CSS color. Pick something with at
-least 4.5:1 contrast against the light background (`#faf8f5`); dark mode works
-out its own from the same value, keeping your hue and lifting the lightness.
-
-That is one setting rather than two on purpose. The old default — reuse the
-light accent in dark mode — is wrong for essentially every colour: measured
-across 36 hues and chromas, all 36 landed below 4.5:1 on the dark background
-(1.32:1 to 3.56:1). The derived value failed none of them (6.90:1 to 8.24:1). A
-setting whose default is always wrong is a setting that quietly hands the work
-back to you.
+Set `accent` in `_config.yml` to an opaque CSS color, such as `"#386ca0"`.
+Browsers with relative colour support derive both themes from it: light mode
+bounds its lightness, while dark mode lifts the lightness and reduces chroma.
+Both preserve the chosen hue. One setting supplies both themes without asking
+you to maintain two colors.
 
 A value that is not a color cannot break the page. Characters that could
 restructure a stylesheet are refused at build time, and the declaration is
 wrapped in `@supports (color: …)` so the browser decides whether the rest is a
-real color. A typo leaves the built-in accent and a line at `/site-check/`.
-A browser too old for relative colour syntax skips the derivation and reuses the
-light accent, which is what this template did before.
+real color. Rejections at build time appear at `/site-check/`; an unrecognized
+color name rejected only by the browser keeps the built-in accent without a report.
+A browser without relative colour syntax uses the raw color in both themes.
+If you need those browsers, check that color's contrast against both backgrounds;
+the derived-color checks do not cover this fallback.
 
 ### changing the type
 
@@ -427,10 +451,10 @@ minimal Linux image, use `npx playwright install --with-deps`).
 | `npm run test:scale` | a 500-post site keeps every title and description in one bounded find-in-page archive |
 | `npm run test:compat` | 13 viewport sizes — folded foldable to 5120px ultrawide — × every route × Chromium, Firefox and WebKit, plus no-JS, keyboard, print, reader-mode and axe; simulated coverage, not physical-device testing |
 
-CI runs all of these, plus the Cloudflare overlay build, plus the whole suite on
-macOS and Windows — because file-name case, `bundle` being a batch file, and the
-default text encoding are all things that differ per machine, and a template
-that claims to work everywhere should hold its own tests to that too.
+CI runs `npm run verify` on Ubuntu, macOS, and Windows to cover differences in
+file-name case, command execution, and text encoding. The three-browser matrix,
+portability and origin fixtures, and optional Cloudflare overlay checks run on
+Ubuntu. The configured-demo fixture runs there only in the mother repository.
 
 Maintainers can regenerate the two README images from the current demo build
 with `npm run docs:screenshots`.

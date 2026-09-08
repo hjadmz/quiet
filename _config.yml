@@ -10,14 +10,14 @@
 # after the parser rejects the file; the quoting rule below prevents the common
 # ones.
 #
-# When in doubt, put quotes around a value. YAML does three surprising things,
-# and quotes fix all of them:
+# When in doubt, quote text values. Correct quoting avoids these common traps:
 #   • the bare words no, yes, on and off become true and false — which is why
 #     Norwegian has to be lang: "no"
-#   • a # starts a comment mid-line, so  tagline: C# notes  loses everything
-#     from the # onward
-#   • a colon-space inside a value stops the build — tagline: "notes: on design"
-# Quoted values are always safe, including ones that did not need it.
+#   • a # preceded by whitespace starts a comment: tagline: C # notes becomes C
+#     (tagline: C# notes keeps the whole value)
+#   • a colon-space inside an unquoted value stops the build; use
+#     tagline: "notes: on design"
+# Escape quotation marks inside the quoted value; see the tagline example below.
 # ---------------------------------------------------------------
 
 
@@ -47,8 +47,8 @@ url: https://username.github.io
 baseurl: ""
 
 # One line under your name on the home page. "" hides it.
-# Use double quotes if you quote it — a single-quoted value cannot contain
-# an apostrophe, and the error it causes points at the wrong line.
+# Double quotes work around an apostrophe. In single quotes, double it:
+# tagline: 'everything it needs, nothing it doesn''t.'
 tagline: "everything it needs, nothing it doesn't."
 
 # How search results and social cards describe the site as a whole.
