@@ -3,9 +3,9 @@
   "private": true,
   "scripts": {
     "blog:new": "node scripts/new-post.mjs",
-    "build": "bundle exec jekyll build --strict_front_matter",
+    "build": "cross-env JEKYLL_ENV=production bundle exec jekyll build --strict_front_matter",
     "doctor": "npm run build && npm run test:config",
-    "build:cloudflare": "bundle exec jekyll build --strict_front_matter --config _config.yml,_config.cloudflare.yml",
+    "build:cloudflare": "cross-env JEKYLL_ENV=production bundle exec jekyll build --strict_front_matter --config _config.yml,_config.cloudflare.yml",
     "build:test": "node tests/build-test-site.cjs",
     "dev": "bundle exec jekyll serve --drafts --livereload",
     "docs:screenshots": "cross-env JEKYLL_ENV=production npm run build:cloudflare && node tests/capture-screenshots.cjs",
@@ -18,11 +18,12 @@
     "test:site": "node tests/site-smoke.cjs",
     "test:origins": "node tests/origins.cjs",
     "test:scale": "node tests/scale.cjs",
-    "verify": "ruby --version && bundle --version && npm run test:edge && npm run test:scale && npm run test:hostile && npm run build && npm run test:config && cross-env EXPECT_DEMO=0 EXPECT_CLOUDFLARE=0 npm run test:site && npm run test:feed",
+    "verify": "ruby --version && bundle --version && npm run test:build-env && npm run test:edge && npm run test:scale && npm run test:hostile && npm run build && npm run test:config && cross-env EXPECT_DEMO=0 EXPECT_CLOUDFLARE=0 npm run test:site && npm run test:feed",
     "verify:template": "cross-env QUIET_EXPECT_PLACEHOLDER=1 npm run verify",
-    "verify:cloudflare": "ruby --version && bundle --version && npm run test:edge && npm run test:hostile && npm run build:cloudflare && npm run test:config && cross-env EXPECT_DEMO=0 EXPECT_CLOUDFLARE=1 npm run test:site && npm run test:feed",
+    "verify:cloudflare": "ruby --version && bundle --version && npm run test:build-env && npm run test:edge && npm run test:hostile && npm run build:cloudflare && npm run test:config && cross-env EXPECT_DEMO=0 EXPECT_CLOUDFLARE=1 npm run test:site && npm run test:feed",
     "verify:cloudflare:template": "cross-env QUIET_EXPECT_PLACEHOLDER=1 npm run verify:cloudflare",
-    "verify:demo": "ruby --version && bundle --version && npm run test:edge && npm run test:hostile && npm run build:cloudflare && npm run test:config && cross-env EXPECT_DEMO=1 EXPECT_CLOUDFLARE=1 npm run test:site && cross-env EXPECT_DEMO=1 npm run test:feed"
+    "verify:demo": "ruby --version && bundle --version && npm run test:build-env && npm run test:edge && npm run test:hostile && npm run build:cloudflare && npm run test:config && cross-env EXPECT_DEMO=1 EXPECT_CLOUDFLARE=1 npm run test:site && cross-env EXPECT_DEMO=1 npm run test:feed",
+    "test:build-env": "node tests/build-environment.cjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",

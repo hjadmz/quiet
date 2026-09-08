@@ -37,6 +37,12 @@ failed; if its details make reading feel effortless, it has succeeded.
    version anyone sees should be yours, not the template's demo posts under
    your name.
 
+The first inherited **Quality** checks may fail while `url`, `author.name`,
+`tagline`, or `description` still contain template placeholders. This is an
+intentional setup check; replace those values and push again. A green check does
+not certify that your title, About page, posts, or artwork have been personalized.
+Review steps 2 and 3 before enabling publishing.
+
 You can skip manual file naming with:
 
 ```bash
@@ -51,7 +57,7 @@ maintainer checks use the pinned Ruby and Node dependencies in this repo.
 
 Open **`/site-check/`** on your own site — `https://yoursite.com/site-check/`.
 Running `npm run dev` locally, you do not have to remember it: a problem puts a
-line in the footer of every page, which never appears on the published site.
+line in the footer of every page. Production builds omit that notice.
 
 It is generated from your config and your posts on every build, and it says in
 plain sentences what quiet could not use as written and what it did instead: a
@@ -59,9 +65,10 @@ setting that fell back to a default, two posts that resolved to the same
 address, a date that will be read differently than you wrote it. A clean config
 gets a clean page.
 
-Nothing links to it, it is excluded from the sitemap, and it is marked
-`noindex`, so readers will not find it. Delete `site-check.html` if you would
-rather it did not exist.
+The production template does not link to this page, excludes it from the
+sitemap, and marks it `noindex`. The page remains public at its URL; those
+settings do not make it private. Keep `site-check.html`: `npm run doctor` and
+the maintained verification tests require its generated report.
 
 One rule prevents most config mistakes before they happen: **when in doubt, put
 quotes around the value.** YAML reads the bare words `no`, `yes`, `on` and `off`
@@ -336,19 +343,25 @@ hostname and set `url` to it.
 ## hosting somewhere else
 
 The repository uses GitHub Pages' pinned Jekyll dependency set, but the
-generated HTML, CSS, JavaScript, XML, and assets are host-independent:
+generated HTML, CSS, JavaScript, XML, and assets are host-independent.
+
+Both **`npm run build`** and **`npm run build:cloudflare`** explicitly set
+`JEKYLL_ENV=production` and create output for publishing. **`npm run dev`**
+remains a development preview.
 
 - **Cloudflare Pages** — edit `_config.cloudflare.yml` to your own URL and
   identity, keeping `include: ["_headers"]`. Connect the repo, set the
   production branch to `main`, build command to `npm run build:cloudflare`,
-  and output directory to `_site`. Set `RUBY_VERSION=3.3.12`,
-  `JEKYLL_ENV=production`, and `BUNDLE_FROZEN=true` in production and previews.
+  and output directory to `_site`. Set `RUBY_VERSION=3.3.12`
+  and `BUNDLE_FROZEN=true` in production and previews. The build command sets
+  `JEKYLL_ENV=production` for both production and hosted preview builds.
   Git integration rebuilds automatically on pushes; no Worker or Wrangler
   configuration is needed for this static site.
 - **Netlify or another static host** — run `npm run build` and publish
   `_site`. That generic build emits no host-specific response policy; add a
   host-native header configuration separately if you need one.
-- **Any static host, or your own server** — run `bundle exec jekyll build`
+- **Any static host, or your own server** — after installing the repository's
+  dependencies, run `npx --no-install cross-env JEKYLL_ENV=production bundle exec jekyll build`
   and upload the `_site` folder.
 - **Served from a subfolder** (e.g. `example.com/blog`, or
   `you.github.io/blog` for a project site) — set `baseurl: "/blog"`. Template
@@ -401,7 +414,8 @@ minimal Linux image, use `npx playwright install --with-deps`).
 | command | what it proves |
 |---------|----------------|
 | `npm run doctor` | your `_config.yml` and posts are clean; exits non-zero if not |
-| `npm run verify` | a generated site has no unfinished template identity, builds, and its output holds up |
+| `npm run test:build-env` | publishing commands omit development warnings even without a host-provided environment; development warnings still work |
+| `npm run verify` | recognized config placeholders are replaced, the site builds, and its output holds up; review personal content and artwork separately |
 | `npm run verify:template` | the mother template itself builds while explicitly allowing its shipped placeholders |
 | `npm run verify:cloudflare:template` | the mother template and its Cloudflare response-header overlay both hold up |
 | `npm run verify:demo` | an explicitly labeled public template demo is internally consistent |

@@ -29,15 +29,14 @@
     exists, and the problem count otherwise travels in an HTML comment nobody
     reads.
 
-    So during local preview — and only there, since GitHub Pages and every other
-    host build with JEKYLL_ENV=production — a problem says so on every page,
-    where the person who caused it is looking. Readers of the published site
-    never see this line.
+    Development builds show the problem where the author is looking. The
+    publishing scripts explicitly select production mode and omit this notice;
+    a host is not assumed to set the environment on the author's behalf.
   {%- endcomment -%}
   {%- if jekyll.environment != "production" and q_problem_count > 0 %}
   <p class="footer-meta config-notice">
     <a href="{{ '/site-check/' | relative_url }}">{{ q_problem_count }} setting{% if q_problem_count > 1 %}s{% endif %} in your config could not be used as written →</a>
-    <span class="config-unset">shown while previewing locally; never on the published site</span>
+    <span class="config-unset">development build; hidden in production builds</span>
   </p>
   {%- endif %}
   {%- if site.demo_notice and site.demo_notice != "" %}

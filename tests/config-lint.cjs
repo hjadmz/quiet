@@ -34,8 +34,8 @@ const reportPath = path.join(ROOT, 'site-check', 'index.html');
 assert.ok(
   fs.existsSync(reportPath),
   'site-check/index.html is missing from the build. It is how an author with no local ' +
-  'toolchain finds out a setting was rejected or two posts collided; if you deleted ' +
-  'the page on purpose, delete this check too.'
+  'toolchain finds out a setting was rejected or two posts collided. Restore ' +
+  'site-check.html and keep it in the build; the maintained checks require it.'
 );
 
 // The report is HTML, so its text is escaped. Decode the handful of entities the

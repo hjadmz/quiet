@@ -248,10 +248,14 @@ description: what quiet made of your settings and your posts, and anything it ha
 
   <h2>about this page</h2>
   <p>
-    It is generated from your settings and your posts at build time, so it is
-    always current.
-    Nothing links to it, it is excluded from the sitemap and from search
-    results, and readers will not find it. Delete
-    <code>site-check.html</code> if you would rather it did not exist.
+    This report reflects your settings and posts at the last build. A clean report
+    does not confirm that the site title, About page, sample posts, or artwork have
+    been personalized; review those before publishing.
+  </p>
+  <p>
+    The production template does not link here, excludes this page from the sitemap,
+    and marks it <code>noindex</code>. It remains public at its URL; these settings
+    do not make it private. Keep <code>site-check.html</code>: <code>npm run doctor</code>
+    and the maintained verification tests require this generated report.
   </p>
 </div>

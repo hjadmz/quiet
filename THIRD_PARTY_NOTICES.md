@@ -2,14 +2,13 @@
 
 ## jekyll-feed template
 
-`feed.xml` is derived from the feed template in jekyll-feed 0.17.0, with six
-declared changes: the language attribute and the alternate link print a
-validated language code rather than the raw setting; the feed-level author is
-omitted when there is no name, and prints a validated one when there is; entry
-authors fall through to the same value instead of printing the config map
-itself; and two obsolete or misplaced DPUB-ARIA roles are removed from embedded
-post HTML. Each is declared by name in `tests/feed-smoke.rb`, which rebuilds the
-expected file from the installed gem and fails if any of them stops applying.
+`feed.xml` is derived from the feed template in jekyll-feed 0.17.0. Its changes
+cover validated language, title, subtitle, author, and feed-length settings;
+author fallbacks; XML escaping for entry language, content, and summaries; and
+removal of obsolete or misplaced DPUB-ARIA roles from embedded post HTML.
+Each change is named in the `DEVIATIONS` list in
+[`tests/feed-smoke.rb`](tests/feed-smoke.rb), which rebuilds the expected file
+from the installed gem and fails if a declared change stops applying.
 jekyll-feed is distributed under the MIT License:
 
 Copyright (c) 2015-present Ben Balter and jekyll-feed contributors
