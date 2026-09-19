@@ -328,22 +328,15 @@ html:not(.js) .theme-toggle { display: none; }
 .archive-year h2 { font-size: 1rem; margin: var(--s6) 0 var(--s3); }
 .archive-list { list-style: none; margin: 0; padding: 0; }
 .archive-list li { padding: var(--s2) 0; }
-/* Two columns, not a wrapping row. The date is nowrap so it stays one unit, and
-   as a flex item it dropped to its own line the moment a title was long enough to
-   crowd it — where `space-between` then aligned it to the START, because a line
-   holding one item has nothing to space it against. The date's side therefore
-   depended on the length of the title above it: measured on a 390px phone, a
-   37-character title put "Sep 17" on the left, directly above the description
-   where it reads as the description's first line, while the two shorter titles
-   beside it kept theirs on the right. A date rail that moves is worse than no
-   rail; scanning a year of posts means reading one column, not hunting for it.
-
-   The grid gives the date a column of its own, so it holds the right edge at
-   every title length and the title wraps under itself instead of pushing it.
-   minmax(0, 1fr) keeps the title column able to shrink below its content — with
-   `main { overflow-wrap: anywhere }` doing the breaking, this measured 0px of
-   document overflow at 16px, 32px and 48px browser text on a 375px viewport,
-   which is the case the flex row was wrapping to avoid in the first place. */
+/* Two columns, not a wrapping row. As a flex item the nowrap date dropped to its
+   own line as soon as a title crowded it, where `space-between` aligned it to the
+   START — a line holding one item has nothing to space against. Its side therefore
+   depended on the title's length: measured on a 390px phone, 9px from the title on
+   short entries and hard left, above the description, on a 37-character one. A grid
+   gives it a column, so it holds the right edge at every length and the title wraps
+   under itself. minmax(0, 1fr) lets the title column shrink below its content, with
+   `main { overflow-wrap: anywhere }` breaking it: 0px document overflow at 16, 32
+   and 48px browser text on 375px — the case the wrapping row existed to avoid. */
 .archive-entry {
   display: grid; grid-template-columns: minmax(0, 1fr) auto;
   align-items: baseline; gap: 0 var(--s4); margin: 0;
@@ -418,11 +411,19 @@ pre, pre code { overflow-wrap: normal; }
 
 h2[id], h3[id], h4[id], sup[id], .footnotes li[id] { scroll-margin-top: var(--s6); }
 
-.heading-anchor { display: flex; align-items: baseline; line-height: 1.2; }
+/* The permalink flows after the last word, so it sits one place whatever the
+   heading's length. As a flex sibling a wrapped heading stretched to fill the row
+   and shoved the hash to the far edge: measured on a 390px phone, 9px after a
+   one-line heading and 111px after a two-line one — the archive date's defect
+   again, a mark placed by the length of the text beside it. Inline flow makes it
+   9px everywhere. Only the box is inline; the tag, role, id and the anchor's
+   aria-labelledby are untouched. text-wrap: balance moves to the wrapper because
+   it needs a block container, and the wrapper already carries the font size. */
+.heading-anchor { display: block; text-wrap: balance; line-height: 1.2; }
 .heading-h2 { font-size: var(--fs-h2); }
 .heading-h3 { font-size: var(--fs-h3); }
 .heading-h4 { font-size: 1rem; }
-.heading-anchor > :is(h2, h3, h4) { margin: 0; min-width: 0; }
+.heading-anchor > :is(h2, h3, h4) { display: inline; margin: 0; }
 .anchor { margin-inline-start: var(--s2); font-weight: 400; text-decoration: none; opacity: 0; }
 .heading-anchor:hover .anchor,
 .anchor:hover, .anchor:focus { opacity: 1; }
