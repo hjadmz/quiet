@@ -328,13 +328,25 @@ html:not(.js) .theme-toggle { display: none; }
 .archive-year h2 { font-size: 1rem; margin: var(--s6) 0 var(--s3); }
 .archive-list { list-style: none; margin: 0; padding: 0; }
 .archive-list li { padding: var(--s2) 0; }
-/* Wraps for the same reason the header does: the date is nowrap so it stays one
-   unit, and at a large browser text size the title and the date stop fitting on
-   one line. Wrapping puts the date under the title; not wrapping pushed the
-   document 4px wide. */
+/* Two columns, not a wrapping row. The date is nowrap so it stays one unit, and
+   as a flex item it dropped to its own line the moment a title was long enough to
+   crowd it — where `space-between` then aligned it to the START, because a line
+   holding one item has nothing to space it against. The date's side therefore
+   depended on the length of the title above it: measured on a 390px phone, a
+   37-character title put "Sep 17" on the left, directly above the description
+   where it reads as the description's first line, while the two shorter titles
+   beside it kept theirs on the right. A date rail that moves is worse than no
+   rail; scanning a year of posts means reading one column, not hunting for it.
+
+   The grid gives the date a column of its own, so it holds the right edge at
+   every title length and the title wraps under itself instead of pushing it.
+   minmax(0, 1fr) keeps the title column able to shrink below its content — with
+   `main { overflow-wrap: anywhere }` doing the breaking, this measured 0px of
+   document overflow at 16px, 32px and 48px browser text on a 375px viewport,
+   which is the case the flex row was wrapping to avoid in the first place. */
 .archive-entry {
-  display: flex; justify-content: space-between; align-items: baseline;
-  flex-wrap: wrap; gap: 0 var(--s4); margin: 0;
+  display: grid; grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline; gap: 0 var(--s4); margin: 0;
 }
 .archive-desc { margin: var(--s1) 0 0; font-size: var(--fs-meta); color: var(--fg-muted); }
 .archive-list time { color: var(--fg-muted); font-size: var(--fs-meta); white-space: nowrap; }
@@ -556,7 +568,7 @@ div.highlighter-rouge.has-copy pre.highlight { padding-top: calc(var(--s2) * 2 +
 .highlight .err { color: inherit; background: transparent; }
 
 /* ---------- config check ---------- */
-/* The unlinked author-facing page at /config-check/. It borrows the site's
+/* The unlinked author-facing page at /site-check/. It borrows the site's
    tokens rather than introducing a palette: a diagnostic that looked like a
    different product would be one more thing to trust. */
 .config-verdict {
