@@ -583,10 +583,21 @@ async function runInteraction(engineName, browser, baseURL) {
   await expect(copy).toHaveText('copy failed');
   await expect(copy).toHaveAccessibleName(`copy failed ${firstLanguage}`);
   await expect(live).toHaveText('copy failed');
+  const copyHelp = page.locator('.copy-help').first();
+  await expect(copyHelp).toBeVisible();
+  await expect(copyHelp).toContainText('Select the code');
   await page.clock.runFor(2000);
   await expect(copy).toHaveText('copy');
   await expect(copy).toHaveAccessibleName(`copy ${firstLanguage}`);
   await expect(live).toBeEmpty();
+  await expect(copyHelp).toBeVisible();
+  // A successful retry clears the persistent recovery guidance.
+  await page.evaluate(() => Object.defineProperty(navigator, 'clipboard', {
+    configurable: true, value: { writeText: () => Promise.resolve() }
+  }));
+  await copy.click();
+  await expect(copy).toHaveText('copied');
+  await expect(copyHelp).toBeHidden();
   await page.clock.resume();
 
   // Focusable so an overflowing table can be panned from the keyboard, and

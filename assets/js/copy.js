@@ -39,11 +39,28 @@
       }, 2000);
     }
 
+    var help = document.createElement("p");
+    help.className = "copy-help";
+    help.hidden = true;
+    help.textContent = "Couldn’t copy. Select the code and copy it manually, or try again.";
+    block.appendChild(help);
+    var pending = false;
     btn.addEventListener("click", function () {
-      navigator.clipboard.writeText(code.innerText).then(function () {
+      if (pending) return;
+      pending = true;
+      btn.setAttribute("aria-busy", "true");
+      // Keep the button focusable while preventing duplicate requests.
+      Promise.resolve().then(function () {
+        return navigator.clipboard.writeText(code.innerText);
+      }).then(function () {
+        help.hidden = true;
         say("copied");
       }).catch(function () {
+        help.hidden = false;
         say("copy failed");
+      }).finally(function () {
+        pending = false;
+        btn.removeAttribute("aria-busy");
       });
     });
     block.classList.add("has-copy");

@@ -20,11 +20,39 @@ full lineage, and the limitation recorded against each name, is in
 
 ## the ordering principle
 
-Function → Convenience → Aesthetics, strictly. A thing must work, then
-remove friction, then create a meaningful experience. Beauty is never
-applied on top; it is what remains when the first two are true. When
-these conflict, the reader outranks the writer, and the writer outranks
-the customizer.
+Function → Convenience → Aesthetics is an order of questions: does this
+serve the reading task, does it remove needless effort, and does it feel
+considered? It is a practical default, not a universal ranking. Visual care
+and enjoyment can matter in their own right; neither justifies obscuring
+content or controls. When customization conflicts with reading, the reader
+comes first.
+
+Quiet is a reusable foundation with its own neutral identity. Personal marks,
+fonts, and palettes belong to individual sites. Shared principles should earn
+their place through useful behavior: for example, a failed code-copy action
+keeps manual-copy guidance visible until a successful retry, instead of
+leaving the reader with only a disappearing error.
+
+## applying The Design of Everyday Things
+
+Norman's [revised edition](https://jnd.org/books/the-design-of-everyday-things-revised-and-expanded-edition/)
+provides the interaction framework: signifiers, mapping, feedback, conceptual
+models, constraints, and designing for error. These are review questions, not a
+visual style or proof that a particular layout works.
+
+| Question | Application in Quiet |
+|---|---|
+| Can readers discover what they can do? | Underlined links, named navigation and text-labeled controls. Keyboard focus makes the active target visible. |
+| Does the control correspond to its result? | Each copy button sits with its code block; the theme label names the current preference. |
+| Can readers tell what happened? | “Copied” appears only after clipboard success. Failed copying leaves visible manual-copy guidance. |
+| Is the model understandable? | Home introduces recent writing, archive contains the full history, and article pages remain ordinary documents. |
+| Are constraints useful? | Hide copy controls when the browser lacks clipboard support; prevent duplicate pending copy requests. |
+| Can people recover? | Code remains selectable after failure; a retry is available and clears guidance after success. |
+
+The retained browser checks exercise these behaviors. They do not establish
+that every reader understands them; observation with readers would be the next
+step if a concrete usability question remains. Personal identity assets and
+AI-suggested lists of influences do not determine the template's behavior.
 
 ## the sentence this is built to satisfy
 
