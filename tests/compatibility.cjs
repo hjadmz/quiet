@@ -821,8 +821,7 @@ async function runAccessibility(engineName, browser, baseURL) {
       return {
         selected: selected.borderTopColor,
         unselected: unselected.borderTopColor,
-        fill: unselected.backgroundColor === 'rgba(0, 0, 0, 0)'
-          ? getComputedStyle(control).backgroundColor : unselected.backgroundColor,
+        fill: getComputedStyle(control).backgroundColor,
         focus: selected.outlineStyle
       };
     });
