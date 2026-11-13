@@ -271,7 +271,7 @@ figure > img, figure > svg { display: block; }
 .site-links > a:first-child { margin-inline-start: -0.125rem; }
 
 #theme-control:not([hidden]) {
-  display: flex; flex-wrap: wrap; max-width: 100%;
+  display: flex; flex-wrap: wrap; gap: 2px; max-width: 100%;
   border-radius: 1.5rem; background: var(--surface);
 }
 #theme-control label {
