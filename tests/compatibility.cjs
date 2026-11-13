@@ -809,6 +809,27 @@ async function runAccessibility(engineName, browser, baseURL) {
   assert.deepEqual(failures, [], `${engineName} accessibility: browser errors or third-party requests`);
   await goto(page, baseURL, '/definitely-missing', 404);
   assert.match(await page.locator('h1').textContent(), /nothing here/i);
+  if (engineName === 'chromium') {
+    await page.emulateMedia({ forcedColors: 'active' });
+    const theme = page.locator('#theme-control');
+    await theme.getByRole('radio', { name: 'System', exact: true }).focus();
+    await page.keyboard.press('ArrowRight');
+    await assertThemeControl(page, 'light', `${engineName} forced colors`);
+    const outline = await theme.evaluate(control => {
+      const selected = getComputedStyle(control.querySelector(':checked + label'));
+      const unselected = getComputedStyle(control.querySelector(':not(:checked) + label'));
+      return {
+        selected: selected.borderTopColor,
+        unselected: unselected.borderTopColor,
+        fill: unselected.backgroundColor === 'rgba(0, 0, 0, 0)'
+          ? getComputedStyle(control).backgroundColor : unselected.backgroundColor,
+        focus: selected.outlineStyle
+      };
+    });
+    assert.equal(outline.unselected, outline.fill, 'unselected segments must have no visible outline');
+    assert.notEqual(outline.selected, outline.unselected, 'selected theme must remain distinct');
+    assert.equal(outline.focus, 'solid', 'keyboard focus must stay visible in forced colors');
+  }
   await context.close();
 }
 

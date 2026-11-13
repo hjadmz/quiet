@@ -280,7 +280,7 @@ figure > img, figure > svg { display: block; }
   border-radius: inherit; color: var(--fg-muted); cursor: pointer;
 }
 #theme-control label:hover { color: var(--fg); }
-#theme-control :checked + label { color: var(--fg); border-color: currentColor; background: var(--bg); }
+#theme-control :checked + label { color: var(--fg); border-color: var(--fg-muted); background: var(--bg); }
 #theme-control :focus-visible + label { outline: 2px solid var(--focus); outline-offset: 2px; }
 /* The isolated copy control can use an invisible extension safely. */
 .copy-btn::after {
@@ -716,6 +716,8 @@ div.highlighter-rouge.has-copy pre.highlight { padding-top: calc(var(--s2) * 2 +
 
 @media (forced-colors: active) {
   .copy-btn { border: 1px solid ButtonText; }
+  #theme-control label { border-color: Canvas; }
+  #theme-control :checked + label { border-color: CanvasText; }
   .anchor { opacity: 1; }
   li:target, sup:target { outline: 2px solid Highlight; outline-offset: 2px; }
 }
