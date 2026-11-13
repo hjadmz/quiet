@@ -23,11 +23,6 @@
   --radius: 4px;
   --measure: 36rem;
   --gutter: var(--s5);
-  /* How much of the accent the link underline carries. Softening the underline
-     drops noise in light mode, where accent already separates from body text at
-     3.16:1. In dark mode that separation is 1.83:1 — the underline is doing
-     nearly all the work of saying "link", so it keeps closer to full ink. */
-  --underline-ink: 55%;
 
   --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-serif: Charter, "Bitstream Charter", "Iowan Old Style", Georgia, serif;
@@ -63,7 +58,6 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
-    --underline-ink: 80%;
     --bg: #121416;
     --fg: #dcdee1;        /* 13.7:1 on bg */
     --fg-muted: #9b9fa3;  /*  6.9:1 on bg */
@@ -91,7 +85,6 @@
 /* dark — forced by the toggle */
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --underline-ink: 80%;
   --bg: #121416;
   --fg: #dcdee1;
   --fg-muted: #9b9fa3;
@@ -185,12 +178,6 @@ a {
   text-underline-offset: 0.15em;
 }
 a:hover { text-decoration-thickness: 2px; }
-/* softened underlines: the affordance stays, the noise drops;
-   full strength returns on hover/focus. Older browsers keep solid. */
-@supports (text-decoration-color: color-mix(in srgb, red 50%, blue)) {
-  a { text-decoration-color: color-mix(in srgb, var(--accent) var(--underline-ink), transparent); }
-  a:hover, a:focus-visible { text-decoration-color: var(--accent); }
-}
 
 a, .copy-btn, .anchor {
   transition: color 150ms ease-out, background-color 150ms ease-out,
@@ -496,11 +483,8 @@ th { font-weight: 600; }
    so a six-item list read as eleven undifferentiated lines. This puts the three
    levels in the right order, the way .post-list already is. */
 .toc li { margin: var(--s2) 0; line-height: 1.4; }
-.toc a { color: var(--fg); }
-@supports (text-decoration-color: color-mix(in srgb, red 50%, blue)) {
-  .toc a { text-decoration-color: var(--border); }
-}
-.toc a:hover, .toc a:focus-visible { color: var(--accent); text-decoration-color: var(--accent); }
+.toc a { color: var(--fg); text-decoration-color: var(--fg-muted); }
+.toc a:hover, .toc a:focus-visible { color: var(--accent); text-decoration-color: currentColor; }
 
 /* One control, two placements. Keep the prose and wide figures on their rail. */
 .toc-enhanced {
@@ -536,8 +520,12 @@ th { font-weight: 600; }
   cursor: pointer;
 }
 .toc-toggle:hover, .toc-toggle[aria-expanded="true"] { border-color: var(--fg-muted); }
-.toc-ring-track { stroke: var(--toc-ring-track, var(--fg-muted)); stroke-width: 1.25; }
-.toc-ring-fill { stroke: var(--accent); stroke-width: 2.5; }
+.toc-ring-track {
+  stroke: #767676;
+  stroke: color-mix(in srgb, var(--fg), var(--bg));
+  stroke-width: 1.25;
+}
+.toc-ring-fill { stroke: var(--fg); stroke-width: 2.5; }
 .toc-kicker, .toc-section { display: block; }
 .toc-kicker {
   font-family: var(--font-mono);
@@ -584,7 +572,7 @@ th { font-weight: 600; }
 }
 .toc-enhanced a[aria-current="location"] {
   background: var(--surface);
-  color: var(--accent);
+  color: var(--fg);
   font-weight: 600;
   text-decoration-color: currentColor;
 }
@@ -707,8 +695,6 @@ div.highlighter-rouge.has-copy pre.highlight { padding-top: calc(var(--s2) * 2 +
 @media (prefers-contrast: more) {
   /* :not() keeps specificity (0,2,0) so this wins in every theme state */
   :root, :root:not([data-theme="light"]) { --fg-muted: var(--fg); --border: var(--fg); }
-  /* the softened underline is a low-contrast affordance; restore it fully */
-  a { text-decoration-color: var(--accent); }
   /* the 25% tint selection is invisible at this contrast; swap the pair
      so the selection is unambiguous */
   ::selection { background: var(--accent); color: var(--bg); }

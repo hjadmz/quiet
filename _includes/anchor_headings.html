@@ -6,8 +6,8 @@
   text inside a snippet can never match here.
 
   The permalink is beside the heading, so its accessible name cannot become
-  part of the heading's name. It remains a native keyboard link, named by the
-  heading it targets. Only the decorative hash is hidden from assistive
+  part of the heading's name. Its accessible name combines the link's purpose
+  with the heading it targets. The decorative hash is hidden from assistive
   technology and reader-mode extraction; the link itself stays accessible.
   A header keeps this introductory group intact in reader mode, which can
   discard short div wrappers along with the headings they contain.
@@ -30,7 +30,7 @@
           <header class="heading-anchor heading-h{{ _lv }}">{{- _open -}}{{- _tag -}}>
           {%- for _s in _segs -%}
             {%- if forloop.first -%}
-              {{- _s | remove_first: _tag | remove_first: '>' -}}{{- _close -}}<a class="anchor" href="#{{ _id }}" aria-labelledby="{{ _id }}" title="permalink"><span aria-hidden="true">#</span></a></header>
+              {{- _s | remove_first: _tag | remove_first: '>' -}}{{- _close -}}<a class="anchor" href="#{{ _id }}" aria-labelledby="quiet-section-link {{ _id }}" title="Link to this section"><span aria-hidden="true">#</span></a></header>
             {%- else -%}
               {{- _s -}}{%- unless forloop.last -%}{{- _close -}}{%- endunless -%}
             {%- endif -%}
@@ -44,3 +44,4 @@
   {%- endif -%}
 {%- endfor -%}
 {{ _out }}
+<span id="quiet-section-link" hidden>Section link</span>

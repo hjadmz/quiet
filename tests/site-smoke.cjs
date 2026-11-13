@@ -263,7 +263,7 @@ assert.equal(archiveLinks.size, postPages.length,
 const referencePath = path.join(ROOT, '2026/everything-a-post-can-do/index.html');
 if (EXPECT_DEMO) {
   const referencePost = fs.readFileSync(referencePath, 'utf8');
-  assert.match(referencePost, /<header class="heading-anchor heading-h3"><h3 id="deep-links" class="reference-heading">Headings get anchors<\/h3><a class="anchor" href="#deep-links" aria-labelledby="deep-links" title="permalink"><span aria-hidden="true">#<\/span><\/a><\/header>/,
+  assert.match(referencePost, /<header class="heading-anchor heading-h3"><h3 id="deep-links" class="reference-heading">Headings get anchors<\/h3><a class="anchor" href="#deep-links" aria-labelledby="quiet-section-link deep-links" title="Link to this section"><span aria-hidden="true">#<\/span><\/a><\/header>/,
     'heading anchors must preserve custom ids and classes, with a named keyboard-accessible link outside the heading');
   const toc = referencePost.match(/<nav class="toc"[\s\S]*?<\/nav>/)?.[0] || '';
   assert.doesNotMatch(toc, /href="#deep-links"/,

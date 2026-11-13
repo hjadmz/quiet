@@ -66,10 +66,8 @@ description: a quiet blog template for GitHub Pages.
 # accent: #386ca0 deletes the value instead of setting it.
 # "" keeps the built-in restrained blue.
 #
-# Pick any color you like and stop thinking about it. Light and dark modes each
-# keep your hue and set their own lightness, which holds both above 4.5:1
-# contrast — across 33 real-world colors, none fell below it, where the raw value
-# failed in 16 of them in light mode and 21 in dark.
+# Each theme derives a readable accent from your chosen hue. Browsers without
+# relative color support use the built-in accent.
 #
 # Something that is not a color cannot break the page: characters that could
 # rewrite the stylesheet are refused, CSS keywords like `inherit` and
