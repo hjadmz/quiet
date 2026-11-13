@@ -343,9 +343,7 @@ restructure a stylesheet are refused at build time, and the declaration is
 wrapped in `@supports (color: …)` so the browser decides whether the rest is a
 real color. Rejections at build time appear at `/site-check/`; an unrecognized
 color name rejected only by the browser keeps the built-in accent without a report.
-A browser without relative colour syntax uses the raw color in both themes.
-If you need those browsers, check that color's contrast against both backgrounds;
-the derived-color checks do not cover this fallback.
+Browsers without relative colour syntax keep the built-in accent.
 
 ### changing the type
 

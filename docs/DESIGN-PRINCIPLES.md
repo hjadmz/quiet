@@ -204,8 +204,7 @@ the author's hue. The retained browser checks exercise the resulting contrast.
 The second setting is gone. This is the shape the whole config is meant to
 have: not "expose a knob for every value", but "compute what can be computed,
 and ask only for what genuinely differs between one person's site and another's".
-A browser without relative colour syntax uses the raw accent in both themes;
-authors supporting that fallback must check its contrast separately.
+Browsers without relative colour syntax keep the built-in accent.
 
 ## perception and structure
 
@@ -322,7 +321,7 @@ The box went too. It was the only bordered panel in a design that groups
 everything else by spacing — the post list uses a measured 9px-within,
 29px-between ratio and not one rule — and a bordered stack of links at the head
 of an article is precisely the shape readers have learned to skip. Rules above
-and below, entries in body ink with a soft underline, accent on hover. The list
+and below, entries in body ink with an underline that stays visible at rest. The list
 now belongs to the article instead of sitting on top of it.
 
 On opted-in posts, the Contents button answers two more questions while

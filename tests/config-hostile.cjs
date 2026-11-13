@@ -234,7 +234,7 @@ const CASES = [
     homePosts: POSTS,
     problems: [],
     expect: (home) => {
-      assert.match(home, /--accent:oklch\(52% 0\.14 30\)/, 'a valid oklch accent must reach the stylesheet');
+      assert.doesNotMatch(home, /--accent:oklch\(52% 0\.14 30\)/, 'browsers without relative color syntax must keep the built-in accent');
       // The dark-mode accent is derived, not configured. Reusing the light value
       // measured below 4.5:1 on the dark background for every hue tested.
       assert.match(home, /--accent:oklch\(from oklch\(52% 0\.14 30\) 0\.72 calc\(c \* 0\.8\) h\)/,
@@ -242,7 +242,7 @@ const CASES = [
       assert.match(home, /--accent:oklch\(from oklch\(52% 0\.14 30\) clamp\(0\.3, l, 0\.5\) c h\)/,
         'the light accent must be bounded too, or one of the two themes is left to chance');
       assert.match(home, /@supports \(color:oklch\(from /,
-        'the derivation must be guarded, so a browser without relative color keeps the light accent');
+        'the derivation must be guarded, so a browser without relative color keeps the built-in accent');
       assert.match(home, /<html lang="en-gb" dir="ltr" data-theme="dark">/, 'valid lang and theme must be applied');
       assert.match(home, /<body class="font-serif">/, 'a valid body_font must be applied');
       assert.match(home, /<a href="https:\/\/github\.com\/octocat" rel="me">/,

@@ -347,7 +347,7 @@ async function focusSkipLink(page, engineName) {
 async function assertKeyboardPermalink(page, label, engineName = label) {
   assert.equal(await page.getByRole('heading', { name: 'Headings get anchors', exact: true }).count(), 1,
     `${label}: the heading's accessible name must contain only its content`);
-  const permalink = page.getByRole('link', { name: 'Headings get anchors', exact: true });
+  const permalink = page.getByRole('link', { name: 'Section link Headings get anchors', exact: true });
   assert.equal(await permalink.count(), 1, `${label}: the permalink must be a named accessible link`);
   assert.equal(await page.locator('h3#deep-links.reference-heading + a.anchor[href="#deep-links"]').count(), 1,
     `${label}: attributed headings and their adjacent permalinks must survive`);

@@ -152,7 +152,7 @@ should prove on their own preview:
   at narrow widths and enlarged text sizes.
 - Hex fallbacks accompany OKLCH tokens so older browsers receive a complete
   palette rather than a broken one.
-- Heading permalinks are accessible links with concise section names. Their
+- Heading permalinks announce “Section link” and the name of the heading. Their
   markup preserves the heading's own accessible name and keeps decorative
   hashes out of reader-mode extraction. The earlier pointer-only implementation
   removed the links from the tab order and accessibility tree; having a heading
