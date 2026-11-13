@@ -192,7 +192,7 @@ a:hover { text-decoration-thickness: 2px; }
   a:hover, a:focus-visible { text-decoration-color: var(--accent); }
 }
 
-a, .copy-btn, .theme-toggle, .anchor {
+a, .copy-btn, .anchor {
   transition: color 150ms ease-out, background-color 150ms ease-out,
     border-color 150ms ease-out, opacity 150ms ease-out;
 }
@@ -255,45 +255,37 @@ figure > img, figure > svg { display: block; }
 }
 .wordmark { font-size: 1rem; font-weight: 600; color: var(--fg); text-decoration: none; }
 .wordmark:hover { text-decoration: underline; text-decoration-thickness: 1px; }
-.site-links { display: flex; align-items: center; gap: var(--s3); font-size: var(--fs-meta); }
+.site-links { display: flex; align-items: center; gap: var(--s1) var(--s2); font-size: var(--fs-meta); }
 .wordmark { min-width: 0; overflow-wrap: anywhere; }
 .site-links { flex: 0 1 auto; flex-wrap: wrap; }
 /* the page you're on is a location, not a link: label weight, full ink */
 .site-links a[aria-current="page"] { color: var(--fg); font-weight: 600; text-decoration: none; }
 
 /* Real hit areas do not overlap when the viewport is narrow. */
-.wordmark, .site-links a, .footer-links a, .footer-links .theme-toggle {
+.wordmark, .site-links a, .footer-links a {
   display: inline-flex; align-items: center; min-height: 44px;
 }
 .site-links a, .footer-links a { padding-inline: 0.125rem; }
-/* That padding also pushed the links on the page's own edges 2px off the column —
-   "feed" sits directly under the wordmark. The boxes now overhang by what they pad, so
-   the words land on the rail with the hit area unchanged. The header needs both edges
-   because the row wraps: the links end on the column beside the wordmark, and begin on
-   it once a long title pushes them onto their own line (measured at 280px). */
+/* Let the first link's text align with the column when the cluster wraps. */
 .footer-links > a:first-child,
 .site-links > a:first-child { margin-inline-start: -0.125rem; }
-.site-links > a:last-child { margin-inline-end: -0.125rem; }
 
-.theme-toggle {
-  font: inherit; font-size: var(--fs-meta); color: var(--fg-muted);
-  background: none; border: 0; padding: 0; cursor: pointer;
-  position: relative;
-  text-decoration: underline; text-decoration-thickness: 1px;
-  text-underline-offset: 0.15em;
-  /* Let the label wrap at enlarged default text sizes on narrow screens. */
-  white-space: normal; text-align: start; max-width: 100%;
+#theme-control:not([hidden]) {
+  display: flex; flex-wrap: wrap; max-width: 100%;
+  border-radius: 1.5rem; background: var(--surface);
 }
-.theme-toggle:hover { color: var(--fg); text-decoration-thickness: 2px; }
-@supports (text-decoration-color: color-mix(in srgb, red 50%, blue)) {
-  .theme-toggle { text-decoration-color: color-mix(in srgb, var(--fg-muted) 55%, transparent); }
-  .theme-toggle:hover, .theme-toggle:focus-visible { text-decoration-color: var(--fg); }
+#theme-control label {
+  display: flex; align-items: center; min-height: 44px;
+  padding-inline: var(--s2); border: 1px solid transparent;
+  border-radius: inherit; color: var(--fg-muted); cursor: pointer;
 }
+#theme-control label:hover { color: var(--fg); }
+#theme-control :checked + label { color: var(--fg); border-color: currentColor; background: var(--bg); }
+#theme-control :focus-visible + label { outline: 2px solid var(--focus); outline-offset: 2px; }
 /* The isolated copy control can use an invisible extension safely. */
 .copy-btn::after {
   content: ""; position: absolute; inset: -12px;
 }
-html:not(.js) .theme-toggle { display: none; }
 
 /* The rule matters: on a page too short to scroll, the leftover window space
    sits ABOVE this line, so it reads as the page bottom band rather than as a
@@ -723,7 +715,7 @@ div.highlighter-rouge.has-copy pre.highlight { padding-top: calc(var(--s2) * 2 +
 }
 
 @media (forced-colors: active) {
-  .copy-btn, .theme-toggle { border: 1px solid ButtonText; }
+  .copy-btn { border: 1px solid ButtonText; }
   .anchor { opacity: 1; }
   li:target, sup:target { outline: 2px solid Highlight; outline-offset: 2px; }
 }
@@ -743,7 +735,7 @@ div.highlighter-rouge.has-copy pre.highlight { padding-top: calc(var(--s2) * 2 +
   }
   html { background: #fff; }
 
-  .site-header, .site-footer, .skip-link, .theme-toggle,
+  .site-header, .site-footer, .skip-link,
   .copy-btn, .copy-help, .post-nav, .toc, .anchor { display: none; }
   body { background: #fff; color: #000; display: block; }
   main { max-width: 100%; padding: 0; }

@@ -160,11 +160,11 @@ for (const file of htmlFiles) {
     assert.match(html, /<meta\s+name="viewport"/i, `${relative}: missing viewport metadata`);
     assert.match(html, /<link rel="stylesheet" href="[^"]*\/assets\/css\/main\.css\?v=\d+">/,
       `${relative}: stylesheet must be build-versioned`);
-    assert.equal(count(html, /id="theme-toggle"/g), 1, `${relative}: needs one theme control`);
-    assert.doesNotMatch(html.match(/<header[\s\S]*?<\/header>/)?.[0] || '', /id="theme-toggle"/,
-      `${relative}: theme preference belongs outside the reading path`);
-    assert.match(html.match(/<footer[\s\S]*?<\/footer>/)?.[0] || '', /id="theme-toggle"/,
-      `${relative}: footer must contain the theme preference`);
+    assert.equal(count(html, /id="theme-control"/g), 1, `${relative}: needs one theme control`);
+    const header = html.match(/<header[\s\S]*?<\/header>/)?.[0] || '';
+    assert.match(header, /id="theme-control"/, `${relative}: theme preference belongs in the header`);
+    assert.equal(count(header, /type="radio" name="quiet-theme"/g), 3,
+      `${relative}: readers need three direct theme choices`);
   }
   // Pages that carry a canonical link but should never be a search result have to
   // say so themselves. A 404 in a result list wastes the one click it gets.

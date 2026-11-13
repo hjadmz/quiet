@@ -84,7 +84,7 @@ body_font: sans
 # What a first-time visitor sees: system, light, or dark.
 # `system` follows their device. Choosing light or dark overrides that on the
 # first visit — their own setting is usually the better one to respect.
-# Either way the footer control lets them change it, and it is remembered.
+# Readers can choose System, Light, or Dark in the header. Their choice is saved.
 theme_default: system
 
 # How many posts the HOME PAGE lists before the "all posts →" link.

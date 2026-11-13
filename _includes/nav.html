@@ -16,6 +16,13 @@
       {%- if _nav_pages contains ",/about/," %}
       <a href="{{ '/about/' | relative_url }}"{% if page.url == '/about/' %} aria-current="page"{% endif %}>about</a>
       {%- endif %}
+      <div id="theme-control" role="group" aria-label="Theme" hidden>
+        {%- assign _themes = "system,light,dark" | split: "," -%}
+        {%- for _theme in _themes %}
+        <input class="visually-hidden" type="radio" name="quiet-theme" id="theme-{{ _theme }}" value="{{ _theme }}" autocomplete="off"{% if q_theme_default == _theme %} checked{% endif %}>
+        <label for="theme-{{ _theme }}">{{ _theme | capitalize }}</label>
+        {%- endfor %}
+      </div>
     </div>
   </nav>
 </header>
