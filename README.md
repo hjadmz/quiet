@@ -166,9 +166,8 @@ put secrets or genuinely private writing there. Preview them with
   there's room. Use `toc_style: inline` in `_config.yml` to keep the list above
   the article on every screen. The list is also inline on short posts and
   viewports, and when JavaScript is unavailable.
-- h2–h4 headings receive a small `#` permalink; it lets readers link to a
-  specific section with a pointer or the keyboard. Each link has a descriptive
-  accessible name, while the heading keeps its own concise name.
+- h2–h4 headings have a visible `#` link. Activate it to put the section link
+  in the address bar, or copy its address from the browser's link menu.
 - No JavaScript is used for these links; they are part of the generated HTML.
 - If you want a cleaner look, remove heading hashes by changing `.anchor` in `assets/css/main.css` (for example, `display: none;` or a neutral color).
 
@@ -244,8 +243,10 @@ Somewhere around 75–100 posts it stops being scannable in one pass, and that i
 the point to remeasure this decision rather than inherit it. Nothing in the code
 prevents adding tag pages later; the archive is a choice, not a ceiling.
 
-For the same reason there is no share button — the URL bar is one, and heading
-permalinks let a reader share a specific section.
+Copy the address from the browser to share the article, or use a heading link
+to share a section. Readers can also select a passage and use their browser's
+highlight-link feature where available. These links depend on the selected
+wording. [How text fragments work](https://developer.mozilla.org/en-US/docs/Web/URI/Reference/Fragment/Text_fragments)
 
 There is no comment box, no like button and no reaction bar either — all of them
 need a server, which on a static host means someone else's. What replaces them is

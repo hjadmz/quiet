@@ -775,6 +775,45 @@ async function runReadingNavigation(engineName, browser, baseURL) {
     const triggerBox = await trigger.boundingBox();
     assert.ok(triggerBox.x > articleBox.x + articleBox.width,
       `${engineName}: the desktop control overlaps the reading column`);
+
+    // The ring reaches 100% as soon as the end is visible. Keep following the
+    // heading at the reading line until the document actually stops scrolling.
+    await page.evaluate(() => {
+      const { bottom } = document.querySelector('article.post').getBoundingClientRect();
+      window.scrollTo(0, Math.ceil(window.scrollY + bottom - innerHeight) + 2);
+    });
+    await expect(ring).toHaveAttribute('stroke-dasharray', '100 100');
+    await expect(trigger).toContainText('Embedded media');
+    const maxScroll = await page.evaluate(() => {
+      const scroller = document.scrollingElement;
+      window.scrollTo(0, scroller.scrollHeight);
+      return scroller.scrollHeight - scroller.clientHeight;
+    });
+    await expect(trigger).toContainText('A quote');
+
+    // Both late targets clamp to the same scroll offset at this viewport size.
+    // A keyboard jump must still select the right link and move focus there.
+    for (const title of ['A running demo', 'A quote']) {
+      await trigger.focus();
+      await page.keyboard.press('Enter');
+      const link = list.getByRole('link', { name: title, exact: true, includeHidden: true });
+      const hash = await link.getAttribute('href');
+      await link.focus();
+      await page.keyboard.press('Enter');
+      await expect(list).toBeHidden();
+      await expect(page).toHaveURL(new RegExp(`${hash}$`));
+      await expect(page.locator(hash)).toBeFocused();
+      await expect(trigger).toContainText(title);
+      await expect(link).toHaveAttribute('aria-current', 'location');
+      assert.ok(Math.abs(await page.evaluate(() => window.scrollY) - maxScroll) <= 1,
+        `${engineName}: late heading jump should be clamped to the document end`);
+    }
+    await page.goBack();
+    await expect(trigger).toContainText('A running demo');
+    await page.evaluate(() => window.scrollBy(0, -30));
+    await expect(trigger).toContainText('Embedded media');
+    await page.evaluate(() => window.scrollTo(0, document.scrollingElement.scrollHeight));
+    await expect(trigger).toContainText('A quote');
   } finally {
     await context.close();
   }
