@@ -19,6 +19,7 @@
 
   const roomForControl = window.matchMedia('(min-height: 20rem)');
   let active;
+  let destination;
   let lastProgress;
   let frame;
 
@@ -39,8 +40,10 @@
     // Use a line near the top, so a heading does not become current the
     // moment it peeks into view at the bottom of the page.
     const readingLine = Math.min(128, Math.max(48, innerHeight * 0.15));
-    const current = progress === 100
-      ? sections[0]
+    const { scrollTop, scrollHeight, clientHeight } = document.scrollingElement;
+    const atEnd = scrollTop >= scrollHeight - clientHeight - 1;
+    if (!atEnd) destination = undefined;
+    const current = atEnd ? destination || sections[0]
       : sections.find(({ heading }) => heading.getBoundingClientRect().top <= readingLine);
     if (current === active) return;
     active?.link.removeAttribute('aria-current');
@@ -51,6 +54,11 @@
 
   function scheduleUpdate() {
     if (frame === undefined) frame = requestAnimationFrame(update);
+  }
+
+  function followTarget() {
+    destination = sections.find(({ heading }) => heading.matches(':target'));
+    scheduleUpdate();
   }
 
   function setOpen(open) {
@@ -93,12 +101,15 @@
   toc.addEventListener('focusout', (event) => {
     if (!button.hidden && event.relatedTarget && !toc.contains(event.relatedTarget)) setOpen(false);
   });
-  for (const { heading, link } of sections) {
+  for (const section of sections) {
+    const { heading, link } = section;
     link.addEventListener('click', (event) => {
       if (button.hidden || event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return;
       setOpen(false);
       if (!heading.hasAttribute('tabindex')) heading.tabIndex = -1;
       heading.focus({ preventScroll: true });
+      destination = section;
+      scheduleUpdate();
       // Leave fragment navigation and browser history to the native link.
     });
   }
@@ -107,7 +118,8 @@
   roomForControl.addEventListener?.('change', syncPlacement);
   window.addEventListener('scroll', scheduleUpdate, { passive: true });
   window.addEventListener('resize', () => { syncPlacement(); scheduleUpdate(); });
-  window.addEventListener('pageshow', scheduleUpdate);
+  window.addEventListener('hashchange', followTarget);
+  window.addEventListener('pageshow', followTarget);
   window.addEventListener('load', scheduleUpdate, { once: true });
   if (typeof ResizeObserver === 'function') new ResizeObserver(() => {
     syncPlacement();

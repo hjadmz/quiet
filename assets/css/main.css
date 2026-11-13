@@ -424,10 +424,7 @@ h2[id], h3[id], h4[id], sup[id], .footnotes li[id] { scroll-margin-top: var(--s6
 .heading-h3 { font-size: var(--fs-h3); }
 .heading-h4 { font-size: 1rem; }
 .heading-anchor > :is(h2, h3, h4) { display: inline; margin: 0; }
-.anchor { margin-inline-start: var(--s2); font-weight: 400; text-decoration: none; opacity: 0; }
-.heading-anchor:hover .anchor,
-.anchor:hover, .anchor:focus { opacity: 1; }
-@media (hover: none) { .anchor { opacity: 1; } }
+.anchor { margin-inline-start: var(--s2); font-weight: 400; text-decoration: none; }
 
 blockquote {
   margin: 0; padding-inline-start: var(--s4);
