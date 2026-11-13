@@ -329,10 +329,11 @@ of an article is precisely the shape readers have learned to skip. Rules above
 and below, entries in body ink with a soft underline, accent on hover. The list
 now belongs to the article instead of sitting on top of it.
 
-Nothing was added to replace what it does not do. A scroll-following highlight
-needs script, needs a fallback at short viewports and near the footer, and puts
-a persistently updating element in peripheral vision while text is being read —
-and the static list already answers the question a reader is asking.
+On opted-in posts, the Contents button answers two more questions while
+reading: “Where am I?” and “How far to the end?” The label and chevron make
+the action visible; the heading and ring give feedback as the reader scrolls.
+The control opens the same list of anchors, and the original inline list still
+works without JavaScript. Inspired by [Jermaine Antwi's article navigator](https://antwi.dev/could-ai-ever-wonder).
 
 ## where friction belongs
 
@@ -534,8 +535,8 @@ declines. Each refusal is a decision, not an oversight:
 
 | Recommendation | Why it isn't here |
 |---|---|
-| Reading progress bar | Persistent motion in the reader's periphery, sold as encouragement. A post's length is already visible in the scrollbar and the reading-time estimate. |
-| Sticky/scroll-spy table of contents | Documentation needs a map; a linear essay does not. It also needs fallback behavior at short viewports and near the footer — complexity added to solve a problem the static TOC and heading anchors already solve. |
+| Site-wide reading progress | The progress ring belongs to the Contents control on posts whose authors opt in. A short or linear essay needs no extra chrome. |
+| Always-open side table of contents | A collapsed button preserves the single reading column. The full map is one action away. |
 | Related posts / "you may also like" | Discovery here is the archive, the feed, and find-in-page. Recommendation grids often optimize for additional page views, which is not the reader's task here. |
 | Newsletter CTA / popups / modals | Interrupting a reader to ask for something is a widely disliked pattern and conflicts with the reading task. |
 | Author photo and bio block on every post | The about page and footer carry authorship. Repeating it above every article spends the reader's first screen on the writer. |
@@ -575,24 +576,12 @@ off-screen skip link positioned at `left: -999rem` put ~17,000px of sideways
 scroll into any RTL document — an offset that is harmless only in the direction
 the document cannot scroll.
 
-## why the contents list is at the top, not beside the text
+## one reading column, one contents control
 
-Some sites float a contents list in the margin on wide screens and move it above
-the text on narrow ones. It is a real pattern and it is the wrong one here.
-
-A margin list needs a second column, which needs a breakpoint, which needs a
-decision about where the list sits in reading order — before the article, where
-a screen reader meets it first, or after, where it is useless. On an iPad in
-portrait there is 48px of margin, so there is nowhere to put it; below that,
-nothing. So the pattern buys a cleaner first screen on wide displays only, and
-pays for it with two layouts, a breakpoint and a reading-order compromise that
-applies everywhere.
-
-Measured, the thing it would buy is already small: after the h2-only cut the
-list is 255px on a 1280×900 desktop, and the first paragraph is on screen
-without scrolling. The single column is the design's central claim — one place
-to look, one reading order, identical on every device — and a margin list trades
-that for 255px on desktops only.
+The Contents button sits below the text on narrow screens. When there's
+enough room beside the widest figure, the same button moves into the trailing
+margin. Only its visual placement changes; the order of the content and links
+stays the same. The list is inline at the top when the page can't enhance it.
 
 ## the setting that is not page zoom
 
@@ -631,6 +620,6 @@ These checks do not establish physical-device, hinge, or posture-change coverage
 They also cover long unbroken titles, light/dark/system preference, keyboard
 skip navigation, print, reduced motion, and a no-JavaScript pass. Hex colors
 remain alongside OKLCH values as older-browser fallbacks. With JavaScript
-disabled, only the theme and copy controls disappear; the table of contents,
+disabled, the theme, copy, and floating contents controls disappear; the inline table of contents,
 heading anchors, archive, and article content remain build-time HTML, and the
 Atom feed remains build-time XML.

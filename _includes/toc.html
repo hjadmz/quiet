@@ -1,5 +1,5 @@
 {% comment %}
-  Build-time table of contents from h2 headings. Pure Liquid, no JS.
+  Build-time table of contents from h2 headings. The links work without JS.
   Rendered only when a post sets `toc: true` in its front matter.
   Usage: {% include toc.html html=content %}
 
@@ -19,8 +19,22 @@
 {%- endfor -%}
 {%- if _has_toc -%}
 <nav class="toc" aria-label="contents">
+  {%- if include.style == "floating" %}
+  <button class="toc-toggle" type="button" aria-expanded="false" aria-controls="quiet-toc-list" hidden>
+    <svg class="toc-ring" viewBox="0 0 28 28" width="28" height="28" fill="none" aria-hidden="true">
+      <circle class="toc-ring-track" cx="14" cy="14" r="11" />
+      <circle class="toc-ring-fill" cx="14" cy="14" r="11" pathLength="100" stroke-dasharray="0 100" transform="rotate(-90 14 14)" />
+    </svg>
+    <span class="toc-status">
+      <span class="toc-kicker">Contents</span>
+      <span class="toc-section">Introduction</span>
+      <span class="toc-percent visually-hidden"></span>
+    </span>
+    <span class="toc-chevron" aria-hidden="true"></span>
+  </button>
+  {%- endif %}
   <p class="toc-title">contents</p>
-  <ul>
+  <ul{% if include.style == "floating" %} id="quiet-toc-list"{% endif %}>
     {%- for _c in _chunks offset: 1 -%}
       {%- assign _tag = _c | split: '>' | first -%}
       {%- assign _id_parts = _tag | split: ' id="' -%}
@@ -33,4 +47,7 @@
     {%- endfor -%}
   </ul>
 </nav>
+{%- if include.style == "floating" %}
+<script src="{{ '/assets/js/reading-navigation.js' | relative_url }}?v={{ site.time | date: '%s' }}" defer></script>
+{%- endif %}
 {%- endif -%}
