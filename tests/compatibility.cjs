@@ -235,7 +235,7 @@ async function assertTextRails(page, label) {
       // box, not against the text grid, and is inset from it on purpose.
       if (cs.position === 'absolute' || cs.position === 'fixed') continue;
       if (!BLOCK.test(cs.display)) continue;
-      if (el.closest('.visually-hidden, .skip-link')) continue;
+      if (el.closest('.visually-hidden, .skip-link, .toc-enhanced')) continue;
       // A table's later columns land where its content puts them. Only the first
       // cell in a row is on the text grid, and it is flush with it on purpose.
       if (/^(td|th)$/i.test(el.tagName) && el.previousElementSibling) continue;
@@ -705,6 +705,8 @@ async function runNoJavaScript(engineName, browser, baseURL) {
   await assertNoOverflow(page, `${engineName} no-JS`);
   assert.equal(await page.locator('#theme-toggle').isVisible(), false);
   assert.equal(await page.locator('.copy-btn').count(), 0);
+  assert.equal(await page.locator('.toc-toggle').isVisible(), false);
+  assert.equal(await page.locator('.toc li a').first().isVisible(), true);
   // Derived, not counted by hand: the invariant is that the build-time TOC and
   // permalinks cover exactly the headings that have ids, whatever the fixture
   // grows to. A hardcoded number just breaks every time the fixture changes and
@@ -725,6 +727,57 @@ async function runNoJavaScript(engineName, browser, baseURL) {
   await assertKeyboardPermalink(page, `${engineName} no-JS`, engineName);
   assert.deepEqual(failures, [], `${engineName} no-JS: browser errors or third-party requests`);
   await context.close();
+}
+
+async function runReadingNavigation(engineName, browser, baseURL) {
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  try {
+    const page = await context.newPage();
+    await goto(page, baseURL, '/2026/everything-a-post-can-do/');
+    const trigger = page.locator('.toc-toggle');
+    const ring = page.locator('.toc-ring-fill');
+    await expect(trigger).toContainText('Introduction');
+    await expect(ring).toHaveAttribute('stroke-dasharray', '0 100');
+    await trigger.focus();
+    await page.keyboard.press('Enter');
+    const list = page.locator('#quiet-toc-list');
+    await expect(list).toBeVisible();
+    const destination = list.locator('a').nth(2);
+    const title = (await destination.textContent()).trim();
+    const hash = await destination.getAttribute('href');
+    await destination.focus();
+    await page.keyboard.press('Enter');
+    await expect(list).toBeHidden();
+    await expect(page).toHaveURL(new RegExp(`${hash}$`));
+    await expect(page.locator(hash)).toBeFocused();
+    await expect(trigger).toContainText(title);
+    await expect(destination).toHaveAttribute('aria-current', 'location');
+    await page.goBack();
+    assert.equal(new URL(page.url()).hash, '');
+    await expect(trigger).toContainText('Introduction');
+
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    await expect(ring).toHaveAttribute('stroke-dasharray', '100 100');
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await expect(trigger).toContainText('Introduction');
+    await expect(ring).toHaveAttribute('stroke-dasharray', '0 100');
+    await trigger.click();
+    await page.keyboard.press('Escape');
+    await expect(trigger).toBeFocused();
+    await expect(list).toBeHidden();
+
+    await page.setViewportSize({ width: 390, height: 260 });
+    await expect(trigger).toBeHidden();
+    await expect(list).toBeVisible();
+    await page.setViewportSize({ width: 1920, height: 1000 });
+    await expect(trigger).toBeVisible();
+    const articleBox = await page.locator('article.post').boundingBox();
+    const triggerBox = await trigger.boundingBox();
+    assert.ok(triggerBox.x > articleBox.x + articleBox.width,
+      `${engineName}: the desktop control overlaps the reading column`);
+  } finally {
+    await context.close();
+  }
 }
 
 async function runAccessibility(engineName, browser, baseURL) {
@@ -939,6 +992,7 @@ async function runLayoutEnvironments(engineName, browser, baseURL) {
         const PHASES = [
           ['responsive', runResponsive],
           ['interaction', runInteraction],
+          ['reading-navigation', runReadingNavigation],
           ['no-JavaScript', runNoJavaScript],
           ['accessibility', runAccessibility],
           ['reader-mode', runReaderMode],

@@ -107,7 +107,7 @@ Front matter reference:
 |---------------|----------|--------|
 | `title`       | yes      | the post's title |
 | `description` | by convention | one line under the title on the home page **and in the archive**, and the post's search/social description |
-| `toc`         | no       | `toc: true` renders a table of contents from the post's h2 headings |
+| `toc`         | no       | `toc: true` adds a table of contents for the post's h2 headings. Omit it or use `false` for a continuous essay. |
 | `last_modified_at` | no  | `last_modified_at: 2026-09-01` shows an "updated" date and updates the feed, sitemap, and page metadata |
 | `published`   | no       | `published: false` hides the post completely — no page, no feed, no sitemap |
 | `image`       | no       | social-preview image for this post, overriding `assets/img/og-default.png` |
@@ -160,6 +160,12 @@ put secrets or genuinely private writing there. Preview them with
   phone's first screen; h2 alone gives 6 and leaves the opening paragraph
   visible. Use it when a post has five or more sections and readers will jump
   between them; leave it off for a linear essay.
+- With the default `toc_style: floating`, a long opted-in post gets a Contents button
+  that shows the current section and scroll progress through the article. It
+  sits at the bottom on narrow screens and moves into the side margin when
+  there's room. Use `toc_style: inline` in `_config.yml` to keep the list above
+  the article on every screen. The list is also inline on short posts and
+  viewports, and when JavaScript is unavailable.
 - h2–h4 headings receive a small `#` permalink; it lets readers link to a
   specific section with a pointer or the keyboard. Each link has a descriptive
   accessible name, while the heading keeps its own concise name.

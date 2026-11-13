@@ -1,0 +1,15 @@
+{%- comment -%} Normalize per-post toc for the post layout and site check. {%- endcomment -%}
+{%- assign q_post_toc = false -%}
+{%- assign q_post_toc_warning = "" -%}
+{%- assign _post_toc = include.value -%}
+{%- if _post_toc == true -%}
+  {%- assign q_post_toc = true -%}
+{%- elsif _post_toc != nil and _post_toc != false -%}
+  {%- assign _post_toc_text = _post_toc | append: "" | strip | downcase -%}
+  {%- if _post_toc_text == "true" -%}
+    {%- assign q_post_toc = true -%}
+    {%- assign q_post_toc_warning = "Write toc: true without quotes. The contents list is enabled." -%}
+  {%- else -%}
+    {%- assign q_post_toc_warning = "Write toc: true or toc: false without quotes. The contents list is off." -%}
+  {%- endif -%}
+{%- endif -%}

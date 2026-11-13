@@ -305,7 +305,7 @@ const shipped = files.filter((file) => /\.(?:css|js)$/.test(file));
 // current — a budget documented in three places is a budget documented nowhere.
 // The PASS line below prints the live utilisation instead, so the real number is
 // in front of whoever runs the suite rather than in a comment that rots.
-const BUDGETS = { css: { raw: 32 * 1024, wire: 10 * 1024 }, js: { raw: 4 * 1024, wire: 2 * 1024 } };
+const BUDGETS = { css: { raw: 34 * 1024, wire: 11 * 1024 }, js: { raw: 8 * 1024, wire: 3 * 1024 } };
 const totals = { css: { raw: 0, wire: 0 }, js: { raw: 0, wire: 0 } };
 for (const file of shipped) {
   const kind = file.endsWith('.css') ? 'css' : 'js';

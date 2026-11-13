@@ -120,6 +120,10 @@ footer:
 # reads the obvious intent anyway and tells you at /site-check/.
 show_reading_time: true
 
+# On posts with toc: true, use the section button and progress ring (floating)
+# or keep the full list above the article (inline).
+toc_style: floating
+
 # "built with quiet" in the footer. false removes it — guilt-free, it's MIT.
 show_credit: true
 

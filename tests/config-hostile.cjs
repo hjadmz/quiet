@@ -28,6 +28,16 @@ const POSTS = 3;
 
 const CASES = [
   {
+    name: 'invalid switch values and a numeric contents style',
+    config: 'show_reading_time: 7\nshow_credit: [true, false]\ntoc_style: 7\n',
+    homePosts: POSTS,
+    problems: [
+      'show_reading_time expects true or false with no quotes. Using true.',
+      'show_credit expects true or false with no quotes. Using true.',
+      'toc_style expects floating or inline. Using inline.'
+    ]
+  },
+  {
     name: 'a Persian title preserves its non-joiner',
     config: `title: ${JSON.stringify('یادداشت‌های من')}\nlang: fa\n`,
     homePosts: POSTS,
@@ -292,6 +302,10 @@ try {
     '---\ntitle: us dated\ndescription: ""\nlast_modified_at: 03/04/2026\n---\n\nBody.\n');
   fs.writeFileSync(path.join(posts, '2026-05-01-half-hidden.md'),
     '---\ntitle: half hidden\ndescription: ""\ndraft: true\n---\n\nBody.\n');
+  fs.writeFileSync(path.join(posts, '2026-06-01-contents.md'),
+    '---\ntitle: contents example\ntoc: "true"\n---\n\n## First\n\n## Second\n');
+  fs.writeFileSync(path.join(posts, '2026-06-02-invalid-contents.md'),
+    '---\ntitle: invalid contents example\ntoc: 7\n---\n\n## First\n\n## Second\n');
   const collided = build('post-problems', 'posts_on_home: 5\n');
   // Liquid conditionals leave newlines mid-sentence; HTML collapses them, so the
   // assertions read the text the way a browser does.
@@ -306,8 +320,17 @@ try {
     'draft: true must be reported as the half-measure it is');
   assert.match(collisionReport, /<code>published: false<\/code>/,
     'the report must name the setting that actually hides a post');
+  assert.match(collisionReport, /contents example<\/em>: Write toc: true without quotes/);
+  assert.match(collisionReport, /invalid contents example<\/em>: Write toc: true or toc: false without quotes/);
+  const postHtml = (root, slug) => fs.readFileSync(path.join(root, '2026', slug, 'index.html'), 'utf8');
+  assert.match(postHtml(collided, 'contents'), /reading-navigation\.js/);
+  assert.doesNotMatch(postHtml(collided, 'invalid-contents'), /<nav class="toc"/);
+  const inline = build('inline-contents', 'toc_style: inline\n');
+  assert.match(postHtml(inline, 'contents'), /<nav class="toc"/);
+  assert.doesNotMatch(postHtml(inline, 'contents'), /reading-navigation\.js|class="toc-toggle"/);
   for (const name of ['2026-02-01-hello-world.md', '2026-03-01-hello-world.md',
-    '2026-04-01-us-dated.md', '2026-05-01-half-hidden.md']) {
+    '2026-04-01-us-dated.md', '2026-05-01-half-hidden.md', '2026-06-01-contents.md',
+    '2026-06-02-invalid-contents.md']) {
     fs.rmSync(path.join(posts, name));
   }
 
