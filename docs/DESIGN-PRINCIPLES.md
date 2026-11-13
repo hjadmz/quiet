@@ -243,15 +243,11 @@ sit next to titles, the archive is reverse-chronological, and the feed lives at
 `/feed.xml` by default (under `baseurl` for project sites). Nothing here needs
 to be learned.
 
-**The theme control names its current preference.** The full label is visible
-text: `theme: system`, `theme: light`, or `theme: dark`. The words identify both
-the setting and its value, without requiring an icon to align with the chosen
-body font. The same wording is available to screen readers and find-in-page.
-
-It remains a native button that cycles system → light → dark → system. The
-label describes the current preference; it is not the name of the next action.
-System follows the device's appearance setting, and the choice persists when
-browser storage is available.
+**Theme choices are visible and direct.** The header groups System, Light,
+and Dark. A reader can choose any mode in one action, and the selected option
+has a visible outline. Native radios support arrow keys and communicate which
+option is selected. System follows the device's appearance. The choice
+persists when browser storage is available.
 
 **Affordance** — no mystery-meat navigation. Controls use labels rather than
 unexplained icons; most text links are underlined, while the wordmark,

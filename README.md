@@ -2,6 +2,8 @@
 
 A reading-first Jekyll blog template for GitHub Pages and static hosts.
 
+For a one-page profile and link directory, see [Elsewhere](https://github.com/hjadmz/elsewhere).
+
 **The philosophy in three sentences.** Function first, then convenience,
 then aesthetics. The reader outranks the writer, and the writer outranks
 the customizer. If the interface pulls attention away from reading, it has
@@ -289,10 +291,9 @@ the About page, and image files remain ordinary content. The short version:
 | `timezone` | IANA zone; `blog:new` reads it too | dates fall back to UTC |
 | `feed.posts_limit` | how many posts the feed carries (default 10) | falls back to 10 |
 
-The footer button shows the current preference as `theme: system`, `theme: light`,
-or `theme: dark`. Each activation cycles **system → light → dark → system**.
-System follows the device's appearance setting; the choice is remembered in
-that browser when storage is available.
+The header lets readers choose **System**, **Light**, or **Dark** directly.
+System follows the device's appearance. The selected choice is remembered
+in that browser when storage is available.
 
 Not settings, on purpose: the favicon, the apple-touch icon and the social image
 are **files** — replace them in place at `assets/img/`. Analytics is **a file

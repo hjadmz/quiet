@@ -1,1 +1,34 @@
-(function(){var d=document.documentElement,S=["system","light","dark"];function g(){try{var v=localStorage["quiet-theme"];return S.indexOf(v)>-1?v:""}catch(e){return""}}function a(v){"light"==v||"dark"==v?d.setAttribute("data-theme",v):d.removeAttribute("data-theme");var l=document.getElementById("theme-label");l&&(l.textContent=v)}function c(){return g()||d.getAttribute("data-theme")||"system"}d.classList.add("js");a(c());addEventListener("DOMContentLoaded",function(){a(c())});addEventListener("click",function(e){if(e.target.closest("#theme-toggle")){var n=S[(S.indexOf(c())+1)%3];try{localStorage["quiet-theme"]=n}catch(e){}a(n)}})})();
+(() => {
+  const root = document.documentElement;
+  const key = 'quiet-theme';
+  const choices = ['system', 'light', 'dark'];
+  let theme = root.getAttribute('data-theme') || 'system';
+  let control;
+
+  function apply() {
+    if (theme === 'system') root.removeAttribute('data-theme');
+    else root.setAttribute('data-theme', theme);
+    if (control) control.querySelector(`[value="${theme}"]`).checked = true;
+  }
+
+  function restore() {
+    try {
+      const saved = localStorage.getItem(key);
+      if (choices.includes(saved)) theme = saved;
+    } catch {}
+    apply();
+  }
+
+  restore();
+  addEventListener('DOMContentLoaded', () => {
+    control = document.getElementById('theme-control');
+    apply();
+    control.hidden = false;
+    control.addEventListener('change', (event) => {
+      theme = event.target.value;
+      try { localStorage.setItem(key, theme); } catch {}
+      apply();
+    });
+  });
+  addEventListener('pageshow', restore);
+})();
