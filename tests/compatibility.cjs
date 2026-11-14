@@ -204,25 +204,18 @@ async function assertTextRails(page, label) {
       if (Math.abs(gap) > 0.5) offEdge.push(`${selector} is ${gap}px off the column ${side}`);
     }
 
-    // The header row is the one place the rail depends on the width. While the links
-    // share a line with the wordmark they finish on the column's far edge; once a long
-    // enough title pushes them onto a line of their own they begin on its near edge
-    // instead. Both are rails — measured on a folded foldable at 280px, where the
-    // title alone fills the line — so the check has to ask which state it is in rather
-    // than assume one and be wrong on small screens.
+    // The last group ends on the reading rail when all three share a row.
+    // On a wrapped row, the first group starts on the reading rail.
     const wordmark = document.querySelector('.wordmark');
     const cluster = document.querySelector('.site-links');
-    if (wordmark && cluster) {
-      const wrapped = Math.abs(cluster.getBoundingClientRect().top -
-        wordmark.getBoundingClientRect().top) > 1;
-      const edge = wrapped ? cluster.querySelector('a') || cluster : cluster;
+    const picker = document.querySelector('#theme-control:not([hidden])');
+    if (wordmark && cluster?.getBoundingClientRect().width) {
+      const onRow = (a, b) => Math.abs(a.getBoundingClientRect().top - b.getBoundingClientRect().top) < 1;
+      const wrapped = !onRow(wordmark, cluster);
+      const edge = wrapped ? cluster.querySelector('a') : picker && onRow(picker, cluster)
+        ? picker : cluster.querySelector('a:last-child');
       const side = wrapped ? 'start' : 'end';
-      if (cluster.getBoundingClientRect().width) {
-        const gap = from(edge, side);
-        if (Math.abs(gap) > 0.5) {
-          offEdge.push(`.site-links (${wrapped ? 'wrapped onto its own line' : 'inline with the wordmark'}) is ${gap}px off the column ${side}`);
-        }
-      }
+      if (Math.abs(from(edge, side)) > 0.5) offEdge.push(`.site-links is off the column ${side}`);
     }
 
     const indents = {};
@@ -715,10 +708,15 @@ async function runReadingNavigation(engineName, browser, baseURL) {
     const ring = page.locator('.toc-ring-fill');
     await expect(trigger).toContainText('Introduction');
     await expect(ring).toHaveAttribute('stroke-dasharray', '0 100');
+    const closedWidth = (await trigger.boundingBox()).width;
     await trigger.focus();
     await page.keyboard.press('Enter');
     const list = page.locator('#quiet-toc-list');
     await expect(list).toBeVisible();
+    if (await page.evaluate(() => CSS.supports('selector(:has(*))'))) {
+      assert.ok((await list.boundingBox()).width > closedWidth,
+        `${engineName}: the closed phone control should leave more reading space than the open list`);
+    }
     const destination = list.locator('a').nth(2);
     const title = (await destination.textContent()).trim();
     const hash = await destination.getAttribute('href');

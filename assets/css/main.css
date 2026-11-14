@@ -236,14 +236,14 @@ figure > img, figure > svg { display: block; }
    79px wide. Stacking is the honest answer at that size; below it there is room
    and nothing moves. */
 .site-header nav {
-  display: flex; align-items: center; justify-content: space-between;
-  flex-wrap: wrap; gap: var(--s3);
+  display: flex; align-items: center; flex-wrap: wrap;
+  gap: var(--s1) var(--s3);
   padding-top: var(--s3); padding-bottom: var(--s3);
 }
 .wordmark { font-size: 1rem; font-weight: 600; color: var(--fg); text-decoration: none; }
 .wordmark:hover { text-decoration: underline; text-decoration-thickness: 1px; }
 .site-links { display: flex; align-items: center; gap: var(--s1) var(--s2); font-size: var(--fs-meta); }
-.wordmark { min-width: 0; overflow-wrap: anywhere; }
+.wordmark { min-width: 0; margin-inline-end: auto; overflow-wrap: anywhere; }
 .site-links { flex: 0 1 auto; flex-wrap: wrap; }
 /* the page you're on is a location, not a link: label weight, full ink */
 .site-links a[aria-current="page"] { color: var(--fg); font-weight: 600; text-decoration: none; }
@@ -256,6 +256,8 @@ figure > img, figure > svg { display: block; }
 /* Let the first link's text align with the column when the cluster wraps. */
 .footer-links > a:first-child,
 .site-links > a:first-child { margin-inline-start: -0.125rem; }
+.site-links > a:last-child { margin-inline-end: -0.125rem; }
+.site-links:empty { display: none; }
 
 #theme-control:not([hidden]) {
   display: flex; flex-wrap: wrap; gap: 2px; max-width: 100%;
@@ -575,6 +577,12 @@ th { font-weight: 600; }
   color: var(--fg);
   font-weight: 600;
   text-decoration-color: currentColor;
+}
+@media screen and (max-width: 40rem) {
+  .toc-enhanced:has(.toc-toggle[aria-expanded="false"]) {
+    width: max-content;
+    max-width: min(16.5rem, 100% - 2 * var(--toc-clearance));
+  }
 }
 @media screen and (min-width: 90rem) and (min-height: 32rem) {
   .toc-enhanced {
