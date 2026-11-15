@@ -186,21 +186,19 @@ const CASES = [
     problems: ['footer is set but has no github or email under it']
   },
   {
-    // The one class the templates cannot fully contain, recorded as a test rather than
-    // as a footnote. jekyll-seo-tag prints site.lang straight into a meta tag without
-    // escaping it, so a quote there escapes the attribute no matter what the layouts
-    // do. quiet still renders correctly and still says what is wrong — and the output
-    // check refuses to pass the build, which is the right answer for a value that has
-    // to be corrected rather than tolerated. If a future jekyll-feed/seo-tag release
-    // escapes it, this case starts failing and the workaround can come out.
-    name: 'a quote in lang, which jekyll-seo-tag prints unescaped',
+    // Keep the validated document-language fallback and require jekyll-seo-tag
+    // to retain hostile language text safely inside one escaped attribute.
+    name: 'a quote in lang remains escaped in SEO metadata',
     config: 'lang: \'en" onload="alert(1)\'\n',
     homePosts: POSTS,
     problems: ['which is not a language code', 'jekyll-seo-tag reads this setting straight from your config'],
-    expectOutputRejected: true,
     expect: (home) => {
       assert.match(home, /<html lang="en" dir="ltr">/,
         'the document language itself must still be the validated fallback');
+      const locale = home.match(/<meta property="og:locale" content="([^"]*)" \/>/);
+      assert.ok(locale, 'SEO locale must remain one quoted content attribute');
+      assert.equal(locale[1], 'en&quot; onload=&quot;alert(1)',
+        'SEO locale must preserve hostile language text through attribute escaping');
     }
   },
   {
