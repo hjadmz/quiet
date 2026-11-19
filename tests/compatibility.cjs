@@ -707,6 +707,7 @@ async function runReadingNavigation(engineName, browser, baseURL) {
     await goto(page, baseURL, '/2026/everything-a-post-can-do/');
     const trigger = page.locator('.toc-toggle');
     const ring = page.locator('.toc-ring-fill');
+    await expect(trigger).toBeVisible();
     await expect(trigger).toContainText('Introduction');
     await expect(ring).toHaveAttribute('stroke-dasharray', '0 100');
     const closedWidth = (await trigger.boundingBox()).width;
@@ -745,6 +746,13 @@ async function runReadingNavigation(engineName, browser, baseURL) {
     await page.setViewportSize({ width: 390, height: 260 });
     await expect(trigger).toBeHidden();
     await expect(list).toBeVisible();
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await expect(trigger).toBeVisible();
+    const sectionLabel = trigger.locator('.toc-section');
+    await expect(sectionLabel).toHaveText('Introduction');
+    assert.ok(await sectionLabel.evaluate(label => label.scrollWidth <= label.clientWidth),
+      `${engineName}: a short section name must fit in the laptop Contents control`);
+
     await page.setViewportSize({ width: 1920, height: 1000 });
     await expect(trigger).toBeVisible();
     const articleBox = await page.locator('article.post').boundingBox();
