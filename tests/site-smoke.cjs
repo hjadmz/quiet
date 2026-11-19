@@ -162,8 +162,13 @@ for (const file of htmlFiles) {
       `${relative}: stylesheet must be build-versioned`);
     assert.equal(count(html, /id="theme-control"/g), 1, `${relative}: needs one theme control`);
     const header = html.match(/<header[\s\S]*?<\/header>/)?.[0] || '';
-    assert.match(header, /id="theme-control"/, `${relative}: theme preference belongs in the header`);
-    assert.equal(count(header, /type="radio" name="quiet-theme"/g), 3,
+    const footer = html.match(/<footer[\s\S]*?<\/footer>/)?.[0] || '';
+    assert.doesNotMatch(header, /id="theme-control"/, `${relative}: header must stay focused on site navigation`);
+    assert.match(footer, /id="theme-control"[^>]*role="group"[^>]*aria-labelledby="theme-label"/,
+      `${relative}: footer must contain the labeled theme group`);
+    assert.match(footer, /id="theme-label"[^>]*>Appearance<\//,
+      `${relative}: theme choices need a visible Appearance label`);
+    assert.equal(count(footer, /type="radio" name="quiet-theme"/g), 3,
       `${relative}: readers need three direct theme choices`);
   }
   // Pages that carry a canonical link but should never be a search result have to

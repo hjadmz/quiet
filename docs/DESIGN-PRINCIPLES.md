@@ -242,9 +242,9 @@ sit next to titles, the archive is reverse-chronological, and the feed lives at
 `/feed.xml` by default (under `baseurl` for project sites). Nothing here needs
 to be learned.
 
-**Theme choices are visible and direct.** The header groups System, Light,
-and Dark. A reader can choose any mode in one action, and the selected option
-has a visible outline. Native radios support arrow keys and communicate which
+**Theme choices are visible and direct.** The footer's Appearance group offers
+System, Light, and Dark. A reader can choose any mode in one action, and the
+selected option has a visible outline. Native radios support arrow keys and communicate which
 option is selected. System follows the device's appearance. The choice
 persists when browser storage is available.
 
@@ -541,7 +541,7 @@ declines. Each refusal is a decision, not an oversight:
 | Built-in text-to-speech | Several KB of JavaScript to reimplement Safari Reader, Edge Read Aloud, and every screen reader — and the word-highlighting half depends on `speechSynthesis` boundary events, which are least reliable on iOS, where reading aloud is most used. Refusing it only counts if the tools people already have work here, which is now a test rather than a claim — see below. |
 | A licence line in the footer | Real, but it buys a config key for a decision most people make once and never revisit. The README says MIT; a fork that relicenses says so in its own LICENSE file. The copyright line already carries the year span and the name. |
 | A webmention endpoint or h-card | Receiving webmentions needs a server, and every hosted alternative is a third-party request on every page — the one thing this template does not do. `rel="me"` on the footer's GitHub link is the piece of the same idea that needs nothing, so that is the piece it ships. |
-| `theme-color`, a web app manifest, `security.txt`, `humans.txt` | Four things that look like completeness. `theme-color` cannot follow the manual toggle without script that keeps it in sync, and buys almost nothing against this palette; a manifest is for an app; `security.txt` is for a service with a vulnerability process; `humans.txt` is a colophon nobody opens. A fork that needs one has a reason the template does not. |
+| `theme-color`, a web app manifest, `security.txt`, `humans.txt` | Four things that look like completeness. `theme-color` cannot follow the appearance preference without script that keeps it in sync, and buys almost nothing against this palette; a manifest is for an app; `security.txt` is for a service with a vulnerability process; `humans.txt` is a colophon nobody opens. A fork that needs one has a reason the template does not. |
 | Back to top, a site-wide "updated" date, a sitemap link | The header is on every page and its archive link goes where a back-to-top would; `last_modified_at` is the updated date, per post, where it means something; the sitemap is for crawlers and they find it in `robots.txt`. |
 | A photo or work gallery | A second layout, a second content type, and a second answer to "where is the index of the work". A post *is* the showcase: `class="wide"` for stills, an inlined demo for anything that runs. |
 | Web fonts | System stacks avoid another download and render in the reader's native environment. Self-hosting a font remains a documented recipe. |
