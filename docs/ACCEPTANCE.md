@@ -96,8 +96,10 @@ date in its filename, or one dated in the future.
   page and feed values. The locked plugin escapes author and language attributes,
   including the quoted values checked by `tests/config-hostile.cjs`. A YAML
   boolean description can still appear in metadata. Visit `/site-check/` for
-  configuration feedback. The local and CI output checks also flag inline event
-  handlers in generated HTML and XML.
+  configuration feedback. Local builds and CI use `Gemfile.lock` and check for
+  inline event handlers in generated HTML and XML. When GitHub Pages builds
+  from a branch, its [managed plugin versions](https://pages.github.com/versions/)
+  can differ from the lockfile and can escape metadata differently.
 - **An unparseable `last_modified_at` stops the build**, in the plugins rather
   than in the layouts, with an error naming the layout. A shape check in the
   layout was tried and removed: the metadata plugins read the raw value either
