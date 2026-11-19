@@ -75,7 +75,13 @@ function contentType(file) {
 
 function startServer() {
   const server = http.createServer((request, response) => {
-    const pathname = decodeURIComponent(new URL(request.url, `http://${HOST}`).pathname);
+    let pathname;
+    try {
+      pathname = decodeURIComponent(new URL(request.url, `http://${HOST}`).pathname);
+    } catch {
+      response.writeHead(400).end('Bad Request');
+      return;
+    }
     let relative = pathname.replace(/^\/+/, '');
     if (!relative || pathname.endsWith('/')) relative = path.join(relative, 'index.html');
     let file = path.resolve(ROOT, relative);
@@ -1042,6 +1048,11 @@ async function runLayoutEnvironments(engineName, browser, baseURL) {
   for (const name of REQUESTED) assert.ok(ENGINES[name], `unknown browser engine: ${name}`);
   const { server, baseURL } = await startServer();
   try {
+    const invalid = await fetch(`${baseURL}/discount-10%`, { method: 'HEAD' });
+    assert.equal(invalid.status, 400, 'an incomplete percent escape must return 400');
+    const home = await fetch(baseURL, { method: 'HEAD' });
+    assert.equal(home.status, 200, 'the server must still serve the homepage');
+
     for (const name of REQUESTED) {
       const browser = await ENGINES[name].launch();
       try {
