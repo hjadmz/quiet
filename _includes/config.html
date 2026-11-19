@@ -109,7 +109,7 @@
 {%- endif -%}
 {%- if q_author contains '"' or q_author contains "<" or q_author contains ">" -%}
   {%- assign q_author = q_author | replace: '"', "" | replace: "<", "" | replace: ">", "" | strip -%}
-  {%- assign q_problems = q_problems | append: "author.name contains a quote or an angle bracket. Those were removed here, but jekyll-seo-tag reads this setting straight from your config and prints it into a meta tag unescaped, so remove them in _config.yml too." | append: _SEP -%}
+  {%- assign q_problems = q_problems | append: "author.name contains a double quote or an angle bracket. Quiet removes these characters from the feed and copyright line. Remove them from the name in _config.yml to match the author in page metadata." | append: _SEP -%}
 {%- endif -%}
 {%- if q_author == "" -%}
   {%- assign q_problems = q_problems | append: "author.name is empty, so the feed and the copyright line have no one to credit. Set author: name: Your Name in _config.yml." | append: _SEP -%}
@@ -146,7 +146,7 @@
   {%- if _lang_ok -%}
     {%- assign q_lang = _lang -%}
   {%- else -%}
-    {%- assign q_problems = q_problems | append: "lang is “" | append: _lang | append: "”, which is not a language code. A code is two or three letters, optionally followed by a region — en, en-GB, ja, pt-BR. The word for the language is not the code for it. Using en here, but jekyll-seo-tag reads this setting straight from your config and prints it into a meta tag unescaped, so fix it in _config.yml." | append: _SEP -%}
+    {%- assign q_problems = q_problems | append: "lang is “" | append: _lang | append: "”, which is not a language code. Quiet uses en for the page and feed. Set lang in _config.yml to the language you write in, such as en, en-GB, ja, or pt-BR. Sharing metadata reads that setting directly." | append: _SEP -%}
   {%- endif -%}
 {%- endif -%}
 

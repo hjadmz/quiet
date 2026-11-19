@@ -5,10 +5,9 @@ collection: posts
 ---
 <?xml version="1.0" encoding="utf-8"?>
 {%- comment -%}
-  Deviation from jekyll-feed 0.17: this template prints the validated q_lang
-  rather than site.lang. Unvalidated, a stray quote in that setting closes the
-  xml:lang attribute and the feed stops parsing for every subscriber at once —
-  the one breakage a reader cannot see and the author cannot notice.
+  Vendored from jekyll-feed 0.18.0 with deviations in tests/feed-smoke.rb.
+  Keep Quiet's validated values and XML-escaped content and summaries.
+  Upstream now escapes language attributes and safely splits CDATA.
 {%- endcomment -%}
 {%- include config.html -%}
 {% if page.xsl %}
@@ -37,6 +36,22 @@ collection: posts
 
   {% if q_description != "" %}
     <subtitle>{{ q_description | xml_escape }}</subtitle>
+  {% endif %}
+
+  {% if site.feed.icon %}
+    {% assign feed_icon = site.feed.icon %}
+    {% unless feed_icon contains "://" %}
+      {% assign feed_icon = feed_icon | absolute_url %}
+    {% endunless %}
+    <icon>{{ feed_icon | xml_escape }}</icon>
+  {% endif %}
+
+  {% if site.feed.logo %}
+    {% assign feed_logo = site.feed.logo %}
+    {% unless feed_logo contains "://" %}
+      {% assign feed_logo = feed_logo | absolute_url %}
+    {% endunless %}
+    <logo>{{ feed_logo | xml_escape }}</logo>
   {% endif %}
 
   {% if q_author != "" %}

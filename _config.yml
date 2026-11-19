@@ -31,8 +31,8 @@
 title: quiet
 
 # Who wrote it. Feed, copyright line, page metadata.
-# `author: Your Name` also works. Avoid quotes and angle brackets: jekyll-seo-tag
-# prints this straight into a meta tag without escaping it.
+# `author: Your Name` also works. Quiet removes double quotes and angle brackets
+# from the displayed name. Apostrophes are fine.
 author:
   name: Your Name
 

@@ -143,18 +143,13 @@ gem = Gem::Specification.find_by_name("jekyll-feed")
 upstream = strip_liquid_comments(read_utf8(File.join(gem.full_gem_path, "lib/jekyll-feed/feed.xml")))
 
 DEVIATIONS = [
-  ["validated language attribute — an unvalidated quote here closes xml:lang and the " \
-   "feed stops parsing for every subscriber at once",
-   %q(<feed xmlns="http://www.w3.org/2005/Atom" {% if site.lang %}xml:lang="{{ site.lang }}"{% endif %}>),
+  ["validated language attribute — retain Quiet's language validation and fallback",
+   %q(<feed xmlns="http://www.w3.org/2005/Atom" {% if site.lang %}xml:lang="{{ site.lang | xml_escape }}"{% endif %}>),
    %q(<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="{{ q_lang | xml_escape }}">)],
 
   ["validated alternate-link language",
-   %q(<link href="{{ '/' | absolute_url }}" rel="alternate" type="text/html" {% if site.lang %}hreflang="{{ site.lang }}" {% endif %}/>),
+   %q(<link href="{{ '/' | absolute_url }}" rel="alternate" type="text/html" {% if site.lang %}hreflang="{{ site.lang | xml_escape }}" {% endif %}/>),
    %q(<link href="{{ '/' | absolute_url }}" rel="alternate" type="text/html" hreflang="{{ q_lang | xml_escape }}" />)],
-
-  ["escaped entry language — a typo in post front matter must not break the XML attribute",
-   %q(xml:lang="{{ post.lang }}"),
-   %q(xml:lang="{{ post.lang | xml_escape }}")],
 
   ["validated feed title — the documented blank-title fallback also names the feed",
    "{% assign title = site.title | default: site.name %}",
@@ -183,9 +178,13 @@ DEVIATIONS = [
    "{% assign posts_limit = site.feed.posts_limit | default: 10 %}",
    "{% assign posts_limit = q_feed_limit %}"],
 
+  ["unused CDATA tokens — Quiet retains XML-escaped content and summaries",
+   %Q(  {% assign cdata_end_token = "]]>" %}\n  {% assign cdata_end_token_escaped = "]]]]><![CDATA[>" %}\n),
+   ""],
+
   ["misplaced Digital Publishing roles removed from entry content (axe flags them on " \
    "kramdown's footnote wrappers; the links keep their semantics)",
-   "{{ post.content | strip }}",
+   "{{ post.content | strip | replace: cdata_end_token, cdata_end_token_escaped }}",
    %q({{ post.content | strip | replace: ' role="doc-noteref"', '' | replace: ' role="doc-endnote"', '' }})],
 
   ["XML-escaped entry content — inline SVG and other HTML may contain CDATA terminators",
@@ -193,7 +192,7 @@ DEVIATIONS = [
    %q({{ post.content | strip | replace: ' role="doc-noteref"', '' | replace: ' role="doc-endnote"', '' | xml_escape }})],
 
   ["XML-escaped summaries — a description containing ]]> must not terminate feed markup",
-   %q(<![CDATA[{{ post_summary | strip_html | normalize_whitespace }}]]>),
+   %q(<![CDATA[{{ post_summary | strip_html | normalize_whitespace | replace: cdata_end_token, cdata_end_token_escaped }}]]>),
    %q({{ post_summary | strip_html | normalize_whitespace | xml_escape }})]
 ].freeze
 

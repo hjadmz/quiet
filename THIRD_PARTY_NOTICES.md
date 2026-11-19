@@ -2,9 +2,9 @@
 
 ## jekyll-feed template
 
-`feed.xml` is derived from the feed template in jekyll-feed 0.17.0. Its changes
+`feed.xml` is derived from the feed template in jekyll-feed 0.18.0. Its changes
 cover validated language, title, subtitle, author, and feed-length settings;
-author fallbacks; XML escaping for entry language, content, and summaries; and
+author fallbacks; XML escaping for content and summaries; and
 removal of obsolete or misplaced DPUB-ARIA roles from embedded post HTML.
 Each change is named in the `DEVIATIONS` list in
 [`tests/feed-smoke.rb`](tests/feed-smoke.rb), which rebuilds the expected file

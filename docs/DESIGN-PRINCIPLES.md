@@ -162,13 +162,11 @@ an apostrophe inside a quoted value. Invalid YAML still stops the build.
 different route: it parses, `site.footer.github` becomes unreadable, and both
 links disappear. That one is checked by shape.
 
-The residue is recorded rather than hidden: `jekyll-seo-tag` reads `site.lang`,
-`site.author.name` and `site.description` directly. The first two are printed
-into meta tags without escaping them; the last can expose a YAML boolean even
-when quiet and its feed use the validated fallback. `tests/config-lint.cjs`
-fails the build on inline event handlers in the output, including the tested
-attribute-escape case. That check is not an exhaustive sanitizer for raw plugin
-inputs; a reported value still needs correction.
+Sharing metadata comes from `jekyll-seo-tag`, which reads `site.lang`,
+`site.author.name` and `site.description` directly. It can therefore differ
+from the text in the page or feed when Quiet applies a fallback. Site check
+names the setting to correct, and the tests verify that the locked plugin
+escapes quoted language and author values in HTML metadata.
 
 ## cognitive load
 

@@ -6,14 +6,8 @@
 // restate them — it reads the page they already generate, so a rule can never
 // drift between what the site does and what CI checks.
 //
-// It then adds the one safety guarantee Liquid cannot make. jekyll-seo-tag
-// prints site.lang and site.author.name into meta tags without escaping them,
-// so a quote in either escapes its attribute no matter what the templates do.
-// (It also reads site.description raw; that content mismatch is reported by the
-// page above, while the plugin escapes it safely.) The template itself ships
-// zero inline event handlers and exactly one inline <style>, so anything else
-// in the output is a value that broke out of its context — including from a
-// plugin this repo does not control.
+// Inspect the generated output too, including markup written by plugins.
+// Quiet emits no inline event handlers and at most one inline accent style.
 
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -135,9 +129,7 @@ for (const file of generated) {
   assert.equal(
     handler,
     null,
-    `${relative}: inline event handler ${handler && handler[1]}. quiet writes none, so a ` +
-    'config value escaped its attribute — check lang and author.name in _config.yml, ' +
-    'which jekyll-seo-tag prints unescaped.'
+    `${relative}: found inline event handler ${handler && handler[1]}. Check the source content, templates and generated metadata.`
   );
 
   // The accent block is the only <style> the template emits, and only when the
