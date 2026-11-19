@@ -198,13 +198,15 @@ const CASES = [
   {
     // Keep the validated document-language fallback and require jekyll-seo-tag
     // to retain hostile language text safely inside one escaped attribute.
-    name: 'a quote in lang remains escaped in SEO metadata',
-    config: 'lang: \'en" onload="alert(1)\'\n',
+    name: 'language and author metadata keep quoted values inside their attributes',
+    config: 'lang: \'en" onload="alert(1)\'\nauthor:\n  name: \'Rae "Q" Reader\'\n',
     homePosts: POSTS,
-    problems: ['which is not a language code', 'jekyll-seo-tag reads this setting straight from your config'],
+    problems: ['which is not a language code', 'Sharing metadata reads that setting directly',
+      'author.name contains a double quote'],
     expect: (home) => {
       assert.match(home, /<html lang="en" dir="ltr">/,
         'the document language itself must still be the validated fallback');
+      assert.match(home, /<meta name="author" content="Rae &quot;Q&quot; Reader" \/>/);
       const locale = home.match(/<meta property="og:locale" content="([^"]*)" \/>/);
       assert.ok(locale, 'SEO locale must remain one quoted content attribute');
       assert.equal(locale[1], 'en&quot; onload=&quot;alert(1)',
@@ -392,27 +394,9 @@ try {
         `"${testCase.name}": the feed title must use the same site name`);
     }
 
-    // And nothing escaped its attribute anywhere in the output.
-    let outputRejected = false;
-    let rejection = '';
-    try {
-      run('node', [path.join(source, 'tests/config-lint.cjs')], {
-        env: { SITE_ROOT: destination, QUIET_ALLOW_CONFIG_PROBLEMS: '1' }
-      });
-    } catch (error) {
-      outputRejected = true;
-      rejection = `${error.stdout || ''}${error.stderr || ''}`
-        .split('\n').find((line) => line.includes('AssertionError')) || '';
-    }
-    if (testCase.expectOutputRejected) {
-      assert.ok(outputRejected,
-        `"${testCase.name}": the output check passed, but this case exists because it ` +
-        'should not. If the upstream plugin now escapes the value, delete the workaround ' +
-        'and this expectation together.');
-    } else {
-      assert.ok(!outputRejected,
-        `"${testCase.name}": a config value escaped into the output.\n  ${rejection}`);
-    }
+    run('node', [path.join(source, 'tests/config-lint.cjs')], {
+      env: { SITE_ROOT: destination, QUIET_ALLOW_CONFIG_PROBLEMS: '1' }
+    });
   }
 
   process.stdout.write(`PASS hostile config: ${CASES.length} configs plus colliding permalinks, ` +
