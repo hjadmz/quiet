@@ -786,7 +786,9 @@ async function runReadingNavigation(engineName, browser, baseURL) {
     }
     await page.goBack();
     await expect(trigger).toContainText('A running demo');
-    await page.evaluate(() => window.scrollBy(0, -30));
+    await page.locator('#embedded-media').evaluate(heading => {
+      window.scrollTo(0, window.scrollY + heading.getBoundingClientRect().top - 100);
+    });
     await expect(trigger).toContainText('Embedded media');
     await page.evaluate(() => window.scrollTo(0, document.scrollingElement.scrollHeight));
     await expect(trigger).toContainText('A quote');
