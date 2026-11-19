@@ -280,6 +280,8 @@
   {%- if _FALSEY contains _v -%}
     {%- assign q_show_reading_time = false -%}
     {%- assign q_problems = q_problems | append: "show_reading_time is “" | append: _v | append: "” rather than false. Anything other than the bare word false counts as true in a template, so the switch would have stayed on. Reading it as off — write false, with no quotes, to make that certain." | append: _SEP -%}
+  {%- else -%}
+    {%- assign q_problems = q_problems | append: "show_reading_time expects true or false with no quotes. Using true." | append: _SEP -%}
   {%- endif -%}
 {%- endif -%}
 
@@ -291,6 +293,19 @@
   {%- if _FALSEY contains _v -%}
     {%- assign q_show_credit = false -%}
     {%- assign q_problems = q_problems | append: "show_credit is “" | append: _v | append: "” rather than false. Anything other than the bare word false counts as true in a template, so the switch would have stayed on. Reading it as off — write false, with no quotes, to make that certain." | append: _SEP -%}
+  {%- else -%}
+    {%- assign q_problems = q_problems | append: "show_credit expects true or false with no quotes. Using true." | append: _SEP -%}
+  {%- endif -%}
+{%- endif -%}
+
+{%- assign q_toc_style = "floating" -%}
+{%- if site.toc_style != nil -%}
+  {%- assign _style = site.toc_style | append: "" | strip | downcase -%}
+  {%- if _style == "inline" or _style == "floating" -%}
+    {%- assign q_toc_style = _style -%}
+  {%- else -%}
+    {%- assign q_toc_style = "inline" -%}
+    {%- assign q_problems = q_problems | append: "toc_style expects floating or inline. Using inline." | append: _SEP -%}
   {%- endif -%}
 {%- endif -%}
 

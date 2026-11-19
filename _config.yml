@@ -66,10 +66,8 @@ description: a quiet blog template for GitHub Pages.
 # accent: #386ca0 deletes the value instead of setting it.
 # "" keeps the built-in restrained blue.
 #
-# Pick any color you like and stop thinking about it. Light and dark modes each
-# keep your hue and set their own lightness, which holds both above 4.5:1
-# contrast — across 33 real-world colors, none fell below it, where the raw value
-# failed in 16 of them in light mode and 21 in dark.
+# Each theme derives a readable accent from your chosen hue. Browsers without
+# relative color support use the built-in accent.
 #
 # Something that is not a color cannot break the page: characters that could
 # rewrite the stylesheet are refused, CSS keywords like `inherit` and
@@ -84,7 +82,8 @@ body_font: sans
 # What a first-time visitor sees: system, light, or dark.
 # `system` follows their device. Choosing light or dark overrides that on the
 # first visit — their own setting is usually the better one to respect.
-# Either way the footer control lets them change it, and it is remembered.
+# Readers can choose System, Light, or Dark under Appearance in the footer.
+# Their choice is saved when browser storage is available.
 theme_default: system
 
 # How many posts the HOME PAGE lists before the "all posts →" link.
@@ -119,6 +118,10 @@ footer:
 # Write false, not "false" — quoted, it is text, and text counts as true. quiet
 # reads the obvious intent anyway and tells you at /site-check/.
 show_reading_time: true
+
+# On posts with toc: true, use the section button and progress ring (floating)
+# or keep the full list above the article (inline).
+toc_style: floating
 
 # "built with quiet" in the footer. false removes it — guilt-free, it's MIT.
 show_credit: true

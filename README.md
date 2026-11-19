@@ -2,6 +2,8 @@
 
 A reading-first Jekyll blog template for GitHub Pages and static hosts.
 
+For a one-page profile and link directory, see [Elsewhere](https://github.com/hjadmz/elsewhere).
+
 **The philosophy in three sentences.** Function first, then convenience,
 then aesthetics. The reader outranks the writer, and the writer outranks
 the customizer. If the interface pulls attention away from reading, it has
@@ -107,7 +109,7 @@ Front matter reference:
 |---------------|----------|--------|
 | `title`       | yes      | the post's title |
 | `description` | by convention | one line under the title on the home page **and in the archive**, and the post's search/social description |
-| `toc`         | no       | `toc: true` renders a table of contents from the post's h2 headings |
+| `toc`         | no       | `toc: true` adds a table of contents for the post's h2 headings. Omit it or use `false` for a continuous essay. |
 | `last_modified_at` | no  | `last_modified_at: 2026-09-01` shows an "updated" date and updates the feed, sitemap, and page metadata |
 | `published`   | no       | `published: false` hides the post completely — no page, no feed, no sitemap |
 | `image`       | no       | social-preview image for this post, overriding `assets/img/og-default.png` |
@@ -160,9 +162,14 @@ put secrets or genuinely private writing there. Preview them with
   phone's first screen; h2 alone gives 6 and leaves the opening paragraph
   visible. Use it when a post has five or more sections and readers will jump
   between them; leave it off for a linear essay.
-- h2–h4 headings receive a small `#` permalink; it lets readers link to a
-  specific section with a pointer or the keyboard. Each link has a descriptive
-  accessible name, while the heading keeps its own concise name.
+- With the default `toc_style: floating`, a long opted-in post gets a Contents button
+  that shows the current section and scroll progress through the article. It
+  sits at the bottom on narrow screens and moves into the side margin when
+  there's room. Use `toc_style: inline` in `_config.yml` to keep the list above
+  the article on every screen. The list is also inline on short posts and
+  viewports, and when JavaScript is unavailable.
+- h2–h4 headings have a visible `#` link. Activate it to put the section link
+  in the address bar, or copy its address from the browser's link menu.
 - No JavaScript is used for these links; they are part of the generated HTML.
 - If you want a cleaner look, remove heading hashes by changing `.anchor` in `assets/css/main.css` (for example, `display: none;` or a neutral color).
 
@@ -211,7 +218,7 @@ write a starting state that means something, and let the caption explain the
 rest. Add `wide=true` to the include for a demo that needs more room.
 
 Two consequences of that isolation worth knowing. A demo cannot see the site's
-theme toggle, so it follows the reader's system setting — give it
+appearance preference, so it follows the reader's system setting — give it
 `color-scheme: light dark` and it reads well either way. And `height` is fixed,
 because an iframe cannot size itself to its content without script on both
 sides; leave headroom, so a reader with larger text gets slack rather than a
@@ -238,8 +245,10 @@ Somewhere around 75–100 posts it stops being scannable in one pass, and that i
 the point to remeasure this decision rather than inherit it. Nothing in the code
 prevents adding tag pages later; the archive is a choice, not a ceiling.
 
-For the same reason there is no share button — the URL bar is one, and heading
-permalinks let a reader share a specific section.
+Copy the address from the browser to share the article, or use a heading link
+to share a section. Readers can also select a passage and use their browser's
+highlight-link feature where available. These links depend on the selected
+wording. [How text fragments work](https://developer.mozilla.org/en-US/docs/Web/URI/Reference/Fragment/Text_fragments)
 
 There is no comment box, no like button and no reaction bar either — all of them
 need a server, which on a static host means someone else's. What replaces them is
@@ -282,10 +291,9 @@ the About page, and image files remain ordinary content. The short version:
 | `timezone` | IANA zone; `blog:new` reads it too | dates fall back to UTC |
 | `feed.posts_limit` | how many posts the feed carries (default 10) | falls back to 10 |
 
-The footer button shows the current preference as `theme: system`, `theme: light`,
-or `theme: dark`. Each activation cycles **system → light → dark → system**.
-System follows the device's appearance setting; the choice is remembered in
-that browser when storage is available.
+The footer's **Appearance** group lets readers choose **System**, **Light**, or
+**Dark** directly. System follows the device's appearance. The selected choice
+is remembered in that browser when storage is available.
 
 Not settings, on purpose: the favicon, the apple-touch icon and the social image
 are **files** — replace them in place at `assets/img/`. Analytics is **a file
@@ -335,9 +343,7 @@ restructure a stylesheet are refused at build time, and the declaration is
 wrapped in `@supports (color: …)` so the browser decides whether the rest is a
 real color. Rejections at build time appear at `/site-check/`; an unrecognized
 color name rejected only by the browser keeps the built-in accent without a report.
-A browser without relative colour syntax uses the raw color in both themes.
-If you need those browsers, check that color's contrast against both backgrounds;
-the derived-color checks do not cover this fallback.
+Browsers without relative colour syntax keep the built-in accent.
 
 ### changing the type
 

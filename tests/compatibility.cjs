@@ -204,26 +204,16 @@ async function assertTextRails(page, label) {
       if (Math.abs(gap) > 0.5) offEdge.push(`${selector} is ${gap}px off the column ${side}`);
     }
 
-    // The header row is the one place the rail depends on the width. While the links
-    // share a line with the wordmark they finish on the column's far edge; once a long
-    // enough title pushes them onto a line of their own they begin on its near edge
-    // instead. Both are rails — measured on a folded foldable at 280px, where the
-    // title alone fills the line — so the check has to ask which state it is in rather
-    // than assume one and be wrong on small screens.
+    // Navigation ends on the reading rail beside the wordmark, or starts
+    // there when an enlarged title pushes it onto a row of its own.
     const wordmark = document.querySelector('.wordmark');
     const cluster = document.querySelector('.site-links');
-    if (wordmark && cluster) {
-      const wrapped = Math.abs(cluster.getBoundingClientRect().top -
-        wordmark.getBoundingClientRect().top) > 1;
+    if (wordmark && cluster?.getBoundingClientRect().width) {
+      const onRow = (a, b) => Math.abs(a.getBoundingClientRect().top - b.getBoundingClientRect().top) < 1;
+      const wrapped = !onRow(wordmark, cluster);
       const edge = cluster.querySelector(wrapped ? 'a' : 'a:last-child');
       const side = wrapped ? 'start' : 'end';
-      if (!edge) missing.push('.site-links a');
-      else {
-        const gap = from(edge, side);
-        if (Math.abs(gap) > 0.5) {
-          offEdge.push(`.site-links (${wrapped ? 'wrapped onto its own line' : 'inline with the wordmark'}) is ${gap}px off the column ${side}`);
-        }
-      }
+      if (Math.abs(from(edge, side)) > 0.5) offEdge.push(`.site-links is off the column ${side}`);
     }
 
     const indents = {};
@@ -235,7 +225,7 @@ async function assertTextRails(page, label) {
       // box, not against the text grid, and is inset from it on purpose.
       if (cs.position === 'absolute' || cs.position === 'fixed') continue;
       if (!BLOCK.test(cs.display)) continue;
-      if (el.closest('.visually-hidden, .skip-link')) continue;
+      if (el.closest('.visually-hidden, .skip-link, .toc-enhanced')) continue;
       // A table's later columns land where its content puts them. Only the first
       // cell in a row is on the text grid, and it is flush with it on purpose.
       if (/^(td|th)$/i.test(el.tagName) && el.previousElementSibling) continue;
@@ -348,7 +338,7 @@ async function focusSkipLink(page, engineName) {
 async function assertKeyboardPermalink(page, label, engineName = label) {
   assert.equal(await page.getByRole('heading', { name: 'Headings get anchors', exact: true }).count(), 1,
     `${label}: the heading's accessible name must contain only its content`);
-  const permalink = page.getByRole('link', { name: 'Headings get anchors', exact: true });
+  const permalink = page.getByRole('link', { name: 'Section link Headings get anchors', exact: true });
   assert.equal(await permalink.count(), 1, `${label}: the permalink must be a named accessible link`);
   assert.equal(await page.locator('h3#deep-links.reference-heading + a.anchor[href="#deep-links"]').count(), 1,
     `${label}: attributed headings and their adjacent permalinks must survive`);
@@ -369,26 +359,14 @@ async function assertKeyboardPermalink(page, label, engineName = label) {
 }
 
 async function assertThemeControl(page, state, label) {
-  const button = page.locator('#theme-toggle');
-  const expected = `theme: ${state}`;
-  assert.equal(await button.isVisible(), true, `${label}: theme control must be visible`);
-  assert.equal((await button.innerText()).replace(/\s+/g, ' ').trim(), expected,
-    `${label}: the visible theme label must describe the current preference`);
-  assert.equal(await page.getByRole('button', { name: expected, exact: true }).count(), 1,
-    `${label}: the theme button's accessible name must match its visible label`);
-  assert.equal(await button.evaluate((element) => {
-    const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
-    while (walker.nextNode()) {
-      if (!/theme\s*:/.test(walker.currentNode.textContent)) continue;
-      for (let parent = walker.currentNode.parentElement; parent; parent = parent.parentElement) {
-        const style = getComputedStyle(parent);
-        if (style.display === 'none' || style.visibility !== 'visible' || Number(style.opacity) === 0 ||
-            style.clip !== 'auto' || style.clipPath !== 'none') return false;
-        if (parent === element) return true;
-      }
-    }
-    return false;
-  }), true, `${label}: the word theme must appear on screen, not only in hidden accessible text`);
+  const control = page.getByRole('group', { name: 'Appearance', exact: true });
+  assert.equal(await control.isVisible(), true, `${label}: theme control must be visible`);
+  await expect(control.locator('#theme-label')).toBeVisible();
+  await expect(control.locator('#theme-label')).toHaveText('Appearance');
+  assert.deepEqual(await control.locator('label').allInnerTexts(), ['System', 'Light', 'Dark'],
+    `${label}: all three choices must be named on screen`);
+  assert.equal(await control.getByRole('radio', { name: new RegExp(`^${state}$`, 'i'), checked: true }).count(), 1,
+    `${label}: the selected theme must be exposed to assistive technology`);
   assert.equal(await page.locator('html').getAttribute('data-theme'), state === 'system' ? null : state,
     `${label}: the rendered theme and the preference label must agree`);
 }
@@ -412,8 +390,7 @@ async function runResponsive(engineName, browser, baseURL) {
       const rails = await assertTextRails(page, `${label} ${route}`);
       if (rails) columnStarts.set(route, rails.start);
       assertTargets(await controlRects(page, '.site-header a'), `${label} ${route} header`);
-      assertTargets(await controlRects(page, '.footer-links a, .footer-links button'),
-        `${label} ${route} footer`);
+      assertTargets(await controlRects(page, '.footer-links a, #theme-control label'), `${label} ${route} footer`);
 
       await assertThemeControl(page, 'system', `${label} ${route}`);
 
@@ -511,21 +488,11 @@ async function runInteraction(engineName, browser, baseURL) {
 
   assert.equal(await page.evaluate(() => localStorage.getItem('quiet-theme')), 'invalid-value',
     `${engineName}: the invalid preference test must seed the application's storage key`);
-  assert.equal(await page.locator('#theme-label').textContent(), 'system',
-    `${engineName}: invalid stored theme must fall back to system`);
-  assert.equal(await page.locator('html').getAttribute('data-theme'), null);
-  assert.equal(await page.locator('.site-header #theme-toggle').count(), 0,
-    `${engineName}: theme control must not compete with reading navigation`);
-
-  // The same plain label names the control visually and for assistive technology.
-  // Check the preference, including system mode, rather than the OS's current color.
-  const themeBtn = page.locator('#theme-toggle');
+  const theme = page.locator('.site-footer #theme-control');
   await assertThemeControl(page, 'system', engineName);
-  assert.equal(await page.evaluate(() => window.find && window.find('theme')), true,
-    `${engineName}: find-in-page must still reach the theme control`);
-  await themeBtn.click();
+  await theme.locator('label[for="theme-light"]').click();
   await assertThemeControl(page, 'light', engineName);
-  await themeBtn.click();
+  await theme.locator('label[for="theme-dark"]').click();
   await assertThemeControl(page, 'dark', engineName);
   await page.reload({ waitUntil: 'networkidle' });
   assert.equal(await page.locator('html').getAttribute('data-theme'), 'dark',
@@ -653,6 +620,7 @@ async function runInteraction(engineName, browser, baseURL) {
   await page.emulateMedia({ media: 'print' });
   assert.equal(await page.locator('.site-header').isVisible(), false, `${engineName}: print must hide header`);
   assert.equal(await page.locator('.site-footer').isVisible(), false, `${engineName}: print must hide footer`);
+  await expect(theme).toBeHidden();
   // This page is still in forced dark mode. Printing must reset syntax colors
   // too: the dark palette had only about 2:1 contrast on the white print canvas.
   assert.equal(await page.locator('html').getAttribute('data-theme'), 'dark');
@@ -679,16 +647,19 @@ async function runInteraction(engineName, browser, baseURL) {
   }
   await page.emulateMedia({ media: 'screen' });
 
-  // Native keyboard activation must complete the cycle and store system mode too.
-  await themeBtn.focus();
-  await page.keyboard.press('Enter');
-  await assertThemeControl(page, 'system', `${engineName} keyboard`);
-  assert.equal(await page.evaluate(() => localStorage.getItem('quiet-theme')), 'system',
-    `${engineName}: returning to system must replace the stored dark preference`);
-  await page.keyboard.press('Space');
+  // Native radios use arrow keys. A direct System choice replaces the saved override.
+  await theme.getByRole('radio', { name: 'Dark', exact: true }).focus();
+  await page.keyboard.press('ArrowLeft');
   await assertThemeControl(page, 'light', `${engineName} keyboard`);
-  await page.keyboard.press('Enter');
-  await assertThemeControl(page, 'dark', `${engineName} keyboard`);
+  await theme.locator('label[for="theme-system"]').click();
+  await assertThemeControl(page, 'system', engineName);
+  assert.equal(await page.evaluate(() => localStorage.getItem('quiet-theme')), 'system',
+    `${engineName}: returning to system must replace the stored override`);
+  await page.evaluate(() => {
+    Storage.prototype.setItem = () => { throw new DOMException('Blocked storage', 'SecurityError'); };
+  });
+  await theme.locator('label[for="theme-dark"]').click();
+  await assertThemeControl(page, 'dark', `${engineName} with blocked storage`);
 
   assert.deepEqual(failures, [], `${engineName}: browser errors or third-party requests`);
   await context.close();
@@ -703,8 +674,10 @@ async function runNoJavaScript(engineName, browser, baseURL) {
   const failures = monitor(page, baseURL);
   await goto(page, baseURL, '/2026/everything-a-post-can-do/');
   await assertNoOverflow(page, `${engineName} no-JS`);
-  assert.equal(await page.locator('#theme-toggle').isVisible(), false);
+  assert.equal(await page.locator('#theme-control').isVisible(), false);
   assert.equal(await page.locator('.copy-btn').count(), 0);
+  assert.equal(await page.locator('.toc-toggle').isVisible(), false);
+  assert.equal(await page.locator('.toc li a').first().isVisible(), true);
   // Derived, not counted by hand: the invariant is that the build-time TOC and
   // permalinks cover exactly the headings that have ids, whatever the fixture
   // grows to. A hardcoded number just breaks every time the fixture changes and
@@ -727,6 +700,125 @@ async function runNoJavaScript(engineName, browser, baseURL) {
   await context.close();
 }
 
+async function runReadingNavigation(engineName, browser, baseURL) {
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true });
+  try {
+    const page = await context.newPage();
+    await goto(page, baseURL, '/2026/everything-a-post-can-do/');
+    const trigger = page.locator('.toc-toggle');
+    const ring = page.locator('.toc-ring-fill');
+    await expect(trigger).toBeVisible();
+    await expect(trigger).toContainText('Introduction');
+    await expect(ring).toHaveAttribute('stroke-dasharray', '0 100');
+    const closedWidth = (await trigger.boundingBox()).width;
+    await trigger.focus();
+    await page.keyboard.press('Enter');
+    const list = page.locator('#quiet-toc-list');
+    await expect(list).toBeVisible();
+    if (await page.evaluate(() => CSS.supports('selector(:has(*))'))) {
+      assert.ok((await list.boundingBox()).width > closedWidth,
+        `${engineName}: the closed phone control should leave more reading space than the open list`);
+    }
+    const destination = list.locator('a').nth(2);
+    const title = (await destination.textContent()).trim();
+    const hash = await destination.getAttribute('href');
+    await destination.focus();
+    await page.keyboard.press('Enter');
+    await expect(list).toBeHidden();
+    await expect(page).toHaveURL(new RegExp(`${hash}$`));
+    await expect(page.locator(hash)).toBeFocused();
+    await expect(trigger).toContainText(title);
+    await expect(destination).toHaveAttribute('aria-current', 'location');
+    await page.goBack();
+    assert.equal(new URL(page.url()).hash, '');
+    await expect(trigger).toContainText('Introduction');
+
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    await expect(ring).toHaveAttribute('stroke-dasharray', '100 100');
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await expect(trigger).toContainText('Introduction');
+    await expect(ring).toHaveAttribute('stroke-dasharray', '0 100');
+    await trigger.click();
+    await page.keyboard.press('Escape');
+    await expect(trigger).toBeFocused();
+    await expect(list).toBeHidden();
+
+    await page.setViewportSize({ width: 390, height: 260 });
+    await expect(trigger).toBeHidden();
+    await expect(list).toBeVisible();
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await expect(trigger).toBeVisible();
+    const sectionLabel = trigger.locator('.toc-section');
+    await expect(sectionLabel).toHaveText('Introduction');
+    assert.ok(await sectionLabel.evaluate(label => label.scrollWidth <= label.clientWidth),
+      `${engineName}: a short section name must fit in the laptop Contents control`);
+
+    await page.setViewportSize({ width: 1920, height: 1000 });
+    await expect(trigger).toBeVisible();
+    const articleBox = await page.locator('article.post').boundingBox();
+    const triggerBox = await trigger.boundingBox();
+    assert.ok(triggerBox.x > articleBox.x + articleBox.width,
+      `${engineName}: the desktop control overlaps the reading column`);
+
+    // The ring reaches 100% as soon as the end is visible. Keep following the
+    // heading at the reading line until the document actually stops scrolling.
+    await page.evaluate(() => {
+      const { bottom } = document.querySelector('article.post').getBoundingClientRect();
+      window.scrollTo(0, Math.ceil(window.scrollY + bottom - innerHeight) + 2);
+    });
+    await expect(ring).toHaveAttribute('stroke-dasharray', '100 100');
+    await expect(trigger).toContainText('Embedded media');
+    const maxScroll = await page.evaluate(() => {
+      const scroller = document.scrollingElement;
+      window.scrollTo(0, scroller.scrollHeight);
+      return scroller.scrollHeight - scroller.clientHeight;
+    });
+    await expect(trigger).toContainText('A quote');
+
+    // Both late targets clamp to the same scroll offset at this viewport size.
+    // A keyboard jump must still select the right link and move focus there.
+    for (const title of ['A running demo', 'A quote']) {
+      await trigger.focus();
+      await page.keyboard.press('Enter');
+      const link = list.getByRole('link', { name: title, exact: true, includeHidden: true });
+      const hash = await link.getAttribute('href');
+      await link.focus();
+      await page.keyboard.press('Enter');
+      await expect(list).toBeHidden();
+      await expect(page).toHaveURL(new RegExp(`${hash}$`));
+      await expect(page.locator(hash)).toBeFocused();
+      await expect(trigger).toContainText(title);
+      await expect(link).toHaveAttribute('aria-current', 'location');
+      assert.ok(Math.abs(await page.evaluate(() => window.scrollY) - maxScroll) <= 1,
+        `${engineName}: late heading jump should be clamped to the document end`);
+    }
+    await page.goBack();
+    await expect(trigger).toContainText('A running demo');
+    await page.locator('#embedded-media').evaluate(heading => {
+      window.scrollTo(0, window.scrollY + heading.getBoundingClientRect().top - 100);
+    });
+    await expect(trigger).toContainText('Embedded media');
+    await page.evaluate(() => window.scrollTo(0, document.scrollingElement.scrollHeight));
+    await expect(trigger).toContainText('A quote');
+
+    // The fixed Contents control must leave the footer's theme choices usable.
+    await page.setViewportSize({ width: 390, height: 844 });
+    const theme = page.getByRole('group', { name: 'Appearance', exact: true });
+    await theme.scrollIntoViewIfNeeded();
+    const clearTargets = await theme.locator('label').evaluateAll(labels => labels.every(label => {
+      const { left, top, width, height } = label.getBoundingClientRect();
+      return label.contains(document.elementFromPoint(left + width / 2, top + height / 2));
+    }));
+    assert.equal(clearTargets, true, `${engineName}: Contents must not cover the footer theme choices`);
+    await theme.locator('label[for="theme-dark"]').tap();
+    await assertThemeControl(page, 'dark', `${engineName} footer touch`);
+    await theme.locator('label[for="theme-system"]').tap();
+    await assertThemeControl(page, 'system', `${engineName} footer touch`);
+  } finally {
+    await context.close();
+  }
+}
+
 async function runAccessibility(engineName, browser, baseURL) {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const page = await context.newPage();
@@ -740,6 +832,26 @@ async function runAccessibility(engineName, browser, baseURL) {
   assert.deepEqual(failures, [], `${engineName} accessibility: browser errors or third-party requests`);
   await goto(page, baseURL, '/definitely-missing', 404);
   assert.match(await page.locator('h1').textContent(), /nothing here/i);
+  if (engineName === 'chromium') {
+    await page.emulateMedia({ forcedColors: 'active' });
+    const theme = page.locator('#theme-control');
+    await theme.getByRole('radio', { name: 'System', exact: true }).focus();
+    await page.keyboard.press('ArrowRight');
+    await assertThemeControl(page, 'light', `${engineName} forced colors`);
+    const outline = await theme.evaluate(control => {
+      const selected = getComputedStyle(control.querySelector(':checked + label'));
+      const unselected = getComputedStyle(control.querySelector(':not(:checked) + label'));
+      return {
+        selected: selected.borderTopColor,
+        unselected: unselected.borderTopColor,
+        fill: getComputedStyle(control.querySelector('.theme-options')).backgroundColor,
+        focus: selected.outlineStyle
+      };
+    });
+    assert.equal(outline.unselected, outline.fill, 'unselected segments must have no visible outline');
+    assert.notEqual(outline.selected, outline.unselected, 'selected theme must remain distinct');
+    assert.equal(outline.focus, 'solid', 'keyboard focus must stay visible in forced colors');
+  }
   await context.close();
 }
 
@@ -829,7 +941,7 @@ async function runTextScaling(engineName, browser, baseURL) {
       await assertNoOverflow(page, `${engineName} ${route} at ${standard}px default text`);
       assert.equal(await page.evaluate(() => {
         const width = document.documentElement.clientWidth;
-        return [...document.querySelectorAll('.site-header a, .footer-links a, .footer-links button')]
+        return [...document.querySelectorAll('.site-header a, #theme-control label, .footer-links a')]
           .every((el) => el.getBoundingClientRect().right <= width + 1);
       }), true, `${engineName} ${route}: navigation left the viewport at ${standard}px default text`);
     }
@@ -939,6 +1051,7 @@ async function runLayoutEnvironments(engineName, browser, baseURL) {
         const PHASES = [
           ['responsive', runResponsive],
           ['interaction', runInteraction],
+          ['reading-navigation', runReadingNavigation],
           ['no-JavaScript', runNoJavaScript],
           ['accessibility', runAccessibility],
           ['reader-mode', runReaderMode],

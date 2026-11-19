@@ -23,11 +23,6 @@
   --radius: 4px;
   --measure: 36rem;
   --gutter: var(--s5);
-  /* How much of the accent the link underline carries. Softening the underline
-     drops noise in light mode, where accent already separates from body text at
-     3.16:1. In dark mode that separation is 1.83:1 — the underline is doing
-     nearly all the work of saying "link", so it keeps closer to full ink. */
-  --underline-ink: 55%;
 
   --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-serif: Charter, "Bitstream Charter", "Iowan Old Style", Georgia, serif;
@@ -63,7 +58,6 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
-    --underline-ink: 80%;
     --bg: #121416;
     --fg: #dcdee1;        /* 13.7:1 on bg */
     --fg-muted: #9b9fa3;  /*  6.9:1 on bg */
@@ -91,7 +85,6 @@
 /* dark — forced by the toggle */
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --underline-ink: 80%;
   --bg: #121416;
   --fg: #dcdee1;
   --fg-muted: #9b9fa3;
@@ -185,14 +178,8 @@ a {
   text-underline-offset: 0.15em;
 }
 a:hover { text-decoration-thickness: 2px; }
-/* softened underlines: the affordance stays, the noise drops;
-   full strength returns on hover/focus. Older browsers keep solid. */
-@supports (text-decoration-color: color-mix(in srgb, red 50%, blue)) {
-  a { text-decoration-color: color-mix(in srgb, var(--accent) var(--underline-ink), transparent); }
-  a:hover, a:focus-visible { text-decoration-color: var(--accent); }
-}
 
-a, .copy-btn, .theme-toggle, .anchor {
+a, .copy-btn, .anchor {
   transition: color 150ms ease-out, background-color 150ms ease-out,
     border-color 150ms ease-out, opacity 150ms ease-out;
 }
@@ -249,51 +236,49 @@ figure > img, figure > svg { display: block; }
    79px wide. Stacking is the honest answer at that size; below it there is room
    and nothing moves. */
 .site-header nav {
-  display: flex; align-items: center; justify-content: space-between;
-  flex-wrap: wrap; gap: var(--s3);
+  display: flex; align-items: center; flex-wrap: wrap;
+  gap: var(--s1) var(--s3);
   padding-top: var(--s3); padding-bottom: var(--s3);
 }
 .wordmark { font-size: 1rem; font-weight: 600; color: var(--fg); text-decoration: none; }
 .wordmark:hover { text-decoration: underline; text-decoration-thickness: 1px; }
-.site-links { display: flex; align-items: center; gap: var(--s3); font-size: var(--fs-meta); }
-.wordmark { min-width: 0; overflow-wrap: anywhere; }
+.site-links { display: flex; align-items: center; gap: var(--s1) var(--s2); font-size: var(--fs-meta); }
+.wordmark { min-width: 0; margin-inline-end: auto; overflow-wrap: anywhere; }
 .site-links { flex: 0 1 auto; flex-wrap: wrap; }
 /* the page you're on is a location, not a link: label weight, full ink */
 .site-links a[aria-current="page"] { color: var(--fg); font-weight: 600; text-decoration: none; }
 
 /* Real hit areas do not overlap when the viewport is narrow. */
-.wordmark, .site-links a, .footer-links a, .footer-links .theme-toggle {
+.wordmark, .site-links a, .footer-links a {
   display: inline-flex; align-items: center; min-height: 44px;
 }
 .site-links a, .footer-links a { padding-inline: 0.125rem; }
-/* That padding also pushed the links on the page's own edges 2px off the column —
-   "feed" sits directly under the wordmark. The boxes now overhang by what they pad, so
-   the words land on the rail with the hit area unchanged. The header needs both edges
-   because the row wraps: the links end on the column beside the wordmark, and begin on
-   it once a long title pushes them onto their own line (measured at 280px). */
+/* Let the first link's text align with the column when the cluster wraps. */
 .footer-links > a:first-child,
 .site-links > a:first-child { margin-inline-start: -0.125rem; }
 .site-links > a:last-child { margin-inline-end: -0.125rem; }
+.site-links:empty { display: none; }
 
-.theme-toggle {
-  font: inherit; font-size: var(--fs-meta); color: var(--fg-muted);
-  background: none; border: 0; padding: 0; cursor: pointer;
-  position: relative;
-  text-decoration: underline; text-decoration-thickness: 1px;
-  text-underline-offset: 0.15em;
-  /* Let the label wrap at enlarged default text sizes on narrow screens. */
-  white-space: normal; text-align: start; max-width: 100%;
+#theme-control:not([hidden]) {
+  display: flex; align-items: center; flex-wrap: wrap;
+  gap: var(--s1) var(--s3); margin-block-end: var(--s2);
 }
-.theme-toggle:hover { color: var(--fg); text-decoration-thickness: 2px; }
-@supports (text-decoration-color: color-mix(in srgb, red 50%, blue)) {
-  .theme-toggle { text-decoration-color: color-mix(in srgb, var(--fg-muted) 55%, transparent); }
-  .theme-toggle:hover, .theme-toggle:focus-visible { text-decoration-color: var(--fg); }
+.theme-options {
+  display: flex; flex-wrap: wrap; gap: 2px; max-width: 100%;
+  border-radius: 1.5rem; background: var(--surface);
 }
+#theme-control label {
+  display: flex; align-items: center; min-height: 44px;
+  padding-inline: var(--s2); border: 1px solid transparent;
+  border-radius: inherit; color: var(--fg-muted); cursor: pointer;
+}
+#theme-control label:hover { color: var(--fg); }
+#theme-control :checked + label { color: var(--fg); border-color: var(--fg-muted); background: var(--bg); }
+#theme-control :focus-visible + label { outline: 2px solid var(--focus); outline-offset: 2px; }
 /* The isolated copy control can use an invisible extension safely. */
 .copy-btn::after {
   content: ""; position: absolute; inset: -12px;
 }
-html:not(.js) .theme-toggle { display: none; }
 
 /* The rule matters: on a page too short to scroll, the leftover window space
    sits ABOVE this line, so it reads as the page bottom band rather than as a
@@ -406,7 +391,7 @@ html:not(.js) .theme-toggle { display: none; }
    the archive descriptions, and each omission scrolled the whole document
    sideways. Anything inside main may break; code is put back below, because it
    scrolls in its own box instead. */
-main, .footer-meta { overflow-wrap: anywhere; }
+main, .footer-meta, #theme-label { overflow-wrap: anywhere; }
 pre, pre code { overflow-wrap: normal; }
 
 h2[id], h3[id], h4[id], sup[id], .footnotes li[id] { scroll-margin-top: var(--s6); }
@@ -424,10 +409,7 @@ h2[id], h3[id], h4[id], sup[id], .footnotes li[id] { scroll-margin-top: var(--s6
 .heading-h3 { font-size: var(--fs-h3); }
 .heading-h4 { font-size: 1rem; }
 .heading-anchor > :is(h2, h3, h4) { display: inline; margin: 0; }
-.anchor { margin-inline-start: var(--s2); font-weight: 400; text-decoration: none; opacity: 0; }
-.heading-anchor:hover .anchor,
-.anchor:hover, .anchor:focus { opacity: 1; }
-@media (hover: none) { .anchor { opacity: 1; } }
+.anchor { margin-inline-start: var(--s2); font-weight: 400; text-decoration: none; }
 
 blockquote {
   margin: 0; padding-inline-start: var(--s4);
@@ -507,11 +489,122 @@ th { font-weight: 600; }
    so a six-item list read as eleven undifferentiated lines. This puts the three
    levels in the right order, the way .post-list already is. */
 .toc li { margin: var(--s2) 0; line-height: 1.4; }
-.toc a { color: var(--fg); }
-@supports (text-decoration-color: color-mix(in srgb, red 50%, blue)) {
-  .toc a { text-decoration-color: var(--border); }
+.toc a { color: var(--fg); text-decoration-color: var(--fg-muted); }
+.toc a:hover, .toc a:focus-visible { color: var(--accent); text-decoration-color: currentColor; }
+
+/* One control, two placements. Keep the prose and wide figures on their rail. */
+.toc-enhanced {
+  --toc-clearance: max(var(--s3), env(safe-area-inset-left), env(safe-area-inset-right));
+  --toc-bottom: max(var(--s3), env(safe-area-inset-bottom));
+  position: fixed;
+  z-index: 2;
+  inset-inline: var(--toc-clearance);
+  inset-block-end: var(--toc-bottom);
+  width: min(16.5rem, 100% - 2 * var(--toc-clearance));
+  margin: 0 auto;
+  padding: 0;
+  border: 0;
+  font-family: var(--font-sans);
 }
-.toc a:hover, .toc a:focus-visible { color: var(--accent); text-decoration-color: var(--accent); }
+.toc-enhanced .toc-title { display: none; }
+.toc-toggle:not([hidden]) {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--s3);
+  width: 100%;
+  min-height: 44px;
+  padding: var(--s2) var(--s4);
+  border: 1px solid var(--border);
+  border-radius: 2rem;
+  background: var(--bg);
+  color: var(--fg);
+  box-shadow: 0 2px 12px rgb(0 0 0 / 9%);
+  font: inherit;
+  line-height: 1.2;
+  text-align: start;
+  cursor: pointer;
+}
+.toc-toggle:hover, .toc-toggle[aria-expanded="true"] { border-color: var(--fg-muted); }
+.toc-ring-track {
+  stroke: #767676;
+  stroke: color-mix(in srgb, var(--fg), var(--bg));
+  stroke-width: 1.25;
+}
+.toc-ring-fill { stroke: var(--fg); stroke-width: 2.5; }
+.toc-kicker, .toc-section { display: block; }
+.toc-kicker {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+}
+.toc-section {
+  margin-block-start: 0.1rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.toc-chevron {
+  width: 0.45rem;
+  height: 0.45rem;
+  border: solid var(--fg-muted);
+  border-width: 1.5px 1.5px 0 0;
+  transform: translateY(25%) rotate(-45deg);
+}
+.toc-toggle[aria-expanded="true"] .toc-chevron { transform: translateY(-25%) rotate(135deg); }
+.toc-enhanced ul {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: calc(100% + var(--s2));
+  max-height: 50vh;
+  max-height: min(50dvh, 100dvh - 5rem - var(--toc-bottom));
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: var(--s2);
+  border: 1px solid var(--border);
+  border-radius: calc(3 * var(--radius));
+  background: var(--bg);
+  box-shadow: 0 2px 16px rgb(0 0 0 / 12%);
+}
+.toc-enhanced li { margin: 0; }
+.toc-enhanced li a {
+  display: block;
+  padding: var(--s2);
+  border-radius: var(--radius);
+  overflow-wrap: anywhere;
+}
+.toc-enhanced a[aria-current="location"] {
+  background: var(--surface);
+  color: var(--fg);
+  font-weight: 600;
+  text-decoration-color: currentColor;
+}
+@media screen and (max-width: 40rem) {
+  .toc-enhanced:has(.toc-toggle[aria-expanded="false"]) {
+    width: max-content;
+    max-width: min(16.5rem, 100% - 2 * var(--toc-clearance));
+  }
+}
+/* Allow for a 52rem figure, the full button, gutters and a scrollbar.
+   Layout rems can be 1.1875 times the browser's media-query rem. */
+@media screen and (min-width: 110rem) and (min-height: 32rem) {
+  .toc-enhanced {
+    inset-inline-start: auto;
+    inset-inline-end: max(var(--s5), var(--toc-clearance));
+    width: min(16.5rem, (100% - 52rem) / 2 - 2 * max(var(--s5), var(--toc-clearance)));
+  }
+}
+@media screen {
+  html:has(.toc-enhanced) { scroll-padding-block-end: 4rem; }
+  html:has(.toc-enhanced) .site-footer { padding-block-end: calc(4rem + env(safe-area-inset-bottom)); }
+}
+@media (forced-colors: active) {
+  .toc-ring-track { stroke: GrayText; }
+  .toc-ring-fill { stroke: Highlight; }
+}
 
 /* ---------- footnotes ---------- */
 .footnotes {
@@ -616,15 +709,15 @@ div.highlighter-rouge.has-copy pre.highlight { padding-top: calc(var(--s2) * 2 +
 @media (prefers-contrast: more) {
   /* :not() keeps specificity (0,2,0) so this wins in every theme state */
   :root, :root:not([data-theme="light"]) { --fg-muted: var(--fg); --border: var(--fg); }
-  /* the softened underline is a low-contrast affordance; restore it fully */
-  a { text-decoration-color: var(--accent); }
   /* the 25% tint selection is invisible at this contrast; swap the pair
      so the selection is unambiguous */
   ::selection { background: var(--accent); color: var(--bg); }
 }
 
 @media (forced-colors: active) {
-  .copy-btn, .theme-toggle { border: 1px solid ButtonText; }
+  .copy-btn { border: 1px solid ButtonText; }
+  #theme-control label { border-color: Canvas; }
+  #theme-control :checked + label { border-color: CanvasText; }
   .anchor { opacity: 1; }
   li:target, sup:target { outline: 2px solid Highlight; outline-offset: 2px; }
 }
@@ -644,7 +737,7 @@ div.highlighter-rouge.has-copy pre.highlight { padding-top: calc(var(--s2) * 2 +
   }
   html { background: #fff; }
 
-  .site-header, .site-footer, .skip-link, .theme-toggle,
+  .site-header, .site-footer, .skip-link,
   .copy-btn, .copy-help, .post-nav, .toc, .anchor { display: none; }
   body { background: #fff; color: #000; display: block; }
   main { max-width: 100%; padding: 0; }

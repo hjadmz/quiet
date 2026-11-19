@@ -59,6 +59,7 @@ description: what quiet made of your settings and your posts, and anything it ha
         requested name alone would report a typo as though it were in use. {%- endcomment -%}
         <tr><td><code>timezone</code></td><td>{{ site.timezone | default: "Etc/UTC" | escape }} — dates are currently rendering at {{ site.time | date: "%z" }}</td></tr>
         <tr><td><code>show_reading_time</code></td><td>{{ q_show_reading_time }}</td></tr>
+        <tr><td><code>toc_style</code></td><td>{{ q_toc_style }}</td></tr>
         <tr><td><code>show_credit</code></td><td>{{ q_show_credit }}</td></tr>
         <tr><td><code>footer.github</code></td><td>{% if q_github == "" %}<span class="config-unset">no link</span>{% else %}{{ q_github | escape }}{% endif %}</td></tr>
         <tr><td><code>footer.email</code></td><td>{% if q_email == "" %}<span class="config-unset">no link</span>{% else %}{{ q_email | escape }}{% endif %}</td></tr>
@@ -107,11 +108,14 @@ description: what quiet made of your settings and your posts, and anything it ha
   {%- assign _unique_urls = _urls | uniq -%}
   {%- assign _untitled = 0 -%}
   {%- assign _bad_dates = "" -%}
+  {%- assign _bad_toc = 0 -%}
   {%- assign _drafts = 0 -%}
   {%- for post in site.posts -%}
     {%- assign _t = post.title | append: "" | strip -%}
     {%- if _t == "" -%}{%- assign _untitled = _untitled | plus: 1 -%}{%- endif -%}
     {%- if post.draft -%}{%- assign _drafts = _drafts | plus: 1 -%}{%- endif -%}
+    {%- include toc-setting.html value=post.toc -%}
+    {%- unless q_post_toc_warning == "" -%}{%- assign _bad_toc = _bad_toc | plus: 1 -%}{%- endunless -%}
     {%- assign _upd = post.last_modified_at | default: post.updated -%}
     {%- if _upd -%}
       {%- include valid_date.html value=_upd -%}
@@ -122,7 +126,7 @@ description: what quiet made of your settings and your posts, and anything it ha
   {%- endfor -%}
   {%- assign _bad_date_list = _bad_dates | split: "‖" -%}
   <h2>posts</h2>
-  {%- if _urls.size == _unique_urls.size and _untitled == 0 and _bad_date_list.size == 0 and _drafts == 0 and _stolen_list.size == 0 %}
+  {%- if _urls.size == _unique_urls.size and _untitled == 0 and _bad_date_list.size == 0 and _drafts == 0 and _stolen_list.size == 0 and _bad_toc == 0 %}
   <p class="config-verdict config-verdict-ok">
     All {{ site.posts.size }} post{% if site.posts.size != 1 %}s{% endif %} have their own
     address, their own title, and dates that read the way they are written.
@@ -130,6 +134,14 @@ description: what quiet made of your settings and your posts, and anything it ha
   {%- else %}
   <p class="config-verdict config-verdict-warn">Some posts are not doing what their front matter says.</p>
   <ol class="config-problems">
+    {%- if _bad_toc > 0 -%}
+      {%- for post in site.posts -%}
+        {%- include toc-setting.html value=post.toc -%}
+        {%- unless q_post_toc_warning == "" %}
+        <li><em>{{ post.title | escape }}</em>: {{ q_post_toc_warning | escape }}</li>
+        {%- endunless -%}
+      {%- endfor -%}
+    {%- endif -%}
     {%- if _urls.size != _unique_urls.size -%}
     {%- for url in _unique_urls -%}
       {%- assign _sharing = site.posts | where: "url", url -%}

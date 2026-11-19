@@ -1,0 +1,3 @@
+# Keep shipped asset sizes consistent across Git checkouts.
+*.css text eol=lf
+*.js text eol=lf

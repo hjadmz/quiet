@@ -15,6 +15,7 @@ posts_on_home: 5
 date_format: "%b %-d, %Y"
 timezone: Etc/UTC
 show_reading_time: true
+toc_style: floating
 show_credit: true
 footer:
   github: ""

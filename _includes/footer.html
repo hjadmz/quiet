@@ -1,4 +1,14 @@
 <footer class="site-footer">
+  <div id="theme-control" role="group" aria-labelledby="theme-label" hidden>
+    <span id="theme-label">Appearance</span>
+    <div class="theme-options">
+      {%- assign _themes = "system,light,dark" | split: "," -%}
+      {%- for _theme in _themes %}
+      <input class="visually-hidden" type="radio" name="quiet-theme" id="theme-{{ _theme }}" value="{{ _theme }}" autocomplete="off"{% if q_theme_default == _theme %} checked{% endif %}>
+      <label for="theme-{{ _theme }}">{{ _theme | capitalize }}</label>
+      {%- endfor %}
+    </div>
+  </div>
   <p class="footer-links">
     {%- if q_github != "" %}
     {%- comment -%} rel="me" lets the linked profile link back and verify this is
@@ -10,18 +20,6 @@
     <a href="mailto:{{ q_email | escape }}">email</a>
     {%- endif %}
     <a href="{{ '/feed.xml' | relative_url }}">feed</a>
-    {%- comment -%}
-      The visible label names the setting and its current preference. Keeping
-      both in text makes the control understandable without an icon and lets
-      its alignment follow whichever typeface the author chooses.
-
-      The initial state is rendered at build time; theme.js reconciles a saved
-      preference and cycles system, light, dark on activation. A native button
-      keeps keyboard activation. No aria-pressed: this has three states.
-    {%- endcomment -%}
-    <button type="button" id="theme-toggle" class="theme-toggle">
-      <span>theme: <span id="theme-label">{{ q_theme_default }}</span></span>
-    </button>
   </p>
   {%- comment -%}
     Editing config on GitHub Pages has no feedback loop: you commit, you wait,

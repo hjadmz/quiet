@@ -37,18 +37,9 @@ without joining the landmark list. {% endcomment %}
       {%- endif %}
     </p>
   </header>
-  {%- comment -%} `toc: "false"` in front matter is a string, and every non-empty
-  string is true in Liquid — the same trap as the config switches, read the same way. {%- endcomment -%}
-  {%- assign _toc = false -%}
-  {%- if page.toc == true -%}
-    {%- assign _toc = true -%}
-  {%- elsif page.toc and page.toc != false -%}
-    {%- assign _toc_v = page.toc | append: "" | strip | downcase -%}
-    {%- assign _toc_falsey = "false,no,off,0,none,disabled" | split: "," -%}
-    {%- unless _toc_v == "" or _toc_falsey contains _toc_v -%}{%- assign _toc = true -%}{%- endunless -%}
-  {%- endif -%}
-  {%- if _toc %}
-  {% include toc.html html=_content %}
+  {%- include toc-setting.html value=page.toc -%}
+  {%- if q_post_toc %}
+  {% include toc.html html=_content style=q_toc_style %}
   {%- endif %}
   <div class="post-content">
     {% include anchor_headings.html html=_content %}

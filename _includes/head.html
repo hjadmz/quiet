@@ -21,24 +21,14 @@
 <link rel="apple-touch-icon" href="{{ '/assets/img/apple-touch-icon.png' | relative_url }}?v={{ site.time | date: '%s' }}">
 <link rel="stylesheet" href="{{ '/assets/css/main.css' | relative_url }}?v={{ site.time | date: '%s' }}">
 {%- comment -%}
-  The accent is the one setting written into CSS. config.html has already rejected
-  anything that could restructure a stylesheet, any CSS keyword that is not a
-  color, and anything with transparency in it; the first @supports asks the
-  browser whether what remains is a real color, so an invented one is skipped and
-  the built-in accent stays rather than the links losing their color.
-
-  The second block fixes the lightness in each theme, keeping the author's hue and
-  chroma. That is what makes one setting enough: measured across 33 plausible
-  accents, 12 failed 4.5:1 on the light background and 21 of 25 failed on the dark
-  one when used raw; bounded this way, none of them fail either. The author picks
-  a colour, the stylesheet keeps it legible. A browser without relative colour
-  syntax skips the whole block and uses the raw value, which is what this template
-  did before — no worse than it was, better wherever it is supported.
+  Validate the configured color before emitting CSS. Relative color syntax
+  tunes lightness separately for each theme; browsers that cannot parse the
+  derived color keep the built-in palette.
 {%- endcomment -%}
 {%- if q_accent != "" %}
 {%- capture _accent_light %}oklch(from {{ q_accent }} clamp(0.3, l, 0.5) c h){% endcapture -%}
 {%- capture _accent_dark %}oklch(from {{ q_accent }} 0.72 calc(c * 0.8) h){% endcapture -%}
-<style media="screen">@supports (color:{{ q_accent }}){:root{--accent:{{ q_accent }}}@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--accent:{{ q_accent }}}}:root[data-theme=dark]{--accent:{{ q_accent }}}}@supports (color:{{ _accent_dark }}){:root{--accent:{{ _accent_light }}}@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--accent:{{ _accent_dark }}}}:root[data-theme=dark]{--accent:{{ _accent_dark }}}}</style>
+<style media="screen">@supports (color:{{ _accent_dark }}){:root{--accent:{{ _accent_light }}}@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--accent:{{ _accent_dark }}}}:root[data-theme=dark]{--accent:{{ _accent_dark }}}}</style>
 {%- endif %}
 {%- comment -%}
   A config problem costs the reader nothing and must not be shown to them, but
