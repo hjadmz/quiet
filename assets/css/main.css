@@ -588,11 +588,13 @@ th { font-weight: 600; }
     max-width: min(16.5rem, 100% - 2 * var(--toc-clearance));
   }
 }
-@media screen and (min-width: 90rem) and (min-height: 32rem) {
+/* Allow for a 52rem figure, the full button, gutters and a scrollbar.
+   Layout rems can be 1.1875 times the browser's media-query rem. */
+@media screen and (min-width: 110rem) and (min-height: 32rem) {
   .toc-enhanced {
     inset-inline-start: auto;
     inset-inline-end: max(var(--s5), var(--toc-clearance));
-    width: min(14rem, (100% - 52rem) / 2 - 2 * max(var(--s5), var(--toc-clearance)));
+    width: min(16.5rem, (100% - 52rem) / 2 - 2 * max(var(--s5), var(--toc-clearance)));
   }
 }
 @media screen {
