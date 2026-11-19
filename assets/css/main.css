@@ -260,6 +260,10 @@ figure > img, figure > svg { display: block; }
 .site-links:empty { display: none; }
 
 #theme-control:not([hidden]) {
+  display: flex; align-items: center; flex-wrap: wrap;
+  gap: var(--s1) var(--s3); margin-block-end: var(--s2);
+}
+.theme-options {
   display: flex; flex-wrap: wrap; gap: 2px; max-width: 100%;
   border-radius: 1.5rem; background: var(--surface);
 }

@@ -204,16 +204,14 @@ async function assertTextRails(page, label) {
       if (Math.abs(gap) > 0.5) offEdge.push(`${selector} is ${gap}px off the column ${side}`);
     }
 
-    // The last group ends on the reading rail when all three share a row.
-    // On a wrapped row, the first group starts on the reading rail.
+    // Navigation ends on the reading rail beside the wordmark, or starts
+    // there when an enlarged title pushes it onto a row of its own.
     const wordmark = document.querySelector('.wordmark');
     const cluster = document.querySelector('.site-links');
-    const picker = document.querySelector('#theme-control:not([hidden])');
     if (wordmark && cluster?.getBoundingClientRect().width) {
       const onRow = (a, b) => Math.abs(a.getBoundingClientRect().top - b.getBoundingClientRect().top) < 1;
       const wrapped = !onRow(wordmark, cluster);
-      const edge = wrapped ? cluster.querySelector('a') : picker && onRow(picker, cluster)
-        ? picker : cluster.querySelector('a:last-child');
+      const edge = cluster.querySelector(wrapped ? 'a' : 'a:last-child');
       const side = wrapped ? 'start' : 'end';
       if (Math.abs(from(edge, side)) > 0.5) offEdge.push(`.site-links is off the column ${side}`);
     }
@@ -361,8 +359,10 @@ async function assertKeyboardPermalink(page, label, engineName = label) {
 }
 
 async function assertThemeControl(page, state, label) {
-  const control = page.getByRole('group', { name: 'Theme', exact: true });
+  const control = page.getByRole('group', { name: 'Appearance', exact: true });
   assert.equal(await control.isVisible(), true, `${label}: theme control must be visible`);
+  await expect(control.locator('#theme-label')).toBeVisible();
+  await expect(control.locator('#theme-label')).toHaveText('Appearance');
   assert.deepEqual(await control.locator('label').allInnerTexts(), ['System', 'Light', 'Dark'],
     `${label}: all three choices must be named on screen`);
   assert.equal(await control.getByRole('radio', { name: new RegExp(`^${state}$`, 'i'), checked: true }).count(), 1,
@@ -389,8 +389,8 @@ async function runResponsive(engineName, browser, baseURL) {
       await assertNoOverflow(page, `${label} ${route}`);
       const rails = await assertTextRails(page, `${label} ${route}`);
       if (rails) columnStarts.set(route, rails.start);
-      assertTargets(await controlRects(page, '.site-header a, #theme-control label'), `${label} ${route} header`);
-      assertTargets(await controlRects(page, '.footer-links a'), `${label} ${route} footer`);
+      assertTargets(await controlRects(page, '.site-header a'), `${label} ${route} header`);
+      assertTargets(await controlRects(page, '.footer-links a, #theme-control label'), `${label} ${route} footer`);
 
       await assertThemeControl(page, 'system', `${label} ${route}`);
 
@@ -488,7 +488,7 @@ async function runInteraction(engineName, browser, baseURL) {
 
   assert.equal(await page.evaluate(() => localStorage.getItem('quiet-theme')), 'invalid-value',
     `${engineName}: the invalid preference test must seed the application's storage key`);
-  const theme = page.locator('.site-header #theme-control');
+  const theme = page.locator('.site-footer #theme-control');
   await assertThemeControl(page, 'system', engineName);
   await theme.locator('label[for="theme-light"]').click();
   await assertThemeControl(page, 'light', engineName);
@@ -620,6 +620,7 @@ async function runInteraction(engineName, browser, baseURL) {
   await page.emulateMedia({ media: 'print' });
   assert.equal(await page.locator('.site-header').isVisible(), false, `${engineName}: print must hide header`);
   assert.equal(await page.locator('.site-footer').isVisible(), false, `${engineName}: print must hide footer`);
+  await expect(theme).toBeHidden();
   // This page is still in forced dark mode. Printing must reset syntax colors
   // too: the dark palette had only about 2:1 contrast on the white print canvas.
   assert.equal(await page.locator('html').getAttribute('data-theme'), 'dark');
@@ -700,7 +701,7 @@ async function runNoJavaScript(engineName, browser, baseURL) {
 }
 
 async function runReadingNavigation(engineName, browser, baseURL) {
-  const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true });
   try {
     const page = await context.newPage();
     await goto(page, baseURL, '/2026/everything-a-post-can-do/');
@@ -789,6 +790,20 @@ async function runReadingNavigation(engineName, browser, baseURL) {
     await expect(trigger).toContainText('Embedded media');
     await page.evaluate(() => window.scrollTo(0, document.scrollingElement.scrollHeight));
     await expect(trigger).toContainText('A quote');
+
+    // The fixed Contents control must leave the footer's theme choices usable.
+    await page.setViewportSize({ width: 390, height: 844 });
+    const theme = page.getByRole('group', { name: 'Appearance', exact: true });
+    await theme.scrollIntoViewIfNeeded();
+    const clearTargets = await theme.locator('label').evaluateAll(labels => labels.every(label => {
+      const { left, top, width, height } = label.getBoundingClientRect();
+      return label.contains(document.elementFromPoint(left + width / 2, top + height / 2));
+    }));
+    assert.equal(clearTargets, true, `${engineName}: Contents must not cover the footer theme choices`);
+    await theme.locator('label[for="theme-dark"]').tap();
+    await assertThemeControl(page, 'dark', `${engineName} footer touch`);
+    await theme.locator('label[for="theme-system"]').tap();
+    await assertThemeControl(page, 'system', `${engineName} footer touch`);
   } finally {
     await context.close();
   }
@@ -819,7 +834,7 @@ async function runAccessibility(engineName, browser, baseURL) {
       return {
         selected: selected.borderTopColor,
         unselected: unselected.borderTopColor,
-        fill: getComputedStyle(control).backgroundColor,
+        fill: getComputedStyle(control.querySelector('.theme-options')).backgroundColor,
         focus: selected.outlineStyle
       };
     });

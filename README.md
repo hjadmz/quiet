@@ -218,7 +218,7 @@ write a starting state that means something, and let the caption explain the
 rest. Add `wide=true` to the include for a demo that needs more room.
 
 Two consequences of that isolation worth knowing. A demo cannot see the site's
-theme toggle, so it follows the reader's system setting — give it
+appearance preference, so it follows the reader's system setting — give it
 `color-scheme: light dark` and it reads well either way. And `height` is fixed,
 because an iframe cannot size itself to its content without script on both
 sides; leave headroom, so a reader with larger text gets slack rather than a
@@ -291,9 +291,9 @@ the About page, and image files remain ordinary content. The short version:
 | `timezone` | IANA zone; `blog:new` reads it too | dates fall back to UTC |
 | `feed.posts_limit` | how many posts the feed carries (default 10) | falls back to 10 |
 
-The header lets readers choose **System**, **Light**, or **Dark** directly.
-System follows the device's appearance. The selected choice is remembered
-in that browser when storage is available.
+The footer's **Appearance** group lets readers choose **System**, **Light**, or
+**Dark** directly. System follows the device's appearance. The selected choice
+is remembered in that browser when storage is available.
 
 Not settings, on purpose: the favicon, the apple-touch icon and the social image
 are **files** — replace them in place at `assets/img/`. Analytics is **a file

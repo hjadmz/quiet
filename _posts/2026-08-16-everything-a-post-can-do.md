@@ -124,9 +124,9 @@ this page, its cookies, or its storage, and nothing it does can reach the site
 around it. With JavaScript off you still see its starting state, which is why a
 demo should start somewhere meaningful.
 
-Isolation cuts both ways. A demo cannot see the site's theme toggle either, so
-it follows the reader's system setting — write it with `color-scheme: light
-dark`, as this one does, and it will look right in both.
+Isolation cuts both ways. A demo cannot see the site's appearance preference
+either, so it follows the reader's system setting — write it with
+`color-scheme: light dark`, as this one does, and it will look right in both.
 
 {% include demo.html src="demos/hue-mixer.html" title="Hue mixer" height="150" caption="Drag the slider. The swatch follows." %}
 

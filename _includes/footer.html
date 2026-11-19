@@ -1,4 +1,14 @@
 <footer class="site-footer">
+  <div id="theme-control" role="group" aria-labelledby="theme-label" hidden>
+    <span id="theme-label">Appearance</span>
+    <div class="theme-options">
+      {%- assign _themes = "system,light,dark" | split: "," -%}
+      {%- for _theme in _themes %}
+      <input class="visually-hidden" type="radio" name="quiet-theme" id="theme-{{ _theme }}" value="{{ _theme }}" autocomplete="off"{% if q_theme_default == _theme %} checked{% endif %}>
+      <label for="theme-{{ _theme }}">{{ _theme | capitalize }}</label>
+      {%- endfor %}
+    </div>
+  </div>
   <p class="footer-links">
     {%- if q_github != "" %}
     {%- comment -%} rel="me" lets the linked profile link back and verify this is
