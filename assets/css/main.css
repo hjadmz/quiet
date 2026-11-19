@@ -404,11 +404,24 @@ h2[id], h3[id], h4[id], sup[id], .footnotes li[id] { scroll-margin-top: var(--s6
    9px everywhere. Only the box is inline; the tag, role, id and the anchor's
    aria-labelledby are untouched. text-wrap: balance moves to the wrapper because
    it needs a block container, and the wrapper already carries the font size. */
-.heading-anchor { display: block; text-wrap: balance; line-height: 1.2; }
+.heading-anchor { position: relative; display: block; text-wrap: balance; line-height: 1.2; }
 .heading-h2 { font-size: var(--fs-h2); }
 .heading-h3 { font-size: var(--fs-h3); }
 .heading-h4 { font-size: 1rem; }
 .heading-anchor > :is(h2, h3, h4) { display: inline; margin: 0; }
+/* Mark the linked heading in the gutter, even when the page ends before
+   the browser can scroll it to the top. Keep wrapped headings in place. */
+@media screen {
+  .heading-anchor > :is(h2, h3, h4):target::before {
+    content: "";
+    position: absolute;
+    inset-inline-end: calc(100% + var(--s2));
+    inset-block-start: 0.15em;
+    block-size: 0.9em;
+    border-inline-start: 3px solid var(--accent);
+    pointer-events: none;
+  }
+}
 .anchor { margin-inline-start: var(--s2); font-weight: 400; text-decoration: none; }
 
 blockquote {

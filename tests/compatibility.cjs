@@ -362,6 +362,13 @@ async function assertKeyboardPermalink(page, label, engineName = label) {
     `${label}: the focused permalink must be visible`);
   await page.keyboard.press('Enter');
   assert.equal(new URL(page.url()).hash, '#deep-links', `${label}: Enter must activate the section URL`);
+  const markedHeadings = await page.locator('.heading-anchor > :is(h2, h3, h4)').evaluateAll((headings) =>
+    headings.filter((heading) => {
+      const marker = getComputedStyle(heading, '::before');
+      return marker.content !== 'none' && parseFloat(marker.borderInlineStartWidth) > 0;
+    }).map((heading) => heading.id)
+  );
+  assert.deepEqual(markedHeadings, ['deep-links'], `${label}: only the linked heading should have a marker`);
 }
 
 async function assertThemeControl(page, state, label) {
