@@ -707,6 +707,7 @@ async function runReadingNavigation(engineName, browser, baseURL) {
     await goto(page, baseURL, '/2026/everything-a-post-can-do/');
     const trigger = page.locator('.toc-toggle');
     const ring = page.locator('.toc-ring-fill');
+    await expect(trigger).toBeVisible();
     await expect(trigger).toContainText('Introduction');
     await expect(ring).toHaveAttribute('stroke-dasharray', '0 100');
     const closedWidth = (await trigger.boundingBox()).width;
