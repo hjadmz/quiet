@@ -170,6 +170,7 @@ put secrets or genuinely private writing there. Preview them with
   viewports, and when JavaScript is unavailable.
 - h2–h4 headings have a visible `#` link. Activate it to put the section link
   in the address bar, or copy its address from the browser's link menu.
+  Opening the link marks that heading with a short line in the margin.
 - No JavaScript is used for these links; they are part of the generated HTML.
 - If you want a cleaner look, remove heading hashes by changing `.anchor` in `assets/css/main.css` (for example, `display: none;` or a neutral color).
 
