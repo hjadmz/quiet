@@ -391,7 +391,7 @@ figure > img, figure > svg { display: block; }
    the archive descriptions, and each omission scrolled the whole document
    sideways. Anything inside main may break; code is put back below, because it
    scrolls in its own box instead. */
-main, .footer-meta { overflow-wrap: anywhere; }
+main, .footer-meta, #theme-label { overflow-wrap: anywhere; }
 pre, pre code { overflow-wrap: normal; }
 
 h2[id], h3[id], h4[id], sup[id], .footnotes li[id] { scroll-margin-top: var(--s6); }
